@@ -1,6 +1,6 @@
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
-import { useRef } from 'react';
-import type { ScrollViewInstance } from 'react-native';
+import { useRef, useState } from 'react';
+import type { ListViewToken, ScrollViewInstance } from 'react-native';
 import {
   FlatList,
   Image,
@@ -107,6 +107,19 @@ function HeroCarousel({
 }) {
   const { width } = useWindowDimensions();
   const coverWidth = Math.min(Math.round(width * 0.5), 200);
+  const [active, setActive] = useState(0);
+  const [onViewableItemsChanged] = useState(
+    () =>
+      ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
+        const index = viewableItems[0]?.index;
+        if (index != null) {
+          setActive(index);
+        }
+      },
+  );
+  const [viewabilityConfig] = useState(() => ({
+    itemVisiblePercentThreshold: 50,
+  }));
 
   if (items.length === 0) {
     return null;
@@ -121,16 +134,35 @@ function HeroCarousel({
         showsHorizontalScrollIndicator={false}
         data={items}
         keyExtractor={(item) => item.path}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <HeroSlide
             item={item}
             width={width}
             coverWidth={coverWidth}
-            position={`${index + 1} / ${items.length}`}
             onPress={onPress}
           />
         )}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
       />
+      {items.length > 1 ? (
+        <View
+          className="mt-3 flex-row justify-center gap-1.5"
+          accessible
+          accessibilityLabel={`Tendencias, ${active + 1} de ${items.length}`}
+        >
+          {items.map((item, index) => (
+            <View
+              key={item.path}
+              className={
+                index === active
+                  ? 'h-1.5 w-1.5 rounded-full bg-zinc-900 dark:bg-zinc-100'
+                  : 'h-1.5 w-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700'
+              }
+            />
+          ))}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -139,13 +171,11 @@ function HeroSlide({
   item,
   width,
   coverWidth,
-  position,
   onPress,
 }: {
   item: HomeTrending;
   width: number;
   coverWidth: number;
-  position: string;
   onPress: (path: string) => void;
 }) {
   return (
@@ -183,9 +213,6 @@ function HeroSlide({
               {item.latestChapter.title}
             </Text>
           ) : null}
-          <Text className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            {position}
-          </Text>
         </View>
       </View>
     </AppPressable>
