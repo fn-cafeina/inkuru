@@ -1,6 +1,6 @@
 # AGENTS.md
 
-## Purpose
+## Overview
 
 Android manga reader app.
 
