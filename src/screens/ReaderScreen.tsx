@@ -11,6 +11,7 @@ import {
 import type { ListViewToken } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
+import { useKeepAwake } from 'expo-keep-awake';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
@@ -37,6 +38,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 export default function ReaderScreen({ navigation, route }: Props) {
   const { path, title } = route.params;
   const insets = useSafeAreaInsets();
+  useKeepAwake();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [page, setPage] = useState(0);
   const [chromeVisible, setChromeVisible] = useState(true);
