@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
   FlatList,
@@ -11,19 +10,17 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
-import type { RootStackParamList } from '../navigation/types';
+import type { TabNavigation } from '../navigation/types';
 import { fetchHome } from '../source/leercapitulo';
 import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
 
 const COVER_ASPECT_RATIO = 248 / 352;
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const {
     data: home,
     hasError,
@@ -32,9 +29,8 @@ export default function HomeScreen() {
     reload,
     refresh,
   } = useRemoteData(fetchHome);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<TabNavigation<'Home'>>();
   const openManga = (path: string) => navigation.navigate('Manga', { path });
-  const openSearch = () => navigation.navigate('Search');
 
   if (loading && !home) {
     return (
@@ -88,39 +84,22 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
       >
-        <Header hasError={hasError} onSearch={openSearch} />
+        <Header hasError={hasError} />
         <HeroCarousel items={home.trending} onPress={openManga} />
         <SideRail title="Últimos mangas" items={home.latest} onPress={openManga} />
         <SideRail title="Populares" items={home.popular} onPress={openManga} />
-        <View style={{ height: insets.bottom + 24 }} />
+        <View style={{ height: 24 }} />
       </ScrollView>
     </Screen>
   );
 }
 
-function Header({
-  hasError,
-  onSearch,
-}: {
-  hasError: boolean;
-  onSearch: () => void;
-}) {
+function Header({ hasError }: { hasError: boolean }) {
   return (
     <View className="px-4 pb-6 pt-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          inkuru
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={onSearch}
-          className="px-2 py-1"
-        >
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-            Buscar
-          </Text>
-        </Pressable>
-      </View>
+      <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+        inkuru
+      </Text>
       {hasError ? (
         <Text className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
           No se pudo actualizar.

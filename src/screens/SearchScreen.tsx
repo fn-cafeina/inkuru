@@ -8,34 +8,25 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchSearch } from '../source/leercapitulo';
 import type { SearchItem } from '../source/leercapitulo';
-import type { RootStackParamList } from '../navigation/types';
+import type { TabNavigation } from '../navigation/types';
 
 const COVER_ASPECT_RATIO = 248 / 352;
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Search'>;
-
-export default function SearchScreen({ navigation }: Props) {
-  const insets = useSafeAreaInsets();
+export default function SearchScreen() {
+  const navigation = useNavigation<TabNavigation<'Search'>>();
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
   const submit = () => setTerm(input.trim());
 
   return (
     <Screen>
-      <View className="flex-row items-center px-4 py-3">
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => navigation.goBack()}
-        >
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">Volver</Text>
-        </Pressable>
+      <View className="px-4 py-3">
         <TextInput
           value={input}
           onChangeText={setInput}
@@ -46,7 +37,7 @@ export default function SearchScreen({ navigation }: Props) {
           returnKeyType="search"
           placeholder="Buscar manga..."
           placeholderTextColor="#71717a"
-          className="ml-4 flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </View>
 
@@ -54,7 +45,6 @@ export default function SearchScreen({ navigation }: Props) {
         <SearchResults
           key={term}
           term={term}
-          bottomInset={insets.bottom}
           onOpen={(path) => navigation.navigate('Manga', { path })}
         />
       ) : (
@@ -70,11 +60,9 @@ export default function SearchScreen({ navigation }: Props) {
 
 function SearchResults({
   term,
-  bottomInset,
   onOpen,
 }: {
   term: string;
-  bottomInset: number;
   onOpen: (path: string) => void;
 }) {
   const fetcher = useCallback(
@@ -128,7 +116,7 @@ function SearchResults({
         <SearchRow item={item} onPress={() => onOpen(item.path)} />
       )}
       keyboardShouldPersistTaps="handled"
-      ListFooterComponent={<View style={{ height: bottomInset + 24 }} />}
+      ListFooterComponent={<View style={{ height: 24 }} />}
       contentContainerClassName="pb-2"
       showsVerticalScrollIndicator={false}
     />
