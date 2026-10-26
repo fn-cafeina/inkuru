@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
+import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -128,6 +129,7 @@ function SearchResults({
       ref={listRef}
       data={data}
       keyExtractor={(item) => item.path}
+      ItemSeparatorComponent={ListDivider}
       renderItem={({ item }) => (
         <SearchRow item={item} onPress={() => onOpen(item.path)} />
       )}

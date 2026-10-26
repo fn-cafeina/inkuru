@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
+import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -55,6 +56,7 @@ export default function MangaScreen({ navigation, route }: Props) {
         <FlatList
           data={data.chapters}
           keyExtractor={(item) => item.path}
+          ItemSeparatorComponent={ListDivider}
           renderItem={({ item }) => (
             <ChapterRow
               item={item}
