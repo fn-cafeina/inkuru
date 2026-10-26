@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
+import type { RootStackParamList } from '../navigation/types';
 import { fetchHome } from '../source/leercapitulo';
 import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
 
@@ -29,6 +32,8 @@ export default function HomeScreen() {
     reload,
     refresh,
   } = useRemoteData(fetchHome);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const openManga = (path: string) => navigation.navigate('Manga', { path });
 
   if (loading && !home) {
     return (
@@ -83,9 +88,9 @@ export default function HomeScreen() {
         }
       >
         <Header hasError={hasError} />
-        <HeroCarousel items={home.trending} />
-        <SideRail title="Últimos mangas" items={home.latest} />
-        <SideRail title="Populares" items={home.popular} />
+        <HeroCarousel items={home.trending} onPress={openManga} />
+        <SideRail title="Últimos mangas" items={home.latest} onPress={openManga} />
+        <SideRail title="Populares" items={home.popular} onPress={openManga} />
         <View style={{ height: insets.bottom + 24 }} />
       </ScrollView>
     </Screen>
@@ -107,7 +112,13 @@ function Header({ hasError }: { hasError: boolean }) {
   );
 }
 
-function HeroCarousel({ items }: { items: HomeTrending[] }) {
+function HeroCarousel({
+  items,
+  onPress,
+}: {
+  items: HomeTrending[];
+  onPress: (path: string) => void;
+}) {
   const { width } = useWindowDimensions();
   const coverWidth = Math.min(Math.round(width * 0.5), 200);
 
@@ -130,6 +141,7 @@ function HeroCarousel({ items }: { items: HomeTrending[] }) {
             width={width}
             coverWidth={coverWidth}
             position={`${index + 1} / ${items.length}`}
+            onPress={onPress}
           />
         )}
       />
@@ -142,14 +154,22 @@ function HeroSlide({
   width,
   coverWidth,
   position,
+  onPress,
 }: {
   item: HomeTrending;
   width: number;
   coverWidth: number;
   position: string;
+  onPress: (path: string) => void;
 }) {
   return (
-    <View style={{ width }} className="px-4">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={item.title}
+      onPress={() => onPress(item.path)}
+      style={{ width }}
+      className="px-4"
+    >
       <View className="flex-row items-center">
         <View
           className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
@@ -182,16 +202,18 @@ function HeroSlide({
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 function SideRail({
   title,
   items,
+  onPress,
 }: {
   title: string;
   items: HomeSideItem[];
+  onPress: (path: string) => void;
 }) {
   if (items.length === 0) {
     return null;
@@ -204,7 +226,7 @@ function SideRail({
         horizontal
         data={items}
         keyExtractor={(item) => item.path}
-        renderItem={({ item }) => <SideCard item={item} />}
+        renderItem={({ item }) => <SideCard item={item} onPress={onPress} />}
         ItemSeparatorComponent={RailSeparator}
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="px-4"
@@ -213,9 +235,20 @@ function SideRail({
   );
 }
 
-function SideCard({ item }: { item: HomeSideItem }) {
+function SideCard({
+  item,
+  onPress,
+}: {
+  item: HomeSideItem;
+  onPress: (path: string) => void;
+}) {
   return (
-    <View className="w-24">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={item.title}
+      onPress={() => onPress(item.path)}
+      className="w-24"
+    >
       <Image
         source={{ uri: item.cover }}
         className="h-36 w-24 rounded-lg bg-zinc-200 dark:bg-zinc-800"
@@ -234,7 +267,7 @@ function SideCard({ item }: { item: HomeSideItem }) {
       >
         {item.lastChapter}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
