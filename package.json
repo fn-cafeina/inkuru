@@ -21,7 +21,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "check:parser": "bun src/source/leercapitulo.check.ts"
   },
   "private": true,
   "trustedDependencies": [
