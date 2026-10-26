@@ -76,25 +76,41 @@ export type ReaderData = {
   next?: MangaChapter;
 };
 
+export type SearchItem = {
+  title: string;
+  cover: string;
+  path: string;
+  lastChapter?: string;
+};
+
 export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
-  return parseHome(await fetchHtml('/', signal));
+  return parseHome(await fetchText('/', signal));
 }
 
 export async function fetchManga(
   path: string,
   signal?: AbortSignal,
 ): Promise<MangaDetail> {
-  return parseManga(await fetchHtml(path, signal));
+  return parseManga(await fetchText(path, signal));
 }
 
 export async function fetchReader(
   path: string,
   signal?: AbortSignal,
 ): Promise<ReaderData> {
-  return parseReader(await fetchHtml(path, signal));
+  return parseReader(await fetchText(path, signal));
 }
 
-async function fetchHtml(
+export async function fetchSearch(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SearchItem[]> {
+  return parseSearch(
+    await fetchText(`/search/?q=${encodeURIComponent(query)}`, signal),
+  );
+}
+
+async function fetchText(
   path: string,
   signal?: AbortSignal,
 ): Promise<string> {
@@ -199,6 +215,43 @@ export function parseReader(html: string): ReaderData {
     pages,
     prev: older ? { title: older.title, path: older.path } : undefined,
     next: newer ? { title: newer.title, path: newer.path } : undefined,
+  };
+}
+
+export function parseSearch(text: string): SearchItem[] {
+  const data: unknown = JSON.parse(text);
+
+  if (!Array.isArray(data)) {
+    throw new Error('Formato inesperado en la búsqueda de LeerCapitulo');
+  }
+
+  return data.map(parseSearchItem).filter(isDefined);
+}
+
+function parseSearchItem(item: unknown): SearchItem | undefined {
+  if (typeof item !== 'object' || item === null) {
+    return undefined;
+  }
+
+  const value = item as Record<string, unknown>;
+  const title = value.name;
+  const cover = value.cover_uri;
+  const path = value.uri;
+  const lastChapter = value.last_chapter_name;
+
+  if (
+    typeof title !== 'string' ||
+    typeof cover !== 'string' ||
+    typeof path !== 'string'
+  ) {
+    return undefined;
+  }
+
+  return {
+    title,
+    cover: absoluteUrl(cover),
+    path,
+    lastChapter: typeof lastChapter === 'string' ? lastChapter : undefined,
   };
 }
 

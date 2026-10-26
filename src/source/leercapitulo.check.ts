@@ -1,7 +1,8 @@
 import { HOME_FIXTURE } from './__fixtures__/home';
 import { MANGA_FIXTURE } from './__fixtures__/manga';
 import { READER_FIXTURE } from './__fixtures__/reader';
-import { parseHome, parseManga, parseReader } from './leercapitulo';
+import { SEARCH_FIXTURE } from './__fixtures__/search';
+import { parseHome, parseManga, parseReader, parseSearch } from './leercapitulo';
 
 const home = parseHome(HOME_FIXTURE);
 
@@ -122,6 +123,35 @@ assertEqual(
   'capítulo siguiente',
 );
 assertEqual(reader.next?.title, 'Capitulo 1196', 'título siguiente');
+
+const search = parseSearch(SEARCH_FIXTURE);
+
+assertEqual(search.length, 2, 'resultados de búsqueda');
+assertEqual(search[0].title, 'One Piece Full Color', 'título de búsqueda');
+assertEqual(
+  search[0].cover,
+  'https://www.leercapitulo.co/covers/50/1ab355791858e5d163d1b9d69cf70c.jpg?v1793004892973',
+  'portada de búsqueda',
+);
+assertEqual(
+  search[0].path,
+  '/manga/7c12f0hx4w/one-piece-full-color/',
+  'ruta de búsqueda',
+);
+assertEqual(
+  search[0].lastChapter,
+  'Capitulo 1055',
+  'último capítulo de búsqueda',
+);
+assertEqual(parseSearch('[]').length, 0, 'búsqueda vacía');
+expectThrow(
+  () => parseSearch('nope'),
+  'JSON inválido de búsqueda debe lanzar error',
+);
+expectThrow(
+  () => parseSearch('{}'),
+  'búsqueda sin array debe lanzar error',
+);
 
 expectThrow(
   () => parseHome('<main><p>sin datos</p></main>'),
