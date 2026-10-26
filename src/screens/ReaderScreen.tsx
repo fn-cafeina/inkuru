@@ -3,12 +3,14 @@ import type { ReactElement } from 'react';
 import {
   FlatList,
   Image,
+  Modal,
   Text,
   useWindowDimensions,
   View,
 } from 'react-native';
 import type { ListViewToken } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
@@ -20,6 +22,7 @@ import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
+import { useColors } from '../theme/colors';
 
 // shortcut: observed pages are 1442x2100, used until the page reports its real size.
 const PAGE_ASPECT_RATIO = 1442 / 2100;
@@ -37,6 +40,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [page, setPage] = useState(0);
   const [chromeVisible, setChromeVisible] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchReader(path, signal),
     [path],
@@ -48,6 +52,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     preferredMode = next;
     setMode(next);
   };
+  const colors = useColors();
   const toggleChrome = () => setChromeVisible((visible) => !visible);
 
   return (
@@ -88,25 +93,125 @@ export default function ReaderScreen({ navigation, route }: Props) {
               subtitle={data?.mangaTitle ? data.title || title : undefined}
               onBack={() => navigation.goBack()}
               action={
-                <AppPressable
-                  accessibilityLabel={
-                    mode === 'vertical'
-                      ? 'Cambiar a modo páginas'
-                      : 'Cambiar a modo cascada'
-                  }
-                  onPress={toggleMode}
-                  className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
-                >
-                  <Text className="text-xs text-zinc-700 dark:text-zinc-300">
-                    {mode === 'vertical' ? 'Páginas' : 'Cascada'}
-                  </Text>
-                </AppPressable>
+                <View className="flex-row items-center">
+                  <AppPressable
+                    accessibilityLabel="Lista de capítulos"
+                    onPress={() => setPickerOpen(true)}
+                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800"
+                  >
+                    <Feather name="list" size={18} color={colors.text} />
+                  </AppPressable>
+                  <AppPressable
+                    accessibilityLabel={
+                      mode === 'vertical'
+                        ? 'Cambiar a modo páginas'
+                        : 'Cambiar a modo cascada'
+                    }
+                    onPress={toggleMode}
+                    className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+                  >
+                    <Text className="text-xs text-zinc-700 dark:text-zinc-300">
+                      {mode === 'vertical' ? 'Páginas' : 'Cascada'}
+                    </Text>
+                  </AppPressable>
+                </View>
               }
             />
           </View>
         ) : null}
+
+        <ChapterPicker
+          visible={pickerOpen}
+          chapters={data?.chapters ?? []}
+          current={data?.chapterIndex ?? -1}
+          onClose={() => setPickerOpen(false)}
+          onSelect={(chapter) => {
+            setPickerOpen(false);
+            if (chapter.path !== path) {
+              navigation.replace('Reader', {
+                path: chapter.path,
+                title: chapter.title,
+              });
+            }
+          }}
+        />
       </View>
     </Screen>
+  );
+}
+
+function ChapterPicker({
+  visible,
+  chapters,
+  current,
+  onClose,
+  onSelect,
+}: {
+  visible: boolean;
+  chapters: MangaChapter[];
+  current: number;
+  onClose: () => void;
+  onSelect: (chapter: MangaChapter) => void;
+}) {
+  const colors = useColors();
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View
+        className="flex-1 justify-end"
+        style={{ backgroundColor: 'rgba(9, 9, 11, 0.5)' }}
+      >
+        <View
+          className="rounded-t-2xl bg-zinc-50 dark:bg-zinc-950"
+          style={{ maxHeight: '70%' }}
+        >
+          <View className="flex-row items-center justify-between px-4 py-2">
+            <Text className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+              Capítulos
+            </Text>
+            <AppPressable
+              accessibilityLabel="Cerrar"
+              onPress={onClose}
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            >
+              <Feather name="x" size={20} color={colors.text} />
+            </AppPressable>
+          </View>
+          <FlatList
+            data={chapters}
+            keyExtractor={(item) => item.path}
+            renderItem={({ item, index }) => (
+              <AppPressable
+                accessibilityLabel={item.title}
+                accessibilityState={{ selected: index === current }}
+                onPress={() => onSelect(item)}
+                className="min-h-12 flex-row items-center justify-between px-4 py-2"
+              >
+                <Text
+                  numberOfLines={1}
+                  className={
+                    index === current
+                      ? 'flex-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100'
+                      : 'flex-1 text-sm text-zinc-700 dark:text-zinc-300'
+                  }
+                >
+                  {item.title}
+                </Text>
+                {index === current ? (
+                  <Feather name="check" size={16} color={colors.text} />
+                ) : null}
+              </AppPressable>
+            )}
+            contentContainerStyle={{ paddingBottom: 24 }}
+          />
+        </View>
+      </View>
+    </Modal>
   );
 }
 
