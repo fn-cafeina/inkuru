@@ -98,7 +98,17 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               accessibilityLabel={
                 descriptors[route.key].options.title ?? route.name
               }
-              onPress={() => navigation.navigate(route.name, route.params)}
+              onPress={() => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+
+                if (!focused && !event.defaultPrevented) {
+                  navigation.navigate(route.name, route.params);
+                }
+              }}
               hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
               className={
                 focused

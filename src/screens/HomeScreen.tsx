@@ -1,4 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useRef } from 'react';
+import type { ScrollViewInstance } from 'react-native';
 import {
   FlatList,
   Image,
@@ -35,6 +37,8 @@ export default function HomeScreen() {
   } = useRemoteData(fetchHome);
   const navigation = useNavigation<TabNavigation<'Home'>>();
   const { onScroll } = useTabBarVisibility();
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  useScrollToTop(scrollRef);
   const openManga = (path: string) => navigation.navigate('Manga', { path });
 
   if (loading && !home) {
@@ -60,6 +64,7 @@ export default function HomeScreen() {
   return (
     <Screen>
       <ScrollView
+        ref={scrollRef}
         contentContainerClassName="pb-2"
         onScroll={onScroll}
         scrollEventThrottle={16}

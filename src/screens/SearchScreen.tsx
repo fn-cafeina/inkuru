@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -6,7 +6,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
@@ -76,6 +76,8 @@ function SearchResults({
   const { data, hasError, loading, reload } = useRemoteData(fetcher);
   const insets = useSafeAreaInsets();
   const { onScroll } = useTabBarVisibility();
+  const listRef = useRef<FlatList<SearchItem>>(null);
+  useScrollToTop(listRef);
 
   if (loading && !data) {
     return <LoadingState />;
@@ -97,6 +99,7 @@ function SearchResults({
 
   return (
     <FlatList
+      ref={listRef}
       data={data}
       keyExtractor={(item) => item.path}
       renderItem={({ item }) => (
