@@ -182,14 +182,11 @@ function SectionTitle({ children }: { children: string }) {
 
 function HeroCarousel({ items }: { items: HomeTrending[] }) {
   const { width } = useWindowDimensions();
-  const [index, setIndex] = useState(0);
-  const coverWidth = Math.min(width - 72, 280);
+  const coverWidth = Math.min(Math.round(width * 0.5), 200);
 
   if (items.length === 0) {
     return null;
   }
-
-  const current = Math.min(index, items.length - 1);
 
   return (
     <View>
@@ -200,17 +197,15 @@ function HeroCarousel({ items }: { items: HomeTrending[] }) {
         showsHorizontalScrollIndicator={false}
         data={items}
         keyExtractor={(item) => item.path}
-        renderItem={({ item }) => (
-          <HeroSlide item={item} width={width} coverWidth={coverWidth} />
+        renderItem={({ item, index }) => (
+          <HeroSlide
+            item={item}
+            width={width}
+            coverWidth={coverWidth}
+            position={`${index + 1} / ${items.length}`}
+          />
         )}
-        onMomentumScrollEnd={(event) => {
-          const next = Math.round(event.nativeEvent.contentOffset.x / width);
-          setIndex(Math.min(Math.max(next, 0), items.length - 1));
-        }}
       />
-      <Text className="mt-4 text-center text-xs text-zinc-400 dark:text-zinc-500">
-        {current + 1} / {items.length}
-      </Text>
     </View>
   );
 }
@@ -219,14 +214,16 @@ function HeroSlide({
   item,
   width,
   coverWidth,
+  position,
 }: {
   item: HomeTrending;
   width: number;
   coverWidth: number;
+  position: string;
 }) {
   return (
-    <View style={{ width }}>
-      <View className="items-center px-6">
+    <View style={{ width }} className="px-4">
+      <View className="flex-row items-center">
         <View
           className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
           style={{ width: coverWidth, aspectRatio: COVER_ASPECT_RATIO }}
@@ -238,22 +235,25 @@ function HeroSlide({
             accessible={false}
           />
         </View>
-        <View style={{ minHeight: 56 }} className="mt-4">
+        <View className="ml-4 flex-1">
           <Text
-            numberOfLines={2}
-            className="text-center text-lg font-semibold text-zinc-900 dark:text-zinc-100"
+            numberOfLines={3}
+            className="text-lg font-semibold text-zinc-900 dark:text-zinc-100"
           >
             {item.title}
           </Text>
-        </View>
-        {item.latestChapter ? (
-          <Text
-            numberOfLines={1}
-            className="mt-1 text-center text-sm text-zinc-500 dark:text-zinc-400"
-          >
-            {item.latestChapter.title}
+          {item.latestChapter ? (
+            <Text
+              numberOfLines={1}
+              className="mt-2 text-sm text-zinc-500 dark:text-zinc-400"
+            >
+              {item.latestChapter.title}
+            </Text>
+          ) : null}
+          <Text className="mt-3 text-xs text-zinc-400 dark:text-zinc-500">
+            {position}
           </Text>
-        ) : null}
+        </View>
       </View>
     </View>
   );
