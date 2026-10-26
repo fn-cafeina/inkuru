@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -13,62 +11,28 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Screen } from '../components/Screen';
+import { SectionTitle } from '../components/SectionTitle';
+import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchHome } from '../source/leercapitulo';
-import type { HomeData, HomeSideItem, HomeTrending } from '../source/leercapitulo';
+import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
 
 const COVER_ASPECT_RATIO = 248 / 352;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
-  const [home, setHome] = useState<HomeData | null>(null);
-  const [hasError, setHasError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const requestRef = useRef(0);
-  const controllerRef = useRef<AbortController | null>(null);
-
-  const request = useCallback(async () => {
-    controllerRef.current?.abort();
-
-    const controller = new AbortController();
-    controllerRef.current = controller;
-    const requestId = ++requestRef.current;
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    try {
-      const data = await fetchHome(controller.signal);
-
-      if (requestId === requestRef.current) {
-        setHome(data);
-        setHasError(false);
-      }
-    } catch {
-      if (requestId === requestRef.current) {
-        setHasError(true);
-      }
-    } finally {
-      clearTimeout(timeout);
-
-      if (requestId === requestRef.current) {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the request updates state after fetch resolves
-    void request();
-
-    return () => {
-      requestRef.current += 1;
-      controllerRef.current?.abort();
-    };
-  }, [request]);
+  const {
+    data: home,
+    hasError,
+    loading,
+    refreshing,
+    reload,
+    refresh,
+  } = useRemoteData(fetchHome);
 
   if (loading && !home) {
     return (
-      <Screen topInset={insets.top}>
+      <Screen>
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#71717a" />
         </View>
@@ -78,18 +42,14 @@ export default function HomeScreen() {
 
   if (hasError && !home) {
     return (
-      <Screen topInset={insets.top}>
+      <Screen>
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             No se pudo cargar el inicio
           </Text>
           <Pressable
             accessibilityRole="button"
-            onPress={() => {
-              setLoading(true);
-              setHasError(false);
-              void request();
-            }}
+            onPress={reload}
             className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
           >
             <Text className="text-sm font-semibold text-white dark:text-zinc-900">
@@ -103,7 +63,7 @@ export default function HomeScreen() {
 
   if (!home) {
     return (
-      <Screen topInset={insets.top}>
+      <Screen>
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-sm text-zinc-500 dark:text-zinc-400">
             Sin datos.
@@ -114,19 +74,12 @@ export default function HomeScreen() {
   }
 
   return (
-    <Screen topInset={insets.top}>
+    <Screen>
       <ScrollView
         contentContainerClassName="pb-2"
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              setHasError(false);
-              void request();
-            }}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
       >
         <Header hasError={hasError} />
@@ -136,21 +89,6 @@ export default function HomeScreen() {
         <View style={{ height: insets.bottom + 24 }} />
       </ScrollView>
     </Screen>
-  );
-}
-
-function Screen({
-  topInset,
-  children,
-}: {
-  topInset: number;
-  children: ReactNode;
-}) {
-  return (
-    <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
-      <View style={{ height: topInset }} />
-      {children}
-    </View>
   );
 }
 
@@ -166,17 +104,6 @@ function Header({ hasError }: { hasError: boolean }) {
         </Text>
       ) : null}
     </View>
-  );
-}
-
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <Text
-      accessibilityRole="header"
-      className="mb-3 px-4 text-base font-semibold text-zinc-900 dark:text-zinc-100"
-    >
-      {children}
-    </Text>
   );
 }
 
