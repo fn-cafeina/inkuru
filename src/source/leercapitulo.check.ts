@@ -105,6 +105,14 @@ assertEqual(manga.chapters[0].date, '2026-10-17', 'fecha del primer capítulo');
 const reader = parseReader(READER_FIXTURE);
 
 assertEqual(reader.title, 'Capitulo 1195', 'título del lector');
+assertEqual(reader.mangaTitle, 'One Piece', 'manga del lector');
+assertEqual(reader.chapters.length, 3, 'capítulos del lector');
+assertEqual(reader.chapterIndex, 1, 'índice del capítulo actual');
+assertEqual(
+  reader.chapters[reader.chapterIndex].title,
+  'Capitulo 1195',
+  'capítulo actual del lector',
+);
 assertEqual(reader.pages.length, 2, 'páginas del lector');
 assertEqual(
   reader.pages[0],

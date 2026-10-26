@@ -6,6 +6,8 @@ const ENTITIES: Record<string, string> = {
   gt: '>',
   hellip: '…',
   laquo: '«',
+  lsaquo: '‹',
+  rsaquo: '›',
   ldquo: '“',
   lsquo: '‘',
   lt: '<',
@@ -71,7 +73,10 @@ export type MangaDetail = {
 
 export type ReaderData = {
   title: string;
+  mangaTitle?: string;
   pages: string[];
+  chapters: MangaChapter[];
+  chapterIndex: number;
   prev?: MangaChapter;
   next?: MangaChapter;
 };
@@ -209,10 +214,20 @@ export function parseReader(html: string): ReaderData {
   const current = index >= 0 ? options[index] : undefined;
   const older = index >= 0 ? options[index + 1] : undefined;
   const newer = index >= 0 ? options[index - 1] : undefined;
+  const mangaTitle = textWithClass(html, 'a', 'lc-rbtn--title')?.replace(
+    /^[^\p{L}\p{N}]+/u,
+    '',
+  );
 
   return {
     title: current?.title ?? '',
+    mangaTitle: mangaTitle || undefined,
     pages,
+    chapters: options.map((option) => ({
+      title: option.title,
+      path: option.path,
+    })),
+    chapterIndex: index,
     prev: older ? { title: older.title, path: older.path } : undefined,
     next: newer ? { title: newer.title, path: newer.path } : undefined,
   };
