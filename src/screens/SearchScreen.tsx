@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Feather } from '@expo/vector-icons';
 import {
   FlatList,
   Image,
@@ -27,22 +28,45 @@ export default function SearchScreen() {
   const navigation = useNavigation<TabNavigation<'Search'>>();
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
-  const submit = () => setTerm(input.trim());
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTerm(input.trim()), 300);
+
+    return () => clearTimeout(timer);
+  }, [input]);
+
+  const clear = () => {
+    setInput('');
+    setTerm('');
+  };
 
   return (
     <Screen>
       <View className="px-4 py-3">
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          onSubmitEditing={submit}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="search"
-          placeholder="Buscar manga..."
-          placeholderTextColor={colors.iconInactive}
-          className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
-        />
+        <View className="min-h-12 flex-row items-center rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            onSubmitEditing={() => setTerm(input.trim())}
+            accessibilityLabel="Buscar manga"
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            placeholder="Buscar manga..."
+            placeholderTextColor={colors.iconInactive}
+            className="min-h-12 flex-1 px-3 text-sm text-zinc-900 dark:text-zinc-100"
+          />
+          {input ? (
+            <AppPressable
+              accessibilityLabel="Limpiar búsqueda"
+              onPress={clear}
+              hitSlop={8}
+              className="min-h-12 items-center justify-center px-3"
+            >
+              <Feather name="x" size={16} color={colors.iconInactive} />
+            </AppPressable>
+          ) : null}
+        </View>
       </View>
 
       {term ? (
@@ -53,8 +77,8 @@ export default function SearchScreen() {
         />
       ) : (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-            Busca por título.
+          <Text className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Escribe el título de un manga para empezar.
           </Text>
         </View>
       )}
@@ -90,8 +114,11 @@ function SearchResults({
   if (!data || data.length === 0) {
     return (
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+        <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
           Sin resultados.
+        </Text>
+        <Text className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
+          Prueba con otro título o revisa la ortografía.
         </Text>
       </View>
     );
