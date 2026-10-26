@@ -11,6 +11,7 @@ import {
 import type { ListViewToken } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,7 +31,10 @@ const PAGE_ASPECT_RATIO = 1442 / 2100;
 
 type ReaderMode = 'vertical' | 'paged';
 
-// shortcut: mode lasts for the session only, persist it with AsyncStorage if it must survive restarts.
+const MODE_KEY = 'reader:mode';
+const pageKey = (path: string) => `reader:page:${path}`;
+
+// Keeps the last mode for the next mount while AsyncStorage resolves.
 let preferredMode: ReaderMode = 'vertical';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
@@ -43,6 +47,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const [page, setPage] = useState(0);
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [restored, setRestored] = useState(false);
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchReader(path, signal),
     [path],
@@ -53,9 +58,57 @@ export default function ReaderScreen({ navigation, route }: Props) {
     const next = mode === 'vertical' ? 'paged' : 'vertical';
     preferredMode = next;
     setMode(next);
+    void AsyncStorage.setItem(MODE_KEY, next);
   };
   const colors = useColors();
   const toggleChrome = () => setChromeVisible((visible) => !visible);
+  const total = data?.pages.length ?? 0;
+  const safePage = total > 0 ? Math.min(page, total - 1) : page;
+
+  useEffect(() => {
+    let active = true;
+
+    const restore = async () => {
+      try {
+        const [storedMode, storedPage] = await Promise.all([
+          AsyncStorage.getItem(MODE_KEY),
+          AsyncStorage.getItem(pageKey(path)),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        if (storedMode === 'vertical' || storedMode === 'paged') {
+          preferredMode = storedMode;
+          setMode(storedMode);
+        }
+
+        const parsedPage = Number.parseInt(storedPage ?? '', 10);
+        if (Number.isFinite(parsedPage) && parsedPage > 0) {
+          setPage(parsedPage);
+        }
+      } catch {
+        // A storage failure must not block reading.
+      } finally {
+        if (active) {
+          setRestored(true);
+        }
+      }
+    };
+
+    void restore();
+
+    return () => {
+      active = false;
+    };
+  }, [path]);
+
+  useEffect(() => {
+    if (restored) {
+      void AsyncStorage.setItem(pageKey(path), String(safePage));
+    }
+  }, [path, restored, safePage]);
 
   return (
     <Screen>
@@ -64,12 +117,12 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <LoadingState />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
-        ) : data ? (
+        ) : data && restored ? (
           <>
             <ReaderPages
               data={data}
               mode={mode}
-              page={page}
+              page={safePage}
               bottomInset={insets.bottom}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
@@ -81,12 +134,14 @@ export default function ReaderScreen({ navigation, route }: Props) {
               }
             />
             <PageCounter
-              page={page}
+              page={safePage}
               total={data.pages.length}
               bottomInset={insets.bottom}
             />
           </>
-        ) : null}
+        ) : (
+          <LoadingState />
+        )}
 
         {chromeVisible ? (
           <View className="absolute left-0 right-0 top-0 bg-zinc-50 dark:bg-zinc-950">
