@@ -30,3 +30,7 @@ belongs to its respective authors and rightsholders.
 
 Users are responsible for the sources they configure. Support official
 releases.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
