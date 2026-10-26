@@ -66,7 +66,17 @@ export default function MangaScreen({ navigation, route }: Props) {
               }
             />
           )}
-          ListHeaderComponent={<MangaHeader manga={data} />}
+          ListHeaderComponent={
+            <MangaHeader
+              manga={data}
+              onRead={(chapter) =>
+                navigation.navigate('Reader', {
+                  path: chapter.path,
+                  title: chapter.title,
+                })
+              }
+            />
+          }
           ListFooterComponent={<View style={{ height: insets.bottom + 24 }} />}
           contentContainerClassName="pb-2"
           showsVerticalScrollIndicator={false}
@@ -76,8 +86,15 @@ export default function MangaScreen({ navigation, route }: Props) {
   );
 }
 
-function MangaHeader({ manga }: { manga: MangaDetail }) {
+function MangaHeader({
+  manga,
+  onRead,
+}: {
+  manga: MangaDetail;
+  onRead: (chapter: MangaChapter) => void;
+}) {
   const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
+  const firstChapter = manga.chapters[manga.chapters.length - 1];
 
   return (
     <View>
@@ -110,6 +127,19 @@ function MangaHeader({ manga }: { manga: MangaDetail }) {
           ) : null}
         </View>
       </View>
+
+      {firstChapter ? (
+        <View className="mt-4 px-4">
+          <AppPressable
+            onPress={() => onRead(firstChapter)}
+            className="min-h-12 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100"
+          >
+            <Text className="text-sm font-semibold text-white dark:text-zinc-900">
+              Leer primer capítulo
+            </Text>
+          </AppPressable>
+        </View>
+      ) : null}
 
       {facts.length > 0 ? (
         <View className="mt-6 px-4">
