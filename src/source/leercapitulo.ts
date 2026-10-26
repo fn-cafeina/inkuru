@@ -69,20 +69,35 @@ export type MangaDetail = {
   chapters: MangaChapter[];
 };
 
+export type ReaderData = {
+  title: string;
+  pages: string[];
+  prev?: MangaChapter;
+  next?: MangaChapter;
+};
+
 export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
-  const response = await fetch(`${BASE_URL}/`, { signal });
-
-  if (!response.ok) {
-    throw new Error(`LeerCapitulo respondió HTTP ${response.status}`);
-  }
-
-  return parseHome(await response.text());
+  return parseHome(await fetchHtml('/', signal));
 }
 
 export async function fetchManga(
   path: string,
   signal?: AbortSignal,
 ): Promise<MangaDetail> {
+  return parseManga(await fetchHtml(path, signal));
+}
+
+export async function fetchReader(
+  path: string,
+  signal?: AbortSignal,
+): Promise<ReaderData> {
+  return parseReader(await fetchHtml(path, signal));
+}
+
+async function fetchHtml(
+  path: string,
+  signal?: AbortSignal,
+): Promise<string> {
   const url = path.startsWith('/') ? `${BASE_URL}${path}` : `${BASE_URL}/${path}`;
   const response = await fetch(url, { signal });
 
@@ -90,7 +105,7 @@ export async function fetchManga(
     throw new Error(`LeerCapitulo respondió HTTP ${response.status}`);
   }
 
-  return parseManga(await response.text());
+  return response.text();
 }
 
 // shortcut: regex tied to leercapitulo's home markup, migrate to an HTML parser when selectors grow.
@@ -149,6 +164,41 @@ export function parseManga(html: string): MangaDetail {
     chapters: extractBlocks(html, 'a', 'lc-chapter-row')
       .map(parseMangaChapter)
       .filter(isDefined),
+  };
+}
+
+// shortcut: regex tied to leercapitulo's reader markup, migrate to an HTML parser when selectors grow.
+export function parseReader(html: string): ReaderData {
+  const pagesBlock = extractBlocks(html, 'main', 'lc-pages')[0];
+  const pages = pagesBlock
+    ? (pagesBlock.match(/<img\b[^>]*>/gi) ?? [])
+        .map((tag) => attribute(tag, 'data-src') ?? attribute(tag, 'src'))
+        .filter(isDefined)
+        .map(absoluteUrl)
+    : [];
+
+  if (pages.length === 0) {
+    throw new Error('Formato inesperado en el lector de LeerCapitulo');
+  }
+
+  const selectBlock = html.match(
+    /<select[^>]*\bid="chapterSelect"[^>]*>([\s\S]*?)<\/select>/i,
+  )?.[1];
+  const options = selectBlock
+    ? extractBlocks(selectBlock, 'option', undefined)
+        .map(parseReaderChapter)
+        .filter(isDefined)
+    : [];
+  const index = options.findIndex((option) => option.selected);
+  const current = index >= 0 ? options[index] : undefined;
+  const older = index >= 0 ? options[index + 1] : undefined;
+  const newer = index >= 0 ? options[index - 1] : undefined;
+
+  return {
+    title: current?.title ?? '',
+    pages,
+    prev: older ? { title: older.title, path: older.path } : undefined,
+    next: newer ? { title: newer.title, path: newer.path } : undefined,
   };
 }
 
@@ -270,6 +320,23 @@ function parseMangaChapter(block: string): MangaChapter | undefined {
   };
 }
 
+type ReaderOption = MangaChapter & { selected: boolean };
+
+function parseReaderChapter(block: string): ReaderOption | undefined {
+  const path = attribute(block, 'value');
+  const title = cleanText(block);
+
+  if (!path || !title) {
+    return undefined;
+  }
+
+  return {
+    title,
+    path,
+    selected: /\bselected\b/i.test(block),
+  };
+}
+
 function parseMangaSynopsis(html: string): string {
   const section = html.match(
     /<section[^>]*\bid="sinopsis"[^>]*>([\s\S]*?)<\/section>/i,
@@ -338,6 +405,10 @@ function extractCover(block: string): string | undefined {
     return undefined;
   }
 
+  return absoluteUrl(source);
+}
+
+function absoluteUrl(source: string): string {
   return /^https?:\/\//i.test(source) ? source : `${BASE_URL}${source}`;
 }
 

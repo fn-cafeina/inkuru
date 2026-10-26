@@ -1,6 +1,7 @@
 import { HOME_FIXTURE } from './__fixtures__/home';
 import { MANGA_FIXTURE } from './__fixtures__/manga';
-import { parseHome, parseManga } from './leercapitulo';
+import { READER_FIXTURE } from './__fixtures__/reader';
+import { parseHome, parseManga, parseReader } from './leercapitulo';
 
 const home = parseHome(HOME_FIXTURE);
 
@@ -100,6 +101,28 @@ assertEqual(
 assertEqual(manga.chapters[0].title, 'Capitulo 1196', 'título del primer capítulo');
 assertEqual(manga.chapters[0].date, '2026-10-17', 'fecha del primer capítulo');
 
+const reader = parseReader(READER_FIXTURE);
+
+assertEqual(reader.title, 'Capitulo 1195', 'título del lector');
+assertEqual(reader.pages.length, 2, 'páginas del lector');
+assertEqual(
+  reader.pages[0],
+  'https://es2s12-2127.t34798ndc.com/B0C3Xdh/J6Y/Uy/Gb/xZ/PE/Pj/GG/sG/b2/mj/Zx/mN/29/qy/s2/29/ZN/eIZgRe5/EE9s/UE.dIk.jpg',
+  'primera página',
+);
+assertEqual(
+  reader.prev?.path,
+  '/leer/psvkfbmjgo/one-piece/1194/',
+  'capítulo anterior',
+);
+assertEqual(reader.prev?.title, 'Capitulo 1194', 'título anterior');
+assertEqual(
+  reader.next?.path,
+  '/leer/psvkfbmjgo/one-piece/1196/',
+  'capítulo siguiente',
+);
+assertEqual(reader.next?.title, 'Capitulo 1196', 'título siguiente');
+
 expectThrow(
   () => parseHome('<main><p>sin datos</p></main>'),
   'HTML inválido del inicio debe lanzar error',
@@ -107,6 +130,10 @@ expectThrow(
 expectThrow(
   () => parseManga('<main><p>sin datos</p></main>'),
   'HTML inválido del detalle debe lanzar error',
+);
+expectThrow(
+  () => parseReader('<main class="lc-pages"></main>'),
+  'HTML inválido del lector debe lanzar error',
 );
 
 console.log('parsers ok');
