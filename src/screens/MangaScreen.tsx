@@ -12,6 +12,7 @@ import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchManga } from '../source/leercapitulo';
@@ -41,14 +42,10 @@ export default function MangaScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      <View className="px-4 py-3">
-        <AppPressable
-          accessibilityRole="button"
-          onPress={() => navigation.goBack()}
-        >
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">Volver</Text>
-        </AppPressable>
-      </View>
+      <ScreenHeader
+        title={data?.title ?? ''}
+        onBack={() => navigation.goBack()}
+      />
 
       {loading && !data ? (
         <LoadingState />

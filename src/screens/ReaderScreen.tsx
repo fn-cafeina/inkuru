@@ -15,6 +15,7 @@ import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
@@ -49,32 +50,26 @@ export default function ReaderScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      <View className="flex-row items-center px-4 py-3">
-        <AppPressable
-          accessibilityRole="button"
-          onPress={() => navigation.goBack()}
-        >
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">Volver</Text>
-        </AppPressable>
-        <Text
-          numberOfLines={1}
-          className="ml-4 flex-1 text-sm text-zinc-700 dark:text-zinc-300"
-        >
-          {data?.title || title}
-        </Text>
-        <AppPressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            mode === 'vertical' ? 'Cambiar a modo páginas' : 'Cambiar a modo cascada'
-          }
-          onPress={toggleMode}
-          className="ml-3 rounded-lg border border-zinc-200 px-3 py-1 dark:border-zinc-800"
-        >
-          <Text className="text-xs text-zinc-700 dark:text-zinc-300">
-            {mode === 'vertical' ? 'Páginas' : 'Cascada'}
-          </Text>
-        </AppPressable>
-      </View>
+      <ScreenHeader
+        title={data?.mangaTitle ?? data?.title ?? title}
+        subtitle={data?.mangaTitle ? data.title || title : undefined}
+        onBack={() => navigation.goBack()}
+        action={
+          <AppPressable
+            accessibilityLabel={
+              mode === 'vertical'
+                ? 'Cambiar a modo páginas'
+                : 'Cambiar a modo cascada'
+            }
+            onPress={toggleMode}
+            className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+          >
+            <Text className="text-xs text-zinc-700 dark:text-zinc-300">
+              {mode === 'vertical' ? 'Páginas' : 'Cascada'}
+            </Text>
+          </AppPressable>
+        }
+      />
 
       {loading && !data ? (
         <LoadingState />
