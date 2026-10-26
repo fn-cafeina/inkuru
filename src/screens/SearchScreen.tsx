@@ -18,10 +18,12 @@ import { fetchSearch } from '../source/leercapitulo';
 import type { SearchItem } from '../source/leercapitulo';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
+import { useColors } from '../theme/colors';
 
 const COVER_ASPECT_RATIO = 248 / 352;
 
 export default function SearchScreen() {
+  const colors = useColors();
   const navigation = useNavigation<TabNavigation<'Search'>>();
   const [input, setInput] = useState('');
   const [term, setTerm] = useState('');
@@ -38,7 +40,7 @@ export default function SearchScreen() {
           autoCorrect={false}
           returnKeyType="search"
           placeholder="Buscar manga..."
-          placeholderTextColor="#71717a"
+          placeholderTextColor={colors.iconInactive}
           className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </View>

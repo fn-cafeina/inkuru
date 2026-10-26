@@ -178,7 +178,7 @@ function HeroSlide({
               {item.latestChapter.title}
             </Text>
           ) : null}
-          <Text className="mt-3 text-xs text-zinc-400 dark:text-zinc-500">
+          <Text className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
             {position}
           </Text>
         </View>

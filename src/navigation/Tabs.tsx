@@ -2,13 +2,10 @@ import { Feather } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
-import {
-  Animated,
-  Keyboard,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Animated, Keyboard, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { useColors } from '../theme/colors';
 
 import { AppPressable } from '../components/AppPressable';
 import HomeScreen from '../screens/HomeScreen';
@@ -47,7 +44,7 @@ export function HomeTabs() {
 
 function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const isDark = useColorScheme() === 'dark';
+  const colors = useColors();
   const { hidden, hideOffset, show } = useTabBarVisibility();
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -68,8 +65,6 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   useEffect(show, [show, state.index]);
 
-  const activeIconColor = isDark ? '#18181b' : '#fafafa';
-  const inactiveIconColor = isDark ? '#71717a' : '#a1a1aa';
 
   const translateY = Animated.add(
     hidden.interpolate({
@@ -115,7 +110,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               <Feather
                 name={ICONS[route.name as keyof typeof ICONS]}
                 size={20}
-                color={focused ? activeIconColor : inactiveIconColor}
+                color={focused ? colors.onPrimary : colors.iconInactive}
               />
             </AppPressable>
           );
