@@ -5,11 +5,10 @@ import { useEffect, useState } from 'react';
 import { Animated, Keyboard, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useColors } from '../theme/colors';
-
 import { AppPressable } from '../components/AppPressable';
 import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
+import { useColors } from '../theme/colors';
 import {
   TabBarVisibilityProvider,
   TAB_BAR_HEIGHT,
@@ -64,7 +63,6 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   }, []);
 
   useEffect(show, [show, state.index]);
-
 
   const translateY = Animated.add(
     hidden.interpolate({
