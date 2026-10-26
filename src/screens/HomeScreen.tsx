@@ -34,6 +34,7 @@ export default function HomeScreen() {
   } = useRemoteData(fetchHome);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const openManga = (path: string) => navigation.navigate('Manga', { path });
+  const openSearch = () => navigation.navigate('Search');
 
   if (loading && !home) {
     return (
@@ -87,7 +88,7 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
         }
       >
-        <Header hasError={hasError} />
+        <Header hasError={hasError} onSearch={openSearch} />
         <HeroCarousel items={home.trending} onPress={openManga} />
         <SideRail title="Últimos mangas" items={home.latest} onPress={openManga} />
         <SideRail title="Populares" items={home.popular} onPress={openManga} />
@@ -97,12 +98,29 @@ export default function HomeScreen() {
   );
 }
 
-function Header({ hasError }: { hasError: boolean }) {
+function Header({
+  hasError,
+  onSearch,
+}: {
+  hasError: boolean;
+  onSearch: () => void;
+}) {
   return (
     <View className="px-4 pb-6 pt-3">
-      <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-        inkuru
-      </Text>
+      <View className="flex-row items-center justify-between">
+        <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+          inkuru
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onSearch}
+          className="px-2 py-1"
+        >
+          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+            Buscar
+          </Text>
+        </Pressable>
+      </View>
       {hasError ? (
         <Text className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950 dark:text-red-300">
           No se pudo actualizar.
