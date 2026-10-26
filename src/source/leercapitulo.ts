@@ -49,6 +49,26 @@ export type HomeData = {
   latest: HomeSideItem[];
 };
 
+export type MangaChapter = {
+  title: string;
+  path: string;
+  date?: string;
+};
+
+export type MangaFact = {
+  label: string;
+  value: string;
+};
+
+export type MangaDetail = {
+  title: string;
+  cover: string;
+  tags: string[];
+  facts: MangaFact[];
+  synopsis: string;
+  chapters: MangaChapter[];
+};
+
 export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
   const response = await fetch(`${BASE_URL}/`, { signal });
 
@@ -57,6 +77,20 @@ export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
   }
 
   return parseHome(await response.text());
+}
+
+export async function fetchManga(
+  path: string,
+  signal?: AbortSignal,
+): Promise<MangaDetail> {
+  const url = path.startsWith('/') ? `${BASE_URL}${path}` : `${BASE_URL}/${path}`;
+  const response = await fetch(url, { signal });
+
+  if (!response.ok) {
+    throw new Error(`LeerCapitulo respondió HTTP ${response.status}`);
+  }
+
+  return parseManga(await response.text());
 }
 
 // shortcut: regex tied to leercapitulo's home markup, migrate to an HTML parser when selectors grow.
@@ -78,6 +112,43 @@ export function parseHome(html: string): HomeData {
     releases,
     popular: parseSidePanel(panels, 'populares'),
     latest: parseSidePanel(panels, 'ultimos mangas'),
+  };
+}
+
+// shortcut: regex tied to leercapitulo's detail markup, migrate to an HTML parser when selectors grow.
+export function parseManga(html: string): MangaDetail {
+  const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  const title = titleMatch ? cleanText(titleMatch[1]) : '';
+  const coverBlock = extractBlocks(html, 'div', 'lc-cover-lg')[0];
+  const cover = coverBlock ? extractCover(coverBlock) : undefined;
+
+  if (!title || !cover) {
+    throw new Error('Formato inesperado en el detalle de LeerCapitulo');
+  }
+
+  const tags = [
+    ...extractBlocks(html, 'a', 'text-bg-secondary'),
+    ...extractBlocks(html, 'a', 'text-bg-light'),
+  ]
+    .map(cleanText)
+    .filter((tag) => tag.length > 0);
+
+  const factsBlock = extractBlocks(html, 'ul', 'lc-facts')[0];
+  const facts = factsBlock
+    ? extractBlocks(factsBlock, 'li', undefined)
+        .map(parseMangaFact)
+        .filter(isDefined)
+    : [];
+
+  return {
+    title,
+    cover,
+    tags,
+    facts,
+    synopsis: parseMangaSynopsis(html),
+    chapters: extractBlocks(html, 'a', 'lc-chapter-row')
+      .map(parseMangaChapter)
+      .filter(isDefined),
   };
 }
 
@@ -168,6 +239,44 @@ function parseSideItem(block: string): HomeSideItem | undefined {
   }
 
   return { title, path, cover, lastChapter };
+}
+
+function parseMangaFact(block: string): MangaFact | undefined {
+  const label = textWithClass(block, 'span', 'k');
+  const valueMatch = block.match(
+    /<span[^>]*\bclass\s*=\s*"[^"]*\bk\b[^"]*"[^>]*>[\s\S]*?<\/span>([\s\S]*)<\/li>/i,
+  );
+  const value = valueMatch ? cleanText(valueMatch[1]) : undefined;
+
+  if (!label || !value) {
+    return undefined;
+  }
+
+  return { label, value };
+}
+
+function parseMangaChapter(block: string): MangaChapter | undefined {
+  const path = attribute(block, 'href');
+  const title = textWithClass(block, 'span', 'n');
+
+  if (!title || !path) {
+    return undefined;
+  }
+
+  return {
+    title,
+    path,
+    date: textWithClass(block, 'span', 'd'),
+  };
+}
+
+function parseMangaSynopsis(html: string): string {
+  const section = html.match(
+    /<section[^>]*\bid="sinopsis"[^>]*>([\s\S]*?)<\/section>/i,
+  )?.[1];
+  const paragraph = section?.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1];
+
+  return paragraph ? cleanText(paragraph) : '';
 }
 
 function extractBlocks(

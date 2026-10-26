@@ -1,5 +1,6 @@
 import { HOME_FIXTURE } from './__fixtures__/home';
-import { parseHome } from './leercapitulo';
+import { MANGA_FIXTURE } from './__fixtures__/manga';
+import { parseHome, parseManga } from './leercapitulo';
 
 const home = parseHome(HOME_FIXTURE);
 
@@ -13,6 +14,18 @@ function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {
     throw new Error(`${label}: esperado ${String(expected)}, recibido ${String(actual)}`);
   }
+}
+
+function expectThrow(fn: () => void, label: string): void {
+  let rejected = false;
+
+  try {
+    fn();
+  } catch {
+    rejected = true;
+  }
+
+  assert(rejected, label);
 }
 
 assertEqual(home.trending.length, 2, 'tendencias');
@@ -47,12 +60,53 @@ assertEqual(home.latest.length, 2, 'últimos mangas');
 assertEqual(home.latest[0].title, 'Arrogant Slave', 'primer último manga');
 assertEqual(home.latest[1].path, '/manga/czgmsoapjn/sannin-gurashi/', 'segundo último manga');
 
-let rejected = false;
-try {
-  parseHome('<main><p>sin datos</p></main>');
-} catch {
-  rejected = true;
-}
-assert(rejected, 'HTML inválido debe lanzar error');
+const manga = parseManga(MANGA_FIXTURE);
 
-console.log('home parser ok');
+assertEqual(manga.title, 'One Piece', 'título del manga');
+assertEqual(
+  manga.cover,
+  'https://www.leercapitulo.co/covers/4f/1067e3fadaf8ec9edd6b71368445a7.jpg?v1792459668816',
+  'portada del manga',
+);
+assertEqual(manga.tags.join('|'), 'Action|Adventure|Martial Arts', 'tags del manga');
+assertEqual(manga.facts.length, 6, 'facts del manga');
+assertEqual(
+  manga.facts.find((fact) => fact.label === 'Estado')?.value,
+  'Ongoing',
+  'estado',
+);
+assertEqual(
+  manga.facts.find((fact) => fact.label === 'Demografia')?.value,
+  'Shōnen',
+  'demografía',
+);
+assertEqual(
+  manga.facts.find((fact) => fact.label === 'Capitulos')?.value,
+  '1272',
+  'capítulos del manga',
+);
+assertEqual(
+  manga.facts.find((fact) => fact.label === 'Autor')?.value,
+  'Oda Eiichirou (尾田栄一郎)',
+  'autor',
+);
+assert(manga.synopsis.includes('"One Piece"'), 'sinopsis decodificada');
+assertEqual(manga.chapters.length, 2, 'capítulos del manga');
+assertEqual(
+  manga.chapters[0].path,
+  '/leer/psvkfbmjgo/one-piece/1196/',
+  'primer capítulo',
+);
+assertEqual(manga.chapters[0].title, 'Capitulo 1196', 'título del primer capítulo');
+assertEqual(manga.chapters[0].date, '2026-10-17', 'fecha del primer capítulo');
+
+expectThrow(
+  () => parseHome('<main><p>sin datos</p></main>'),
+  'HTML inválido del inicio debe lanzar error',
+);
+expectThrow(
+  () => parseManga('<main><p>sin datos</p></main>'),
+  'HTML inválido del detalle debe lanzar error',
+);
+
+console.log('parsers ok');
