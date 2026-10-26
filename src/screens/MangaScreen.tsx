@@ -72,7 +72,17 @@ export default function MangaScreen({ navigation, route }: Props) {
         <FlatList
           data={data.chapters}
           keyExtractor={(item) => item.path}
-          renderItem={({ item }) => <ChapterRow item={item} />}
+          renderItem={({ item }) => (
+            <ChapterRow
+              item={item}
+              onPress={() =>
+                navigation.navigate('Reader', {
+                  path: item.path,
+                  title: item.title,
+                })
+              }
+            />
+          )}
           ListHeaderComponent={<MangaHeader manga={data} />}
           ListFooterComponent={<View style={{ height: insets.bottom + 24 }} />}
           contentContainerClassName="pb-2"
@@ -149,9 +159,20 @@ function MangaHeader({ manga }: { manga: MangaDetail }) {
   );
 }
 
-function ChapterRow({ item }: { item: MangaChapter }) {
+function ChapterRow({
+  item,
+  onPress,
+}: {
+  item: MangaChapter;
+  onPress: () => void;
+}) {
   return (
-    <View className="flex-row items-center px-4 py-3">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={item.title}
+      onPress={onPress}
+      className="flex-row items-center px-4 py-3"
+    >
       <Text
         numberOfLines={1}
         className="flex-1 text-sm text-zinc-900 dark:text-zinc-100"
@@ -163,6 +184,6 @@ function ChapterRow({ item }: { item: MangaChapter }) {
           {item.date}
         </Text>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
