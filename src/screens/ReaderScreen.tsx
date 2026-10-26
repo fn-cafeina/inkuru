@@ -36,6 +36,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [page, setPage] = useState(0);
+  const [chromeVisible, setChromeVisible] = useState(true);
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchReader(path, signal),
     [path],
@@ -47,56 +48,64 @@ export default function ReaderScreen({ navigation, route }: Props) {
     preferredMode = next;
     setMode(next);
   };
+  const toggleChrome = () => setChromeVisible((visible) => !visible);
 
   return (
     <Screen>
-      <ScreenHeader
-        title={data?.mangaTitle ?? data?.title ?? title}
-        subtitle={data?.mangaTitle ? data.title || title : undefined}
-        onBack={() => navigation.goBack()}
-        action={
-          <AppPressable
-            accessibilityLabel={
-              mode === 'vertical'
-                ? 'Cambiar a modo páginas'
-                : 'Cambiar a modo cascada'
-            }
-            onPress={toggleMode}
-            className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
-          >
-            <Text className="text-xs text-zinc-700 dark:text-zinc-300">
-              {mode === 'vertical' ? 'Páginas' : 'Cascada'}
-            </Text>
-          </AppPressable>
-        }
-      />
+      <View className="flex-1">
+        {loading && !data ? (
+          <LoadingState />
+        ) : hasError && !data ? (
+          <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
+        ) : data ? (
+          <>
+            <ReaderPages
+              data={data}
+              mode={mode}
+              page={page}
+              bottomInset={insets.bottom}
+              onPageChange={setPage}
+              onToggleChrome={toggleChrome}
+              onOpen={(chapter) =>
+                navigation.replace('Reader', {
+                  path: chapter.path,
+                  title: chapter.title,
+                })
+              }
+            />
+            <PageCounter
+              page={page}
+              total={data.pages.length}
+              bottomInset={insets.bottom}
+            />
+          </>
+        ) : null}
 
-      {loading && !data ? (
-        <LoadingState />
-      ) : hasError && !data ? (
-        <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
-      ) : data ? (
-        <>
-          <ReaderPages
-            data={data}
-            mode={mode}
-            page={page}
-            bottomInset={insets.bottom}
-            onPageChange={setPage}
-            onOpen={(chapter) =>
-              navigation.replace('Reader', {
-                path: chapter.path,
-                title: chapter.title,
-              })
-            }
-          />
-          <PageCounter
-            page={page}
-            total={data.pages.length}
-            bottomInset={insets.bottom}
-          />
-        </>
-      ) : null}
+        {chromeVisible ? (
+          <View className="absolute left-0 right-0 top-0 bg-zinc-50 dark:bg-zinc-950">
+            <ScreenHeader
+              title={data?.mangaTitle ?? data?.title ?? title}
+              subtitle={data?.mangaTitle ? data.title || title : undefined}
+              onBack={() => navigation.goBack()}
+              action={
+                <AppPressable
+                  accessibilityLabel={
+                    mode === 'vertical'
+                      ? 'Cambiar a modo páginas'
+                      : 'Cambiar a modo cascada'
+                  }
+                  onPress={toggleMode}
+                  className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+                >
+                  <Text className="text-xs text-zinc-700 dark:text-zinc-300">
+                    {mode === 'vertical' ? 'Páginas' : 'Cascada'}
+                  </Text>
+                </AppPressable>
+              }
+            />
+          </View>
+        ) : null}
+      </View>
     </Screen>
   );
 }
@@ -107,6 +116,7 @@ function ReaderPages({
   page,
   bottomInset,
   onPageChange,
+  onToggleChrome,
   onOpen,
 }: {
   data: ReaderData;
@@ -114,6 +124,7 @@ function ReaderPages({
   page: number;
   bottomInset: number;
   onPageChange: (page: number) => void;
+  onToggleChrome: () => void;
   onOpen: (chapter: MangaChapter) => void;
 }) {
   const { width } = useWindowDimensions();
@@ -130,8 +141,10 @@ function ReaderPages({
     <PagedPages
       pages={data.pages}
       width={width}
+      page={page}
       initialPage={page}
       onPageChange={onPageChange}
+      onToggleChrome={onToggleChrome}
       footer={chapterNav}
     />
   ) : (
@@ -140,6 +153,7 @@ function ReaderPages({
       width={width}
       initialPage={page}
       onPageChange={onPageChange}
+      onToggleChrome={onToggleChrome}
       footer={chapterNav}
     />
   );
@@ -150,12 +164,14 @@ function VerticalPages({
   width,
   initialPage,
   onPageChange,
+  onToggleChrome,
   footer,
 }: {
   pages: string[];
   width: number;
   initialPage: number;
   onPageChange: (page: number) => void;
+  onToggleChrome: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
@@ -207,7 +223,12 @@ function VerticalPages({
       data={pages}
       keyExtractor={(item) => item}
       renderItem={({ item, index }) => (
-        <PageImage uri={item} width={width} label={`Página ${index + 1}`} />
+        <PageImage
+          uri={item}
+          width={width}
+          label={`Página ${index + 1}`}
+          onPress={onToggleChrome}
+        />
       )}
       ListFooterComponent={footer}
       showsVerticalScrollIndicator={false}
@@ -224,16 +245,21 @@ function VerticalPages({
 function PagedPages({
   pages,
   width,
+  page,
   initialPage,
   onPageChange,
+  onToggleChrome,
   footer,
 }: {
   pages: string[];
   width: number;
+  page: number;
   initialPage: number;
   onPageChange: (page: number) => void;
+  onToggleChrome: () => void;
   footer: ReactElement;
 }) {
+  const listRef = useRef<FlatList<string>>(null);
   const [onViewableItemsChanged] = useState(
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
@@ -247,8 +273,16 @@ function PagedPages({
     itemVisiblePercentThreshold: 50,
   }));
 
+  const goToPage = (index: number) => {
+    if (index < 0 || index >= pages.length) {
+      return;
+    }
+    listRef.current?.scrollToIndex({ index, animated: true });
+  };
+
   return (
     <FlatList
+      ref={listRef}
       horizontal
       pagingEnabled
       data={pages}
@@ -261,7 +295,30 @@ function PagedPages({
       initialScrollIndex={Math.min(initialPage, pages.length - 1)}
       renderItem={({ item, index }) => (
         <View style={{ width }} className="justify-center">
-          <PageImage uri={item} paged label={`Página ${index + 1}`} />
+          <PageImage
+            uri={item}
+            paged
+            label={`Página ${index + 1}`}
+            onPress={onToggleChrome}
+          />
+          <AppPressable
+            accessibilityLabel="Página anterior"
+            accessibilityState={{ disabled: page === 0 }}
+            disabled={page === 0}
+            onPress={() => goToPage(page - 1)}
+            android_ripple={{ color: 'transparent' }}
+            className="absolute bottom-0 left-0 top-0"
+            style={{ width: width / 4 }}
+          />
+          <AppPressable
+            accessibilityLabel="Página siguiente"
+            accessibilityState={{ disabled: page >= pages.length - 1 }}
+            disabled={page >= pages.length - 1}
+            onPress={() => goToPage(page + 1)}
+            android_ripple={{ color: 'transparent' }}
+            className="absolute bottom-0 right-0 top-0"
+            style={{ width: width / 4 }}
+          />
         </View>
       )}
       ListFooterComponent={
@@ -284,11 +341,13 @@ function PageImage({
   label,
   width,
   paged = false,
+  onPress,
 }: {
   uri: string;
   label: string;
   width?: number;
   paged?: boolean;
+  onPress?: () => void;
 }) {
   const [ratio, setRatio] = useState(PAGE_ASPECT_RATIO);
   const [attempt, setAttempt] = useState(0);
@@ -297,7 +356,6 @@ function PageImage({
   if (failed) {
     return (
       <AppPressable
-        accessibilityRole="button"
         accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
         onPress={() => {
           setFailed(false);
@@ -316,24 +374,32 @@ function PageImage({
   }
 
   return (
-    <Image
-      key={attempt}
-      source={{ uri }}
-      onLoad={(event) => {
-        if (!paged) {
-          const { width: sourceWidth, height: sourceHeight } =
-            event.nativeEvent.source;
-          setRatio(sourceWidth / sourceHeight);
-        }
-      }}
-      onError={() => setFailed(true)}
-      resizeMode="contain"
-      accessibilityLabel={label}
+    <AppPressable
+      accessible={false}
+      onPress={onPress}
+      disabled={!onPress}
+      android_ripple={{ color: 'transparent' }}
       style={
         paged ? { width: '100%', height: '100%' } : { width, aspectRatio: ratio }
       }
       className="bg-zinc-200 dark:bg-zinc-800"
-    />
+    >
+      <Image
+        key={attempt}
+        source={{ uri }}
+        onLoad={(event) => {
+          if (!paged) {
+            const { width: sourceWidth, height: sourceHeight } =
+              event.nativeEvent.source;
+            setRatio(sourceWidth / sourceHeight);
+          }
+        }}
+        onError={() => setFailed(true)}
+        resizeMode="contain"
+        accessibilityLabel={label}
+        className="h-full w-full"
+      />
+    </AppPressable>
   );
 }
 
@@ -355,7 +421,6 @@ function ChapterNav({
     >
       {prev ? (
         <AppPressable
-          accessibilityRole="button"
           accessibilityLabel={prev.title}
           onPress={() => onOpen(prev)}
           className="mr-3 min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
@@ -370,7 +435,6 @@ function ChapterNav({
       ) : null}
       {next ? (
         <AppPressable
-          accessibilityRole="button"
           accessibilityLabel={next.title}
           onPress={() => onOpen(next)}
           className="min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
