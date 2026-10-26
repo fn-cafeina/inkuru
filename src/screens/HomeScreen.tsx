@@ -10,10 +10,12 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
+import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { fetchHome } from '../source/leercapitulo';
 import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
@@ -21,6 +23,7 @@ import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
 const COVER_ASPECT_RATIO = 248 / 352;
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
   const {
     data: home,
     hasError,
@@ -30,6 +33,7 @@ export default function HomeScreen() {
     refresh,
   } = useRemoteData(fetchHome);
   const navigation = useNavigation<TabNavigation<'Home'>>();
+  const { onScroll } = useTabBarVisibility();
   const openManga = (path: string) => navigation.navigate('Manga', { path });
 
   if (loading && !home) {
@@ -79,6 +83,8 @@ export default function HomeScreen() {
     <Screen>
       <ScrollView
         contentContainerClassName="pb-2"
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refresh} />
@@ -88,7 +94,7 @@ export default function HomeScreen() {
         <HeroCarousel items={home.trending} onPress={openManga} />
         <SideRail title="Últimos mangas" items={home.latest} onPress={openManga} />
         <SideRail title="Populares" items={home.popular} onPress={openManga} />
-        <View style={{ height: 24 }} />
+        <View style={{ height: insets.bottom + TAB_BAR_SPACE }} />
       </ScrollView>
     </Screen>
   );

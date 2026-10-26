@@ -9,11 +9,13 @@ import {
   View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchSearch } from '../source/leercapitulo';
 import type { SearchItem } from '../source/leercapitulo';
+import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 
 const COVER_ASPECT_RATIO = 248 / 352;
@@ -31,7 +33,6 @@ export default function SearchScreen() {
           value={input}
           onChangeText={setInput}
           onSubmitEditing={submit}
-          autoFocus
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="search"
@@ -70,6 +71,8 @@ function SearchResults({
     [term],
   );
   const { data, hasError, loading, reload } = useRemoteData(fetcher);
+  const insets = useSafeAreaInsets();
+  const { onScroll } = useTabBarVisibility();
 
   if (loading && !data) {
     return (
@@ -116,7 +119,11 @@ function SearchResults({
         <SearchRow item={item} onPress={() => onOpen(item.path)} />
       )}
       keyboardShouldPersistTaps="handled"
-      ListFooterComponent={<View style={{ height: 24 }} />}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      ListFooterComponent={
+        <View style={{ height: insets.bottom + TAB_BAR_SPACE }} />
+      }
       contentContainerClassName="pb-2"
       showsVerticalScrollIndicator={false}
     />
