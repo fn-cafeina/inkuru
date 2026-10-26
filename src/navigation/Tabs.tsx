@@ -104,6 +104,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 descriptors[route.key].options.title ?? route.name
               }
               onPress={() => navigation.navigate(route.name, route.params)}
+              hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
               className={
                 focused
                   ? 'items-center justify-center rounded-full bg-zinc-900 px-6 dark:bg-zinc-100'

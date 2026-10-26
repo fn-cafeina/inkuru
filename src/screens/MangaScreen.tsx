@@ -154,7 +154,7 @@ function ChapterRow({
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={onPress}
-      className="flex-row items-center px-4 py-3"
+      className="min-h-12 flex-row items-center px-4 py-3"
     >
       <Text
         numberOfLines={1}

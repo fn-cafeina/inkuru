@@ -358,7 +358,7 @@ function ChapterNav({
           accessibilityRole="button"
           accessibilityLabel={prev.title}
           onPress={() => onOpen(prev)}
-          className="mr-3 flex-1 items-center justify-center rounded-lg border border-zinc-200 py-3 dark:border-zinc-800"
+          className="mr-3 min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
         >
           <Text
             numberOfLines={1}
@@ -373,7 +373,7 @@ function ChapterNav({
           accessibilityRole="button"
           accessibilityLabel={next.title}
           onPress={() => onOpen(next)}
-          className="flex-1 items-center justify-center rounded-lg border border-zinc-200 py-3 dark:border-zinc-800"
+          className="min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
         >
           <Text
             numberOfLines={1}
