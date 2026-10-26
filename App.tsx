@@ -1,13 +1,15 @@
 import './global.css';
 
 import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import HomeScreen from './src/screens/HomeScreen';
 
 export default function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-black">
-      <Text className="text-lg font-semibold text-black dark:text-white">inkuru</Text>
+    <SafeAreaProvider>
+      <HomeScreen />
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaProvider>
   );
 }
