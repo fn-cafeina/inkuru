@@ -16,10 +16,10 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchManga } from '../source/leercapitulo';
+import { COVER_ASPECT_RATIO } from '../theme/layout';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 
-const COVER_ASPECT_RATIO = 248 / 352;
 const VISIBLE_FACTS = new Set([
   'Estado',
   'Tipo',

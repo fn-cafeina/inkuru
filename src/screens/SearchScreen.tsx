@@ -20,8 +20,7 @@ import type { SearchItem } from '../source/leercapitulo';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { useColors } from '../theme/colors';
-
-const COVER_ASPECT_RATIO = 248 / 352;
+import { COVER_ASPECT_RATIO } from '../theme/layout';
 
 export default function SearchScreen() {
   const colors = useColors();

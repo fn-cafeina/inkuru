@@ -21,9 +21,8 @@ import { useRemoteData } from '../hooks/useRemoteData';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { fetchHome } from '../source/leercapitulo';
+import { COVER_ASPECT_RATIO } from '../theme/layout';
 import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
-
-const COVER_ASPECT_RATIO = 248 / 352;
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
