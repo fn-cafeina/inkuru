@@ -1,6 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
@@ -12,6 +11,8 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import { ErrorState } from '../components/ErrorState';
+import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -39,9 +40,7 @@ export default function HomeScreen() {
   if (loading && !home) {
     return (
       <Screen>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#71717a" />
-        </View>
+        <LoadingState />
       </Screen>
     );
   }
@@ -49,34 +48,13 @@ export default function HomeScreen() {
   if (hasError && !home) {
     return (
       <Screen>
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            No se pudo cargar el inicio
-          </Text>
-          <AppPressable
-            accessibilityRole="button"
-            onPress={reload}
-            className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
-          >
-            <Text className="text-sm font-semibold text-white dark:text-zinc-900">
-              Reintentar
-            </Text>
-          </AppPressable>
-        </View>
+        <ErrorState message="No se pudo cargar el inicio" onRetry={reload} />
       </Screen>
     );
   }
 
   if (!home) {
-    return (
-      <Screen>
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-            Sin datos.
-          </Text>
-        </View>
-      </Screen>
-    );
+    return null;
   }
 
   return (

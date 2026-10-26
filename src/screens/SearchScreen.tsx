@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Text,
@@ -11,6 +10,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import { ErrorState } from '../components/ErrorState';
+import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchSearch } from '../source/leercapitulo';
@@ -75,30 +76,11 @@ function SearchResults({
   const { onScroll } = useTabBarVisibility();
 
   if (loading && !data) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#71717a" />
-      </View>
-    );
+    return <LoadingState />;
   }
 
   if (hasError && !data) {
-    return (
-      <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          No se pudo buscar
-        </Text>
-        <AppPressable
-          accessibilityRole="button"
-          onPress={reload}
-          className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
-        >
-          <Text className="text-sm font-semibold text-white dark:text-zinc-900">
-            Reintentar
-          </Text>
-        </AppPressable>
-      </View>
-    );
+    return <ErrorState message="No se pudo buscar" onRetry={reload} />;
   }
 
   if (!data || data.length === 0) {

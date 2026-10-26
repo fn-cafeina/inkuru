@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Text,
@@ -10,6 +9,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import { ErrorState } from '../components/ErrorState';
+import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -50,24 +51,9 @@ export default function MangaScreen({ navigation, route }: Props) {
       </View>
 
       {loading && !data ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#71717a" />
-        </View>
+        <LoadingState />
       ) : hasError && !data ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            No se pudo cargar el manga
-          </Text>
-          <AppPressable
-            accessibilityRole="button"
-            onPress={reload}
-            className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
-          >
-            <Text className="text-sm font-semibold text-white dark:text-zinc-900">
-              Reintentar
-            </Text>
-          </AppPressable>
-        </View>
+        <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
       ) : data ? (
         <FlatList
           data={data.chapters}
