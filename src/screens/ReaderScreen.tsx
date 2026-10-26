@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
   Text,
   useWindowDimensions,
   View,
@@ -13,6 +12,7 @@ import type { ListViewToken } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../components/AppPressable';
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchReader } from '../source/leercapitulo';
@@ -49,19 +49,19 @@ export default function ReaderScreen({ navigation, route }: Props) {
   return (
     <Screen>
       <View className="flex-row items-center px-4 py-3">
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           onPress={() => navigation.goBack()}
         >
           <Text className="text-sm text-zinc-500 dark:text-zinc-400">Volver</Text>
-        </Pressable>
+        </AppPressable>
         <Text
           numberOfLines={1}
           className="ml-4 flex-1 text-sm text-zinc-700 dark:text-zinc-300"
         >
           {data?.title || title}
         </Text>
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           accessibilityLabel={
             mode === 'vertical' ? 'Cambiar a modo páginas' : 'Cambiar a modo cascada'
@@ -72,7 +72,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <Text className="text-xs text-zinc-700 dark:text-zinc-300">
             {mode === 'vertical' ? 'Páginas' : 'Cascada'}
           </Text>
-        </Pressable>
+        </AppPressable>
       </View>
 
       {loading && !data ? (
@@ -84,7 +84,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             No se pudo cargar el capítulo
           </Text>
-          <Pressable
+          <AppPressable
             accessibilityRole="button"
             onPress={reload}
             className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
@@ -92,7 +92,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
             <Text className="text-sm font-semibold text-white dark:text-zinc-900">
               Reintentar
             </Text>
-          </Pressable>
+          </AppPressable>
         </View>
       ) : data ? (
         <>
@@ -315,7 +315,7 @@ function PageImage({
 
   if (failed) {
     return (
-      <Pressable
+      <AppPressable
         accessibilityRole="button"
         accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
         onPress={() => {
@@ -330,7 +330,7 @@ function PageImage({
         <Text className="text-center text-xs text-zinc-600 dark:text-zinc-400">
           No se pudo cargar. Toca para reintentar.
         </Text>
-      </Pressable>
+      </AppPressable>
     );
   }
 
@@ -373,7 +373,7 @@ function ChapterNav({
       style={{ paddingBottom: bottomInset + 24 }}
     >
       {prev ? (
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           accessibilityLabel={prev.title}
           onPress={() => onOpen(prev)}
@@ -385,10 +385,10 @@ function ChapterNav({
           >
             ‹ {prev.title}
           </Text>
-        </Pressable>
+        </AppPressable>
       ) : null}
       {next ? (
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           accessibilityLabel={next.title}
           onPress={() => onOpen(next)}
@@ -400,7 +400,7 @@ function ChapterNav({
           >
             {next.title} ›
           </Text>
-        </Pressable>
+        </AppPressable>
       ) : null}
     </View>
   );

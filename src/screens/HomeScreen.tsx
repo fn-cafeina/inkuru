@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
   RefreshControl,
   ScrollView,
   Text,
@@ -12,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../components/AppPressable';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -53,7 +53,7 @@ export default function HomeScreen() {
           <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             No se pudo cargar el inicio
           </Text>
-          <Pressable
+          <AppPressable
             accessibilityRole="button"
             onPress={reload}
             className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
@@ -61,7 +61,7 @@ export default function HomeScreen() {
             <Text className="text-sm font-semibold text-white dark:text-zinc-900">
               Reintentar
             </Text>
-          </Pressable>
+          </AppPressable>
         </View>
       </Screen>
     );
@@ -166,7 +166,7 @@ function HeroSlide({
   onPress: (path: string) => void;
 }) {
   return (
-    <Pressable
+    <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={() => onPress(item.path)}
@@ -205,7 +205,7 @@ function HeroSlide({
           </Text>
         </View>
       </View>
-    </Pressable>
+    </AppPressable>
   );
 }
 
@@ -246,7 +246,7 @@ function SideCard({
   onPress: (path: string) => void;
 }) {
   return (
-    <Pressable
+    <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={() => onPress(item.path)}
@@ -270,7 +270,7 @@ function SideCard({
       >
         {item.lastChapter}
       </Text>
-    </Pressable>
+    </AppPressable>
   );
 }
 

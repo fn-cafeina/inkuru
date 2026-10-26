@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import {
   Animated,
   Keyboard,
-  Pressable,
   useColorScheme,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../components/AppPressable';
 import HomeScreen from '../screens/HomeScreen';
 import SearchScreen from '../screens/SearchScreen';
 import {
@@ -96,7 +96,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           const focused = state.index === index;
 
           return (
-            <Pressable
+            <AppPressable
               key={route.key}
               accessibilityRole="tab"
               accessibilityState={{ selected: focused }}
@@ -116,7 +116,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 size={20}
                 color={focused ? activeIconColor : inactiveIconColor}
               />
-            </Pressable>
+            </AppPressable>
           );
         })}
       </View>

@@ -3,13 +3,13 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
   Text,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../components/AppPressable';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -41,12 +41,12 @@ export default function MangaScreen({ navigation, route }: Props) {
   return (
     <Screen>
       <View className="px-4 py-3">
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           onPress={() => navigation.goBack()}
         >
           <Text className="text-sm text-zinc-500 dark:text-zinc-400">Volver</Text>
-        </Pressable>
+        </AppPressable>
       </View>
 
       {loading && !data ? (
@@ -58,7 +58,7 @@ export default function MangaScreen({ navigation, route }: Props) {
           <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             No se pudo cargar el manga
           </Text>
-          <Pressable
+          <AppPressable
             accessibilityRole="button"
             onPress={reload}
             className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
@@ -66,7 +66,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             <Text className="text-sm font-semibold text-white dark:text-zinc-900">
               Reintentar
             </Text>
-          </Pressable>
+          </AppPressable>
         </View>
       ) : data ? (
         <FlatList
@@ -167,7 +167,7 @@ function ChapterRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={onPress}
@@ -184,6 +184,6 @@ function ChapterRow({
           {item.date}
         </Text>
       ) : null}
-    </Pressable>
+    </AppPressable>
   );
 }

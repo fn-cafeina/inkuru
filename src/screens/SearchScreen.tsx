@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
-  Pressable,
   Text,
   TextInput,
   View,
@@ -11,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../components/AppPressable';
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchSearch } from '../source/leercapitulo';
@@ -88,7 +88,7 @@ function SearchResults({
         <Text className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
           No se pudo buscar
         </Text>
-        <Pressable
+        <AppPressable
           accessibilityRole="button"
           onPress={reload}
           className="mt-6 rounded-lg bg-zinc-900 px-5 py-2 dark:bg-zinc-100"
@@ -96,7 +96,7 @@ function SearchResults({
           <Text className="text-sm font-semibold text-white dark:text-zinc-900">
             Reintentar
           </Text>
-        </Pressable>
+        </AppPressable>
       </View>
     );
   }
@@ -138,7 +138,7 @@ function SearchRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={onPress}
@@ -167,6 +167,6 @@ function SearchRow({
           </Text>
         ) : null}
       </View>
-    </Pressable>
+    </AppPressable>
   );
 }
