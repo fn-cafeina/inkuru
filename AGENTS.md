@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## Purpose
+
+Android manga reader app.
+
 ## Stack
 
 - Expo SDK 58, React Native 0.88, React 19.3, TypeScript 6 (strict)

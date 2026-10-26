@@ -1,6 +1,6 @@
 # inkuru
 
-Android app built with Expo SDK 58.
+Android manga reader built with Expo SDK 58.
 
 ## Requirements
 
