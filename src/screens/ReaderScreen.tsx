@@ -133,11 +133,13 @@ export default function ReaderScreen({ navigation, route }: Props) {
                 })
               }
             />
-            <PageCounter
-              page={safePage}
-              total={data.pages.length}
-              bottomInset={insets.bottom}
-            />
+            {safePage < data.pages.length - 1 ? (
+              <PageCounter
+                page={safePage}
+                total={data.pages.length}
+                bottomInset={insets.bottom}
+              />
+            ) : null}
           </>
         ) : (
           <LoadingState />
