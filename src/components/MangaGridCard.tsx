@@ -34,7 +34,7 @@ export function MangaGridCard({
       <Image
         source={{ uri: cover }}
         style={{ width, aspectRatio: COVER_ASPECT_RATIO }}
-        className="rounded-lg bg-zinc-200 dark:bg-zinc-800"
+        className="rounded-xl bg-zinc-200 dark:bg-zinc-800"
         resizeMode="cover"
         accessible={false}
       />

@@ -53,7 +53,7 @@ export default function SettingsScreen() {
         <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Se aplica al abrir un capítulo.
         </Text>
-        <View className="mt-3 flex-row rounded-lg border border-zinc-200 p-1 dark:border-zinc-800">
+        <View className="mt-3 flex-row rounded-xl border border-zinc-200 p-1 dark:border-zinc-800">
           {MODES.map((option) => {
             const selected = mode === option.value;
 

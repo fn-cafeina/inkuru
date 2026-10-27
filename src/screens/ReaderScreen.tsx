@@ -174,7 +174,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
                   <AppPressable
                     accessibilityLabel="Lista de capítulos"
                     onPress={() => setPickerOpen(true)}
-                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800"
+                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800"
                   >
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
@@ -185,7 +185,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
                         : 'Cambiar a modo cascada'
                     }
                     onPress={toggleMode}
-                    className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+                    className="min-h-12 justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
                   >
                     <Text className="text-xs text-zinc-700 dark:text-zinc-300">
                       {mode === 'vertical' ? 'Páginas' : 'Cascada'}
@@ -628,7 +628,7 @@ function ChapterNav({
           <AppPressable
             accessibilityLabel={prev.title}
             onPress={() => onOpen(prev)}
-            className="mr-3 min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+            className="mr-3 min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
           >
             <Text
               numberOfLines={1}
@@ -642,7 +642,7 @@ function ChapterNav({
           <AppPressable
             accessibilityLabel={next.title}
             onPress={() => onOpen(next)}
-            className="min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+            className="min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
           >
             <Text
               numberOfLines={1}

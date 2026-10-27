@@ -210,7 +210,7 @@ function MangaHeader({
     <View>
       <View className="flex-row px-4">
         <View
-          className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
+          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
           style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
         >
           <Image
@@ -242,7 +242,7 @@ function MangaHeader({
         <View className="mt-4 px-4">
           <AppPressable
             onPress={() => onRead(readChapter)}
-            className="min-h-12 items-center justify-center rounded-lg bg-accent-500"
+            className="min-h-12 items-center justify-center rounded-xl bg-accent-500"
           >
             <Text className="text-sm font-semibold text-white">
               {resumeChapter
