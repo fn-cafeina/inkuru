@@ -239,16 +239,23 @@ function MangaHeader({
           >
             {manga.title}
           </Text>
-          {manga.tags.length > 0 ? (
-            <Text
-              numberOfLines={2}
-              className="mt-2 text-xs text-zinc-500 dark:text-zinc-400"
-            >
-              {manga.tags.join(' · ')}
-            </Text>
-          ) : null}
         </View>
       </View>
+
+      {manga.tags.length > 0 ? (
+        <View className="mt-3 flex-row flex-wrap gap-1.5 px-4">
+          {manga.tags.map((tag) => (
+            <View
+              key={tag}
+              className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
+            >
+              <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+                {tag}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
 
       {readChapter ? (
         <View className="mt-4 px-4">
@@ -341,8 +348,12 @@ function MangaSkeleton() {
         />
         <View className="ml-4 flex-1">
           <Skeleton className="h-6 w-3/4 rounded" />
-          <Skeleton className="mt-3 h-4 w-1/2 rounded" />
         </View>
+      </View>
+      <View className="mt-3 flex-row gap-1.5 px-4">
+        <Skeleton className="h-6 w-16 rounded-full" />
+        <Skeleton className="h-6 w-20 rounded-full" />
+        <Skeleton className="h-6 w-14 rounded-full" />
       </View>
       <View className="mt-4 px-4">
         <Skeleton className="h-12 rounded-xl" />
