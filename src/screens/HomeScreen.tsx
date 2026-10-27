@@ -357,7 +357,8 @@ function SideCard({
     >
       <Image
         source={{ uri: item.cover }}
-        className="h-36 w-24 rounded-lg bg-zinc-200 dark:bg-zinc-800"
+        style={{ width: 96, aspectRatio: COVER_ASPECT_RATIO }}
+        className="rounded-lg bg-zinc-200 dark:bg-zinc-800"
         resizeMode="cover"
         accessible={false}
       />
