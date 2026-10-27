@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import {
   FlatList,
   Image,
+  RefreshControl,
   Text,
   View,
 } from 'react-native';
@@ -39,7 +40,8 @@ export default function MangaScreen({ navigation, route }: Props) {
     (signal: AbortSignal) => fetchManga(path, signal),
     [path],
   );
-  const { data, hasError, loading, reload } = useRemoteData(fetcher);
+  const { data, hasError, loading, reload, refreshing, refresh } =
+    useRemoteData(fetcher);
 
   return (
     <Screen>
@@ -80,6 +82,16 @@ export default function MangaScreen({ navigation, route }: Props) {
             />
           }
           ListFooterComponent={<View style={{ height: insets.bottom + 24 }} />}
+          ListEmptyComponent={
+            <View className="px-4 py-6">
+              <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+                Sin capítulos disponibles.
+              </Text>
+            </View>
+          }
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+          }
           contentContainerClassName="pb-2"
           showsVerticalScrollIndicator={false}
         />
