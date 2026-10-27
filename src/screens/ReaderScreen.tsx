@@ -21,6 +21,7 @@ import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
 import { loadReaderMode, saveReaderMode } from '../storage/readerSettings';
@@ -130,7 +131,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
       <StatusBar hidden={!chromeVisible} />
       <View className="flex-1">
         {loading && !data ? (
-          <LoadingState />
+          <ReaderSkeleton />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
         ) : data && restored ? (
@@ -214,6 +215,22 @@ export default function ReaderScreen({ navigation, route }: Props) {
           }}
         />
       </View>
+    </View>
+  );
+}
+
+function ReaderSkeleton() {
+  const { width } = useWindowDimensions();
+
+  return (
+    <View>
+      {[0, 1, 2].map((index) => (
+        <Skeleton
+          key={index}
+          className="mb-2 rounded"
+          style={{ width, aspectRatio: PAGE_ASPECT_RATIO }}
+        />
+      ))}
     </View>
   );
 }

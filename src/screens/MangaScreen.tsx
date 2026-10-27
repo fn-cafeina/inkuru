@@ -15,10 +15,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
-import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
+import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
@@ -138,7 +138,7 @@ export default function MangaScreen({ navigation, route }: Props) {
       />
 
       {loading && !data ? (
-        <LoadingState />
+        <MangaSkeleton />
       ) : hasError && !data ? (
         <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
       ) : data ? (
@@ -294,6 +294,42 @@ function MangaHeader({
       <View className="mt-6">
         <SectionTitle>Capítulos</SectionTitle>
       </View>
+    </View>
+  );
+}
+
+function MangaSkeleton() {
+  return (
+    <View>
+      <View className="flex-row px-4">
+        <Skeleton
+          className="rounded-xl"
+          style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
+        />
+        <View className="ml-4 flex-1">
+          <Skeleton className="h-6 w-3/4 rounded" />
+          <Skeleton className="mt-3 h-4 w-1/2 rounded" />
+        </View>
+      </View>
+      <View className="mt-4 px-4">
+        <Skeleton className="h-12 rounded-xl" />
+      </View>
+      <View className="mt-6 px-4">
+        <Skeleton className="h-3 w-24 rounded" />
+        <Skeleton className="mt-3 h-4 w-5/6 rounded" />
+        <Skeleton className="mt-2 h-4 w-2/3 rounded" />
+      </View>
+      <View className="mt-7 px-4">
+        <Skeleton className="h-3 w-28 rounded" />
+      </View>
+      {Array.from({ length: 8 }, (_, index) => (
+        <View key={index} className="px-4 py-3">
+          <Skeleton
+            className="h-4 rounded"
+            style={{ width: `${55 + (index % 3) * 15}%` }}
+          />
+        </View>
+      ))}
     </View>
   );
 }

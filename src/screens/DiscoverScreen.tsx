@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
-import { LoadingState } from '../components/LoadingState';
 import { MangaGridCard } from '../components/MangaGridCard';
 import { Screen } from '../components/Screen';
+import { MangaGridSkeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
@@ -104,7 +104,7 @@ function DiscoverResults({ term }: { term: string }) {
   };
 
   if (loading && !data) {
-    return <LoadingState />;
+    return <MangaGridSkeleton cardWidth={cardWidth} />;
   }
 
   if (hasError && !data) {

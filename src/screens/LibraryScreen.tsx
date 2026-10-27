@@ -14,9 +14,9 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
-import { LoadingState } from '../components/LoadingState';
 import { MangaGridCard } from '../components/MangaGridCard';
 import { Screen } from '../components/Screen';
+import { MangaGridSkeleton } from '../components/Skeleton';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { loadLibrary, removeFromLibrary } from '../storage/library';
@@ -104,7 +104,7 @@ export default function LibraryScreen() {
       </View>
 
       {!entries ? (
-        <LoadingState />
+        <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
