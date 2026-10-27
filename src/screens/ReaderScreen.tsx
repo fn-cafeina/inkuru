@@ -13,13 +13,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
+import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
-import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
@@ -123,7 +123,9 @@ export default function ReaderScreen({ navigation, route }: Props) {
   }, [data?.title, mangaPath, path, restored, safePage, title]);
 
   return (
-    <Screen>
+    // The reader owns the top inset so pages reach the status bar when the chrome is hidden.
+    <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
+      <StatusBar hidden={!chromeVisible} />
       <View className="flex-1">
         {loading && !data ? (
           <LoadingState />
@@ -157,7 +159,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
         )}
 
         {chromeVisible ? (
-          <View className="absolute left-0 right-0 top-0 bg-zinc-50 dark:bg-zinc-950">
+          <View
+            className="absolute left-0 right-0 top-0 bg-zinc-50 dark:bg-zinc-950"
+            style={{ paddingTop: insets.top }}
+          >
             <ScreenHeader
               title={data?.mangaTitle ?? data?.title ?? title}
               subtitle={data?.mangaTitle ? data.title || title : undefined}
@@ -207,7 +212,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           }}
         />
       </View>
-    </Screen>
+    </View>
   );
 }
 
