@@ -63,6 +63,7 @@ export default function MangaScreen({ navigation, route }: Props) {
     useRemoteData(fetcher, `manga:${path}`);
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
   const [inLibrary, setInLibrary] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useFocusEffect(
     useCallback(() => {
@@ -143,7 +144,9 @@ export default function MangaScreen({ navigation, route }: Props) {
         <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
       ) : data ? (
         <FlatList
-          data={data.chapters}
+          data={
+            sortOrder === 'asc' ? [...data.chapters].reverse() : data.chapters
+          }
           keyExtractor={(item) => item.path}
           ItemSeparatorComponent={ListDivider}
           renderItem={({ item }) => (
@@ -162,6 +165,10 @@ export default function MangaScreen({ navigation, route }: Props) {
             <MangaHeader
               manga={data}
               resumeChapter={resumeChapter}
+              sortOrder={sortOrder}
+              onToggleSort={() =>
+                setSortOrder((current) => (current === 'desc' ? 'asc' : 'desc'))
+              }
               onRead={(chapter) =>
                 navigation.navigate('Reader', {
                   path: chapter.path,
@@ -193,12 +200,17 @@ export default function MangaScreen({ navigation, route }: Props) {
 function MangaHeader({
   manga,
   resumeChapter,
+  sortOrder,
+  onToggleSort,
   onRead,
 }: {
   manga: MangaDetail;
   resumeChapter?: MangaChapter;
+  sortOrder: 'asc' | 'desc';
+  onToggleSort: () => void;
   onRead: (chapter: MangaChapter) => void;
 }) {
+  const colors = useColors();
   const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
@@ -291,8 +303,29 @@ function MangaHeader({
         </View>
       ) : null}
 
-      <View className="mt-6">
-        <SectionTitle>Capítulos</SectionTitle>
+      <View className="mt-6 flex-row items-center px-4">
+        <Text
+          accessibilityRole="header"
+          className="flex-1 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+        >
+          {manga.chapters.length} capítulos
+        </Text>
+        <AppPressable
+          accessibilityLabel={
+            sortOrder === 'desc'
+              ? 'Ordenar capítulos ascendente'
+              : 'Ordenar capítulos descendente'
+          }
+          accessibilityState={{ selected: sortOrder === 'asc' }}
+          onPress={onToggleSort}
+          className="min-h-11 min-w-11 items-center justify-center rounded-full"
+        >
+          <Feather
+            name={sortOrder === 'desc' ? 'arrow-down' : 'arrow-up'}
+            size={18}
+            color={colors.textMuted}
+          />
+        </AppPressable>
       </View>
     </View>
   );
