@@ -134,13 +134,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
                 })
               }
             />
-            {safePage < data.pages.length - 1 ? (
-              <PageCounter
-                page={safePage}
-                total={data.pages.length}
-                bottomInset={insets.bottom}
-              />
-            ) : null}
+            <PageCounter
+              page={safePage}
+              total={data.pages.length}
+              bottomInset={insets.bottom}
+            />
           </>
         ) : (
           <LoadingState />
@@ -601,38 +599,40 @@ function ChapterNav({
   onOpen: (chapter: MangaChapter) => void;
 }) {
   return (
-    <View
-      className="flex-row px-4 pt-8"
-      style={{ paddingBottom: bottomInset + 24 }}
-    >
-      {prev ? (
-        <AppPressable
-          accessibilityLabel={prev.title}
-          onPress={() => onOpen(prev)}
-          className="mr-3 min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
-        >
-          <Text
-            numberOfLines={1}
-            className="text-sm text-zinc-700 dark:text-zinc-300"
+    <View className="px-4 pt-8" style={{ paddingBottom: bottomInset + 48 }}>
+      <Text className="mb-3 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        Fin del capítulo
+      </Text>
+      <View className="flex-row">
+        {prev ? (
+          <AppPressable
+            accessibilityLabel={prev.title}
+            onPress={() => onOpen(prev)}
+            className="mr-3 min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
           >
-            ‹ {prev.title}
-          </Text>
-        </AppPressable>
-      ) : null}
-      {next ? (
-        <AppPressable
-          accessibilityLabel={next.title}
-          onPress={() => onOpen(next)}
-          className="min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
-        >
-          <Text
-            numberOfLines={1}
-            className="text-sm text-zinc-700 dark:text-zinc-300"
+            <Text
+              numberOfLines={1}
+              className="text-sm text-zinc-700 dark:text-zinc-300"
+            >
+              ‹ {prev.title}
+            </Text>
+          </AppPressable>
+        ) : null}
+        {next ? (
+          <AppPressable
+            accessibilityLabel={next.title}
+            onPress={() => onOpen(next)}
+            className="min-h-12 flex-1 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
           >
-            {next.title} ›
-          </Text>
-        </AppPressable>
-      ) : null}
+            <Text
+              numberOfLines={1}
+              className="text-sm text-zinc-700 dark:text-zinc-300"
+            >
+              {next.title} ›
+            </Text>
+          </AppPressable>
+        ) : null}
+      </View>
     </View>
   );
 }
