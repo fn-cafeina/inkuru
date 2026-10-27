@@ -20,37 +20,6 @@ const ENTITIES: Record<string, string> = {
   rsquo: '’',
 };
 
-export type HomeChapter = {
-  title: string;
-  path: string;
-  time?: string;
-};
-
-export type HomeManga = {
-  title: string;
-  path: string;
-  cover: string;
-};
-
-export type HomeTrending = HomeManga & {
-  latestChapter?: HomeChapter;
-};
-
-export type HomeRelease = HomeManga & {
-  chapters: HomeChapter[];
-};
-
-export type HomeSideItem = HomeManga & {
-  lastChapter: string;
-};
-
-export type HomeData = {
-  trending: HomeTrending[];
-  releases: HomeRelease[];
-  popular: HomeSideItem[];
-  latest: HomeSideItem[];
-};
-
 export type MangaChapter = {
   title: string;
   path: string;
@@ -92,10 +61,6 @@ export type CatalogPage = {
   items: MangaListItem[];
   hasMore: boolean;
 };
-
-export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
-  return parseHome(await fetchText('/', signal));
-}
 
 export async function fetchManga(
   path: string,
@@ -141,28 +106,6 @@ async function fetchText(
   }
 
   return response.text();
-}
-
-// shortcut: regex tied to leercapitulo's home markup, migrate to an HTML parser when selectors grow.
-export function parseHome(html: string): HomeData {
-  const trending = extractBlocks(html, 'div', 'lc-slide')
-    .map(parseTrending)
-    .filter(isDefined);
-  const releases = extractBlocks(html, 'article', 'lc-release')
-    .map(parseRelease)
-    .filter(isDefined);
-  const panels = extractBlocks(html, 'section', 'lc-panel');
-
-  if (trending.length === 0 || releases.length === 0) {
-    throw new Error('Formato inesperado en el inicio de LeerCapitulo');
-  }
-
-  return {
-    trending,
-    releases,
-    popular: parseSidePanel(panels, 'populares'),
-    latest: parseSidePanel(panels, 'ultimos mangas'),
-  };
 }
 
 // shortcut: regex tied to leercapitulo's detail markup, migrate to an HTML parser when selectors grow.
@@ -314,95 +257,6 @@ function parseSearchItem(item: unknown): MangaListItem | undefined {
     path,
     lastChapter: typeof lastChapter === 'string' ? lastChapter : undefined,
   };
-}
-
-function parseTrending(block: string): HomeTrending | undefined {
-  const coverTag = tagWithClass(block, 'a', 'lc-slide-cover');
-  const chapterTag = tagWithClass(block, 'a', 'lc-slide-chapter');
-  const cover = extractCover(block);
-  const path = coverTag ? attribute(coverTag, 'href') : undefined;
-  const title = textWithClass(block, 'a', 'lc-slide-name');
-
-  if (!title || !path || !cover) {
-    return undefined;
-  }
-
-  const chapterTitle = textWithClass(block, 'a', 'lc-slide-chapter');
-  const chapterPath = chapterTag ? attribute(chapterTag, 'href') : undefined;
-
-  return {
-    title,
-    path,
-    cover,
-    latestChapter:
-      chapterTitle && chapterPath
-        ? { title: chapterTitle, path: chapterPath }
-        : undefined,
-  };
-}
-
-function parseRelease(block: string): HomeRelease | undefined {
-  const coverTag = tagWithClass(block, 'a', 'lc-release-cover');
-  const titleTag = tagWithClass(block, 'a', 'lc-release-title');
-  const cover = extractCover(block);
-  const path =
-    (coverTag ? attribute(coverTag, 'href') : undefined) ??
-    (titleTag ? attribute(titleTag, 'href') : undefined);
-  const title = textWithClass(block, 'a', 'lc-release-title');
-
-  if (!title || !path || !cover) {
-    return undefined;
-  }
-
-  const chapters = extractBlocks(block, 'li', undefined)
-    .map(parseChapter)
-    .filter(isDefined);
-
-  return { title, path, cover, chapters };
-}
-
-function parseChapter(block: string): HomeChapter | undefined {
-  const linkTag = tagWithClass(block, 'a', 'lc-chapter-link');
-  const title = textWithClass(block, 'a', 'lc-chapter-link');
-  const path = linkTag ? attribute(linkTag, 'href') : undefined;
-
-  if (!title || !path) {
-    return undefined;
-  }
-
-  return {
-    title,
-    path,
-    time: textWithClass(block, 'span', 'lc-chapter-time'),
-  };
-}
-
-function parseSidePanel(panels: string[], titleStart: string): HomeSideItem[] {
-  const panel = panels.find((candidate) => {
-    const title = textWithClass(candidate, 'h2', 'lc-panel-title');
-    return title?.toLowerCase().startsWith(titleStart) ?? false;
-  });
-
-  if (!panel) {
-    return [];
-  }
-
-  return extractBlocks(panel, 'a', 'lc-side-item')
-    .map(parseSideItem)
-    .filter(isDefined);
-}
-
-function parseSideItem(block: string): HomeSideItem | undefined {
-  const cover = extractCover(block);
-  const path = attribute(block, 'href');
-  const title = textWithClass(block, 'span', 'lc-side-name');
-  const lastChapter = textWithClass(block, 'span', 'lc-side-chapter');
-
-  if (!title || !path || !cover || !lastChapter) {
-    return undefined;
-  }
-
-  return { title, path, cover, lastChapter };
 }
 
 function parseMangaFact(block: string): MangaFact | undefined {
