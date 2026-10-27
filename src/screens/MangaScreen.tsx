@@ -60,7 +60,7 @@ export default function MangaScreen({ navigation, route }: Props) {
     [path],
   );
   const { data, hasError, loading, reload, refreshing, refresh } =
-    useRemoteData(fetcher);
+    useRemoteData(fetcher, `manga:${path}`);
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
   const [inLibrary, setInLibrary] = useState(false);
 

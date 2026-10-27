@@ -53,7 +53,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
     (signal: AbortSignal) => fetchReader(path, signal),
     [path],
   );
-  const { data, hasError, loading, reload } = useRemoteData(fetcher);
+  const { data, hasError, loading, reload } = useRemoteData(
+    fetcher,
+    `reader:${path}`,
+  );
 
   const toggleMode = () => {
     const next = mode === 'vertical' ? 'paged' : 'vertical';

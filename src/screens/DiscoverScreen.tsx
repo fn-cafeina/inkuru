@@ -89,7 +89,10 @@ function DiscoverResults({ term }: { term: string }) {
     },
     [page, term],
   );
-  const { data, hasError, loading, reload } = useRemoteData(fetcher);
+  const { data, hasError, loading, reload } = useRemoteData(
+    fetcher,
+    `discover:${term}:${page}`,
+  );
   const cardWidth = Math.floor((width - 32 - CARD_GAP * 2) / 3);
 
   const openManga = (item: MangaListItem) =>

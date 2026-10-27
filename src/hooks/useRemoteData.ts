@@ -9,12 +9,22 @@ type RemoteData<T> = {
   refresh: () => void;
 };
 
+// Stale-while-revalidate cache: remounts (stack push, replace, key change)
+// show the last result instantly and revalidate in the background.
+const cache = new Map<string, unknown>();
+
 export function useRemoteData<T>(
   fetcher: (signal: AbortSignal) => Promise<T>,
+  cacheKey?: string,
 ): RemoteData<T> {
-  const [data, setData] = useState<T | null>(null);
+  const [data, setData] = useState<T | null>(() => {
+    const cached = cacheKey ? cache.get(cacheKey) : undefined;
+    return (cached as T | undefined) ?? null;
+  });
   const [hasError, setHasError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    () => !cacheKey || !cache.has(cacheKey),
+  );
   const [refreshing, setRefreshing] = useState(false);
   const requestRef = useRef(0);
   const controllerRef = useRef<AbortController | null>(null);
@@ -33,6 +43,9 @@ export function useRemoteData<T>(
       if (requestId === requestRef.current) {
         setData(result);
         setHasError(false);
+        if (cacheKey) {
+          cache.set(cacheKey, result);
+        }
       }
     } catch {
       if (requestId === requestRef.current) {
@@ -46,7 +59,7 @@ export function useRemoteData<T>(
         setRefreshing(false);
       }
     }
-  }, [fetcher]);
+  }, [cacheKey, fetcher]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the request updates state after fetch resolves
