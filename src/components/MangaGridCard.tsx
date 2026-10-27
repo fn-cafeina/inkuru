@@ -24,7 +24,7 @@ export function MangaGridCard({
 }: Props) {
   return (
     <AppPressable
-      accessibilityLabel={title}
+      accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
       accessibilityHint={accessibilityHint}
       onPress={onPress}
       onLongPress={onLongPress}
