@@ -6,8 +6,9 @@ import { Animated, Keyboard, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
-import HomeScreen from '../screens/HomeScreen';
-import SearchScreen from '../screens/SearchScreen';
+import DiscoverScreen from '../screens/DiscoverScreen';
+import LibraryScreen from '../screens/LibraryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 import { useColors } from '../theme/colors';
 import {
   TabBarVisibilityProvider,
@@ -20,21 +21,30 @@ const renderTabBar = (props: BottomTabBarProps) => <FloatingTabBar {...props} />
 
 const Tab = createBottomTabNavigator<MainTabsParamList>();
 
-const ICONS = { Home: 'home', Search: 'search' } as const;
+const ICONS = {
+  Library: 'book-open',
+  Discover: 'compass',
+  Settings: 'settings',
+} as const;
 
 export function MainTabs() {
   return (
     <TabBarVisibilityProvider>
       <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
         <Tab.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Inicio' }}
+          name="Library"
+          component={LibraryScreen}
+          options={{ title: 'Biblioteca' }}
         />
         <Tab.Screen
-          name="Search"
-          component={SearchScreen}
-          options={{ title: 'Buscar' }}
+          name="Discover"
+          component={DiscoverScreen}
+          options={{ title: 'Explorar' }}
+        />
+        <Tab.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: 'Ajustes' }}
         />
       </Tab.Navigator>
     </TabBarVisibilityProvider>
