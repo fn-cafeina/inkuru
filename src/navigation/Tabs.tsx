@@ -14,15 +14,15 @@ import {
   TAB_BAR_HEIGHT,
   useTabBarVisibility,
 } from './tabBar';
-import type { HomeTabsParamList } from './types';
+import type { MainTabsParamList } from './types';
 
 const renderTabBar = (props: BottomTabBarProps) => <FloatingTabBar {...props} />;
 
-const Tab = createBottomTabNavigator<HomeTabsParamList>();
+const Tab = createBottomTabNavigator<MainTabsParamList>();
 
 const ICONS = { Home: 'home', Search: 'search' } as const;
 
-export function HomeTabs() {
+export function MainTabs() {
   return (
     <TabBarVisibilityProvider>
       <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={renderTabBar}>

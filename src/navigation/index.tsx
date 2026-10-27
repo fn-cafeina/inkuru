@@ -9,7 +9,7 @@ import { useColorScheme } from 'react-native';
 import MangaScreen from '../screens/MangaScreen';
 import ReaderScreen from '../screens/ReaderScreen';
 import { useColors } from '../theme/colors';
-import { HomeTabs } from './Tabs';
+import { MainTabs } from './Tabs';
 import type { RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,7 +35,7 @@ export function RootNavigator() {
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Tabs" component={HomeTabs} />
+        <Stack.Screen name="Tabs" component={MainTabs} />
         <Stack.Screen name="Manga" component={MangaScreen} />
         <Stack.Screen name="Reader" component={ReaderScreen} />
       </Stack.Navigator>

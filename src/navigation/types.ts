@@ -5,19 +5,19 @@ import type {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export type HomeTabsParamList = {
+export type MainTabsParamList = {
   Home: undefined;
   Search: undefined;
 };
 
 export type RootStackParamList = {
-  Tabs: NavigatorScreenParams<HomeTabsParamList> | undefined;
+  Tabs: NavigatorScreenParams<MainTabsParamList> | undefined;
   Manga: { path: string; title?: string };
   Reader: { path: string; title: string; mangaPath?: string };
 };
 
-export type TabNavigation<RouteName extends keyof HomeTabsParamList> =
+export type TabNavigation<RouteName extends keyof MainTabsParamList> =
   CompositeNavigationProp<
-    BottomTabNavigationProp<HomeTabsParamList, RouteName>,
+    BottomTabNavigationProp<MainTabsParamList, RouteName>,
     NativeStackNavigationProp<RootStackParamList>
   >;
