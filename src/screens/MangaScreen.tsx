@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Image,
   RefreshControl,
   Text,
   View,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,9 +20,11 @@ import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
+import { addToLibrary, isInLibrary, removeFromLibrary } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
+import { useColors } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
@@ -50,6 +54,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 export default function MangaScreen({ navigation, route }: Props) {
   const { path, title } = route.params;
   const insets = useSafeAreaInsets();
+  const colors = useColors();
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchManga(path, signal),
     [path],
@@ -57,22 +62,48 @@ export default function MangaScreen({ navigation, route }: Props) {
   const { data, hasError, loading, reload, refreshing, refresh } =
     useRemoteData(fetcher);
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
+  const [inLibrary, setInLibrary] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
-      void loadProgress(path).then((value) => {
-        if (active) {
-          setProgress(value);
-        }
-      });
+      void Promise.all([loadProgress(path), isInLibrary(path)]).then(
+        ([value, saved]) => {
+          if (active) {
+            setProgress(value);
+            setInLibrary(saved);
+          }
+        },
+      );
 
       return () => {
         active = false;
       };
     }, [path]),
   );
+
+  const toggleLibrary = async () => {
+    if (!data) {
+      return;
+    }
+
+    const ok = inLibrary
+      ? await removeFromLibrary(path)
+      : await addToLibrary({
+          path,
+          title: data.title,
+          cover: data.cover,
+          addedAt: Date.now(),
+        });
+
+    if (!ok) {
+      Alert.alert('No se pudo actualizar la biblioteca');
+      return;
+    }
+
+    setInLibrary(!inLibrary);
+  };
 
   const resumeChapter = data
     ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
@@ -83,6 +114,27 @@ export default function MangaScreen({ navigation, route }: Props) {
       <ScreenHeader
         title={data?.title ?? title ?? ''}
         onBack={() => navigation.goBack()}
+        action={
+          <AppPressable
+            accessibilityLabel={
+              inLibrary
+                ? 'Quitar de la biblioteca'
+                : 'Añadir a la biblioteca'
+            }
+            accessibilityState={{ selected: inLibrary }}
+            disabled={!data}
+            onPress={() => {
+              void toggleLibrary();
+            }}
+            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+          >
+            <Feather
+              name="bookmark"
+              size={20}
+              color={inLibrary ? colors.primary : colors.iconInactive}
+            />
+          </AppPressable>
+        }
       />
 
       {loading && !data ? (
