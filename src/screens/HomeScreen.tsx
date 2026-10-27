@@ -22,7 +22,39 @@ import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { fetchHome } from '../source/leercapitulo';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
-import type { HomeSideItem, HomeTrending } from '../source/leercapitulo';
+import type { HomeRelease, HomeSideItem, HomeTrending } from '../source/leercapitulo';
+
+const MAX_UPDATES = 8;
+
+type HomeUpdate = {
+  mangaTitle: string;
+  mangaPath: string;
+  cover: string;
+  chapterTitle: string;
+  chapterPath: string;
+};
+
+function buildUpdates(releases: HomeRelease[]): HomeUpdate[] {
+  const updates: HomeUpdate[] = [];
+
+  for (const release of releases) {
+    const chapter = release.chapters[0];
+    if (chapter) {
+      updates.push({
+        mangaTitle: release.title,
+        mangaPath: release.path,
+        cover: release.cover,
+        chapterTitle: chapter.title,
+        chapterPath: chapter.path,
+      });
+    }
+    if (updates.length >= MAX_UPDATES) {
+      break;
+    }
+  }
+
+  return updates;
+}
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
@@ -74,7 +106,15 @@ export default function HomeScreen() {
       >
         <Header hasError={hasError} />
         <HeroCarousel items={home.trending} onPress={openManga} />
-        <SideRail title="Últimos mangas" items={home.latest} onPress={openManga} />
+        <Updates
+          items={buildUpdates(home.releases)}
+          onPress={(update) =>
+            navigation.navigate('Reader', {
+              path: update.chapterPath,
+              title: update.chapterTitle,
+            })
+          }
+        />
         <SideRail title="Populares" items={home.popular} onPress={openManga} />
         <View style={{ height: insets.bottom + TAB_BAR_SPACE }} />
       </ScrollView>
@@ -215,6 +255,60 @@ function HeroSlide({
         </View>
       </View>
     </AppPressable>
+  );
+}
+
+function Updates({
+  items,
+  onPress,
+}: {
+  items: HomeUpdate[];
+  onPress: (update: HomeUpdate) => void;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <View className="mt-8">
+      <SectionTitle>Actualizaciones</SectionTitle>
+      <View className="px-4">
+        {items.map((item, index) => (
+          <View key={item.chapterPath}>
+            {index > 0 ? (
+              <View className="h-px bg-zinc-200 dark:bg-zinc-800" />
+            ) : null}
+            <AppPressable
+              accessibilityLabel={`${item.mangaTitle}, ${item.chapterTitle}`}
+              onPress={() => onPress(item)}
+              className="min-h-12 flex-row items-center py-2"
+            >
+              <Image
+                source={{ uri: item.cover }}
+                style={{ width: 32, aspectRatio: COVER_ASPECT_RATIO }}
+                className="rounded-md bg-zinc-200 dark:bg-zinc-800"
+                resizeMode="cover"
+                accessible={false}
+              />
+              <View className="ml-3 flex-1">
+                <Text
+                  numberOfLines={1}
+                  className="text-xs text-zinc-500 dark:text-zinc-400"
+                >
+                  {item.mangaTitle}
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  className="mt-0.5 text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                >
+                  {item.chapterTitle}
+                </Text>
+              </View>
+            </AppPressable>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
