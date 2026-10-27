@@ -9,6 +9,7 @@ export type MainTabsParamList = {
   Home: undefined;
   Search: undefined;
   Discover: undefined;
+  Library: undefined;
 };
 
 export type RootStackParamList = {
