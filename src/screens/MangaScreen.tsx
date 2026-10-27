@@ -142,6 +142,9 @@ function MangaHeader({
   const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
+  const [expanded, setExpanded] = useState(false);
+  // shortcut: length heuristic, measure the rendered lines if the synopsis copy changes.
+  const longSynopsis = manga.synopsis.length > 280;
 
   return (
     <View>
@@ -208,9 +211,23 @@ function MangaHeader({
       {manga.synopsis ? (
         <View className="mt-6">
           <SectionTitle>Sinopsis</SectionTitle>
-          <Text className="px-4 text-sm text-zinc-700 dark:text-zinc-300">
+          <Text
+            numberOfLines={!expanded && longSynopsis ? 6 : undefined}
+            className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
+          >
             {manga.synopsis}
           </Text>
+          {longSynopsis ? (
+            <AppPressable
+              accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
+              onPress={() => setExpanded((value) => !value)}
+              className="mt-1 min-h-12 justify-center px-4 self-start"
+            >
+              <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                {expanded ? 'Ver menos' : 'Ver más'}
+              </Text>
+            </AppPressable>
+          ) : null}
         </View>
       ) : null}
 
