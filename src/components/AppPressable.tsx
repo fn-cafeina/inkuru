@@ -16,7 +16,7 @@ export function AppPressable({
   return (
     <Pressable
       accessibilityRole={accessibilityRole}
-      android_ripple={android_ripple ?? { color: colors.ripple }}
+      android_ripple={android_ripple ?? { color: colors.ripple, borderless: true }}
       {...rest}
     />
   );
