@@ -88,6 +88,11 @@ export type MangaListItem = {
   lastChapter?: string;
 };
 
+export type CatalogPage = {
+  items: MangaListItem[];
+  hasMore: boolean;
+};
+
 export async function fetchHome(signal?: AbortSignal): Promise<HomeData> {
   return parseHome(await fetchText('/', signal));
 }
@@ -113,6 +118,15 @@ export async function fetchSearch(
   return parseSearch(
     await fetchText(`/search/?q=${encodeURIComponent(query)}`, signal),
   );
+}
+
+export async function fetchCatalog(
+  page: number,
+  signal?: AbortSignal,
+): Promise<CatalogPage> {
+  const path = page > 1 ? `/manga/?page=${page}` : '/manga/';
+
+  return parseCatalog(await fetchText(path, signal));
 }
 
 async function fetchText(
@@ -241,6 +255,38 @@ export function parseSearch(text: string): MangaListItem[] {
   }
 
   return data.map(parseSearchItem).filter(isDefined);
+}
+
+// shortcut: regex tied to leercapitulo's catalog markup, migrate to an HTML parser when selectors grow.
+export function parseCatalog(html: string): CatalogPage {
+  if (!/\bdata-filter-form\b/.test(html)) {
+    throw new Error('Formato inesperado en el catálogo de LeerCapitulo');
+  }
+
+  return {
+    items: extractBlocks(html, 'article', 'lc-card')
+      .map(parseCatalogItem)
+      .filter(isDefined),
+    hasMore: /<a\b[^>]*\brel="next"/i.test(html),
+  };
+}
+
+function parseCatalogItem(block: string): MangaListItem | undefined {
+  const nameTag = tagWithClass(block, 'a', 'lc-card-name');
+  const title = textWithClass(block, 'a', 'lc-card-name');
+  const path = nameTag ? attribute(nameTag, 'href') : undefined;
+  const cover = extractCover(block);
+
+  if (!title || !path || !cover) {
+    return undefined;
+  }
+
+  return {
+    title,
+    cover,
+    path,
+    lastChapter: textWithClass(block, 'a', 'lc-chapter-link'),
+  };
 }
 
 function parseSearchItem(item: unknown): MangaListItem | undefined {

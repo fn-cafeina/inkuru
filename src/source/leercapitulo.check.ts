@@ -1,8 +1,9 @@
+import { CATALOG_EMPTY_FIXTURE, CATALOG_FIXTURE } from './__fixtures__/catalog';
 import { HOME_FIXTURE } from './__fixtures__/home';
 import { MANGA_FIXTURE } from './__fixtures__/manga';
 import { READER_FIXTURE } from './__fixtures__/reader';
 import { SEARCH_FIXTURE } from './__fixtures__/search';
-import { parseHome, parseManga, parseReader, parseSearch } from './leercapitulo';
+import { parseHome, parseCatalog, parseManga, parseReader, parseSearch } from './leercapitulo';
 
 const home = parseHome(HOME_FIXTURE);
 
@@ -159,6 +160,41 @@ expectThrow(
 expectThrow(
   () => parseSearch('{}'),
   'búsqueda sin array debe lanzar error',
+);
+
+const catalog = parseCatalog(CATALOG_FIXTURE);
+
+assertEqual(catalog.items.length, 2, 'mangas del catálogo');
+assertEqual(catalog.items[0].title, 'One Piece', 'título del catálogo');
+assertEqual(
+  catalog.items[0].cover,
+  'https://www.leercapitulo.co/covers/4f/1067e3fadaf8ec9edd6b71368445a7.jpg?v1793004892973',
+  'portada del catálogo',
+);
+assertEqual(
+  catalog.items[0].path,
+  '/manga/psvkfbmjgo/one-piece/',
+  'ruta del catálogo',
+);
+assertEqual(
+  catalog.items[0].lastChapter,
+  'Capitulo 1196',
+  'último capítulo del catálogo',
+);
+assertEqual(
+  catalog.items[1].title,
+  "To Hell with Being Heir, I'm going to Heal",
+  'entidades HTML del catálogo',
+);
+assertEqual(catalog.hasMore, true, 'siguiente página del catálogo');
+
+const emptyCatalog = parseCatalog(CATALOG_EMPTY_FIXTURE);
+
+assertEqual(emptyCatalog.items.length, 0, 'catálogo vacío');
+assertEqual(emptyCatalog.hasMore, false, 'catálogo vacío sin siguiente página');
+expectThrow(
+  () => parseCatalog('<main><p>sin datos</p></main>'),
+  'HTML inválido del catálogo debe lanzar error',
 );
 
 expectThrow(
