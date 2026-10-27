@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
+import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -213,6 +214,7 @@ function ChapterPicker({
   onSelect: (chapter: MangaChapter) => void;
 }) {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
 
   return (
     <Modal
@@ -225,6 +227,12 @@ function ChapterPicker({
         className="flex-1 justify-end"
         style={{ backgroundColor: 'rgba(9, 9, 11, 0.5)' }}
       >
+        <AppPressable
+          accessible={false}
+          onPress={onClose}
+          android_ripple={{ color: 'transparent' }}
+          className="absolute inset-0"
+        />
         <View
           className="rounded-t-2xl bg-zinc-50 dark:bg-zinc-950"
           style={{ maxHeight: '70%' }}
@@ -244,12 +252,24 @@ function ChapterPicker({
           <FlatList
             data={chapters}
             keyExtractor={(item) => item.path}
+            ItemSeparatorComponent={ListDivider}
+            // shortcut: rows are min-h-12 plus a 1px divider, keep the layout in sync.
+            getItemLayout={(_, index) => ({
+              length: 49,
+              offset: 49 * index,
+              index,
+            })}
+            initialScrollIndex={
+              chapters.length > 0
+                ? Math.min(Math.max(current, 0), chapters.length - 1)
+                : undefined
+            }
             renderItem={({ item, index }) => (
               <AppPressable
                 accessibilityLabel={item.title}
                 accessibilityState={{ selected: index === current }}
                 onPress={() => onSelect(item)}
-                className="min-h-12 flex-row items-center justify-between px-4 py-2"
+                className="min-h-12 flex-row items-center justify-between px-4 py-3"
               >
                 <Text
                   numberOfLines={1}
@@ -266,7 +286,7 @@ function ChapterPicker({
                 ) : null}
               </AppPressable>
             )}
-            contentContainerStyle={{ paddingBottom: 24 }}
+            contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
           />
         </View>
       </View>
