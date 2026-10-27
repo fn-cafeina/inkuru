@@ -27,9 +27,12 @@ const VISIBLE_FACTS = new Set([
   'Tipo',
   'Demografia',
   'Autor',
-  'Capitulos',
   'Actualizado',
 ]);
+
+const FACT_LABELS: Record<string, string> = {
+  Demografia: 'Demografía',
+};
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
@@ -160,7 +163,7 @@ function MangaHeader({
           {facts.map((fact) => (
             <View key={fact.label} className="flex-row py-1">
               <Text className="w-24 text-xs text-zinc-500 dark:text-zinc-400">
-                {fact.label}
+                {FACT_LABELS[fact.label] ?? fact.label}
               </Text>
               <Text className="flex-1 text-xs text-zinc-700 dark:text-zinc-300">
                 {fact.value}
