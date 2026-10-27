@@ -10,6 +10,7 @@ export type MainTabsParamList = {
   Search: undefined;
   Discover: undefined;
   Library: undefined;
+  Settings: undefined;
 };
 
 export type RootStackParamList = {
