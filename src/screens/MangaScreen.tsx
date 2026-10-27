@@ -37,6 +37,14 @@ const FACT_LABELS: Record<string, string> = {
   Demografia: 'Demografía',
 };
 
+const FACT_VALUES: Record<string, string> = {
+  Ongoing: 'En emisión',
+  Completed: 'Completa',
+  Cancelled: 'Cancelada',
+  Canceled: 'Cancelada',
+  Hiatus: 'En pausa',
+};
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
 export default function MangaScreen({ navigation, route }: Props) {
@@ -201,7 +209,7 @@ function MangaHeader({
                 {FACT_LABELS[fact.label] ?? fact.label}
               </Text>
               <Text className="flex-1 text-xs text-zinc-700 dark:text-zinc-300">
-                {fact.value}
+                {FACT_VALUES[fact.value] ?? fact.value}
               </Text>
             </View>
           ))}
