@@ -23,6 +23,8 @@ import { LoadingState } from '../components/LoadingState';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
+import { loadReaderMode, saveReaderMode } from '../storage/readerSettings';
+import type { ReaderMode } from '../storage/readerSettings';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
@@ -31,9 +33,6 @@ import { useColors } from '../theme/colors';
 // shortcut: observed pages are 1442x2100, used until the page reports its real size.
 const PAGE_ASPECT_RATIO = 1442 / 2100;
 
-type ReaderMode = 'vertical' | 'paged';
-
-const MODE_KEY = 'reader:mode';
 const pageKey = (path: string) => `reader:page:${path}`;
 
 // Keeps the last mode for the next mount while AsyncStorage resolves.
@@ -60,7 +59,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     const next = mode === 'vertical' ? 'paged' : 'vertical';
     preferredMode = next;
     setMode(next);
-    void AsyncStorage.setItem(MODE_KEY, next);
+    void saveReaderMode(next);
   };
   const colors = useColors();
   const toggleChrome = () => setChromeVisible((visible) => !visible);
@@ -73,7 +72,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     const restore = async () => {
       try {
         const [storedMode, storedPage] = await Promise.all([
-          AsyncStorage.getItem(MODE_KEY),
+          loadReaderMode(),
           AsyncStorage.getItem(pageKey(path)),
         ]);
 
@@ -81,7 +80,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           return;
         }
 
-        if (storedMode === 'vertical' || storedMode === 'paged') {
+        if (storedMode) {
           preferredMode = storedMode;
           setMode(storedMode);
         }
