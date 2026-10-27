@@ -445,9 +445,11 @@ function PagedPages({
   };
 
   return (
+    // Manga reads right to left, so page 1 sits on the right and the chapter end on the left.
     <FlatList
       ref={listRef}
       horizontal
+      inverted
       pagingEnabled
       data={pages}
       keyExtractor={(item) => item}
@@ -466,19 +468,19 @@ function PagedPages({
             onPress={onToggleChrome}
           />
           <AppPressable
-            accessibilityLabel="Página anterior"
-            accessibilityState={{ disabled: page === 0 }}
-            disabled={page === 0}
-            onPress={() => goToPage(page - 1)}
+            accessibilityLabel="Página siguiente"
+            accessibilityState={{ disabled: page >= pages.length - 1 }}
+            disabled={page >= pages.length - 1}
+            onPress={() => goToPage(page + 1)}
             android_ripple={{ color: 'transparent' }}
             className="absolute bottom-0 left-0 top-0"
             style={{ width: width / 4 }}
           />
           <AppPressable
-            accessibilityLabel="Página siguiente"
-            accessibilityState={{ disabled: page >= pages.length - 1 }}
-            disabled={page >= pages.length - 1}
-            onPress={() => goToPage(page + 1)}
+            accessibilityLabel="Página anterior"
+            accessibilityState={{ disabled: page === 0 }}
+            disabled={page === 0}
+            onPress={() => goToPage(page - 1)}
             android_ripple={{ color: 'transparent' }}
             className="absolute bottom-0 right-0 top-0"
             style={{ width: width / 4 }}
