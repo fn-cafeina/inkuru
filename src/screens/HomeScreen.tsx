@@ -113,6 +113,7 @@ export default function HomeScreen() {
             navigation.navigate('Reader', {
               path: update.chapterPath,
               title: update.chapterTitle,
+              mangaPath: update.mangaPath,
             })
           }
         />

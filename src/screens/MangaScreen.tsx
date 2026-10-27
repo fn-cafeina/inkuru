@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -6,6 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,6 +18,8 @@ import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { useRemoteData } from '../hooks/useRemoteData';
+import { loadProgress } from '../storage/readerProgress';
+import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
@@ -45,6 +48,27 @@ export default function MangaScreen({ navigation, route }: Props) {
   );
   const { data, hasError, loading, reload, refreshing, refresh } =
     useRemoteData(fetcher);
+  const [progress, setProgress] = useState<ReaderProgress | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      void loadProgress(path).then((value) => {
+        if (active) {
+          setProgress(value);
+        }
+      });
+
+      return () => {
+        active = false;
+      };
+    }, [path]),
+  );
+
+  const resumeChapter = data
+    ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
+    : undefined;
 
   return (
     <Screen>
@@ -69,6 +93,7 @@ export default function MangaScreen({ navigation, route }: Props) {
                 navigation.navigate('Reader', {
                   path: item.path,
                   title: item.title,
+                  mangaPath: path,
                 })
               }
             />
@@ -76,10 +101,12 @@ export default function MangaScreen({ navigation, route }: Props) {
           ListHeaderComponent={
             <MangaHeader
               manga={data}
+              resumeChapter={resumeChapter}
               onRead={(chapter) =>
                 navigation.navigate('Reader', {
                   path: chapter.path,
                   title: chapter.title,
+                  mangaPath: path,
                 })
               }
             />
@@ -105,13 +132,16 @@ export default function MangaScreen({ navigation, route }: Props) {
 
 function MangaHeader({
   manga,
+  resumeChapter,
   onRead,
 }: {
   manga: MangaDetail;
+  resumeChapter?: MangaChapter;
   onRead: (chapter: MangaChapter) => void;
 }) {
   const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
   const firstChapter = manga.chapters[manga.chapters.length - 1];
+  const readChapter = resumeChapter ?? firstChapter;
 
   return (
     <View>
@@ -145,14 +175,16 @@ function MangaHeader({
         </View>
       </View>
 
-      {firstChapter ? (
+      {readChapter ? (
         <View className="mt-4 px-4">
           <AppPressable
-            onPress={() => onRead(firstChapter)}
+            onPress={() => onRead(readChapter)}
             className="min-h-12 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100"
           >
             <Text className="text-sm font-semibold text-white dark:text-zinc-900">
-              Leer primer capítulo
+              {resumeChapter
+                ? `Continuar ${resumeChapter.title}`
+                : 'Leer primer capítulo'}
             </Text>
           </AppPressable>
         </View>

@@ -22,6 +22,7 @@ import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { useRemoteData } from '../hooks/useRemoteData';
+import { saveProgress } from '../storage/readerProgress';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
@@ -41,7 +42,7 @@ let preferredMode: ReaderMode = 'vertical';
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
 export default function ReaderScreen({ navigation, route }: Props) {
-  const { path, title } = route.params;
+  const { path, title, mangaPath } = route.params;
   const insets = useSafeAreaInsets();
   useKeepAwake();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
@@ -106,10 +107,20 @@ export default function ReaderScreen({ navigation, route }: Props) {
   }, [path]);
 
   useEffect(() => {
-    if (restored) {
-      void AsyncStorage.setItem(pageKey(path), String(safePage));
+    if (!restored) {
+      return;
     }
-  }, [path, restored, safePage]);
+
+    void AsyncStorage.setItem(pageKey(path), String(safePage));
+
+    if (mangaPath) {
+      void saveProgress(mangaPath, {
+        chapterPath: path,
+        chapterTitle: data?.title || title,
+        page: safePage,
+      });
+    }
+  }, [data?.title, mangaPath, path, restored, safePage, title]);
 
   return (
     <Screen>
@@ -131,6 +142,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
                 navigation.replace('Reader', {
                   path: chapter.path,
                   title: chapter.title,
+                  mangaPath,
                 })
               }
             />
@@ -189,6 +201,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
               navigation.replace('Reader', {
                 path: chapter.path,
                 title: chapter.title,
+                mangaPath,
               });
             }
           }}

@@ -13,7 +13,7 @@ export type HomeTabsParamList = {
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<HomeTabsParamList> | undefined;
   Manga: { path: string; title?: string };
-  Reader: { path: string; title: string };
+  Reader: { path: string; title: string; mangaPath?: string };
 };
 
 export type TabNavigation<RouteName extends keyof HomeTabsParamList> =
