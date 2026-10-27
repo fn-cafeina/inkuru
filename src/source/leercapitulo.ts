@@ -81,7 +81,7 @@ export type ReaderData = {
   next?: MangaChapter;
 };
 
-export type SearchItem = {
+export type MangaListItem = {
   title: string;
   cover: string;
   path: string;
@@ -109,7 +109,7 @@ export async function fetchReader(
 export async function fetchSearch(
   query: string,
   signal?: AbortSignal,
-): Promise<SearchItem[]> {
+): Promise<MangaListItem[]> {
   return parseSearch(
     await fetchText(`/search/?q=${encodeURIComponent(query)}`, signal),
   );
@@ -233,7 +233,7 @@ export function parseReader(html: string): ReaderData {
   };
 }
 
-export function parseSearch(text: string): SearchItem[] {
+export function parseSearch(text: string): MangaListItem[] {
   const data: unknown = JSON.parse(text);
 
   if (!Array.isArray(data)) {
@@ -243,7 +243,7 @@ export function parseSearch(text: string): SearchItem[] {
   return data.map(parseSearchItem).filter(isDefined);
 }
 
-function parseSearchItem(item: unknown): SearchItem | undefined {
+function parseSearchItem(item: unknown): MangaListItem | undefined {
   if (typeof item !== 'object' || item === null) {
     return undefined;
   }

@@ -17,7 +17,7 @@ import { LoadingState } from '../components/LoadingState';
 import { Screen } from '../components/Screen';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { fetchSearch } from '../source/leercapitulo';
-import type { SearchItem } from '../source/leercapitulo';
+import type { MangaListItem } from '../source/leercapitulo';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { useColors } from '../theme/colors';
@@ -100,7 +100,7 @@ function SearchResults({
   const { data, hasError, loading, reload } = useRemoteData(fetcher);
   const insets = useSafeAreaInsets();
   const { onScroll } = useTabBarVisibility();
-  const listRef = useRef<FlatList<SearchItem>>(null);
+  const listRef = useRef<FlatList<MangaListItem>>(null);
   useScrollToTop(listRef);
 
   if (loading && !data) {
@@ -149,7 +149,7 @@ function SearchRow({
   item,
   onPress,
 }: {
-  item: SearchItem;
+  item: MangaListItem;
   onPress: () => void;
 }) {
   return (
