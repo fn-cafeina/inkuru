@@ -36,6 +36,7 @@ export function useRemoteData<T>(
     controllerRef.current = controller;
     const requestId = ++requestRef.current;
     const timeout = setTimeout(() => controller.abort(), 15000);
+    setLoading(true);
 
     try {
       const result = await fetcher(controller.signal);

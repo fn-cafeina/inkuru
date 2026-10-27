@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { FlatList, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -93,31 +100,46 @@ function DiscoverResults({ term }: { term: string }) {
     fetcher,
     `discover:${term}:${page}`,
   );
+  const [items, setItems] = useState<MangaListItem[]>(data?.items ?? []);
+  const [hasMore, setHasMore] = useState(data?.hasMore ?? false);
+  const seenRef = useRef(data);
+  const colors = useColors();
   const cardWidth = Math.floor((width - 32 - CARD_GAP * 2) / 3);
+
+  useEffect(() => {
+    if (!data || data === seenRef.current) {
+      return;
+    }
+
+    seenRef.current = data;
+    setItems((current) =>
+      page === 1 ? data.items : [...current, ...data.items],
+    );
+    setHasMore(data.hasMore);
+  }, [data, page]);
 
   const openManga = (item: MangaListItem) =>
     navigation.navigate('Manga', { path: item.path, title: item.title });
 
-  const changePage = (next: number) => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-    setPage(next);
+  const loadMore = () => {
+    if (loading || !data || !hasMore) {
+      return;
+    }
+
+    setPage((current) => current + 1);
   };
 
-  if (loading && !data) {
+  if (loading && items.length === 0) {
     return <MangaGridSkeleton cardWidth={cardWidth} />;
   }
 
-  if (hasError && !data) {
+  if (hasError && items.length === 0) {
     return (
       <ErrorState message="No se pudo cargar el catálogo" onRetry={reload} />
     );
   }
 
-  if (!data) {
-    return null;
-  }
-
-  if (data.items.length === 0) {
+  if (items.length === 0) {
     return (
       <View className="flex-1 items-center justify-center px-8">
         <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -133,7 +155,7 @@ function DiscoverResults({ term }: { term: string }) {
   return (
     <FlatList
       ref={listRef}
-      data={data.items}
+      data={items}
       keyExtractor={(item) => item.path}
       numColumns={3}
       columnWrapperStyle={{ gap: CARD_GAP }}
@@ -149,51 +171,23 @@ function DiscoverResults({ term }: { term: string }) {
       )}
       onScroll={onScroll}
       scrollEventThrottle={16}
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
       ListFooterComponent={
-        <View style={{ paddingBottom: insets.bottom + TAB_BAR_SPACE }}>
-          {term ? null : (
-            <View className="mt-2 flex-row gap-3">
-              <PageButton
-                label="Anterior"
-                disabled={page === 1}
-                onPress={() => changePage(page - 1)}
-              />
-              <PageButton
-                label="Siguiente"
-                disabled={!data.hasMore}
-                onPress={() => changePage(page + 1)}
-              />
-            </View>
-          )}
+        <View
+          className="items-center"
+          style={{
+            paddingTop: loading ? 16 : 0,
+            paddingBottom: insets.bottom + TAB_BAR_SPACE,
+          }}
+        >
+          {loading && items.length > 0 ? (
+            <ActivityIndicator size="small" color={colors.iconInactive} />
+          ) : null}
         </View>
       }
     />
-  );
-}
-
-function PageButton({
-  label,
-  disabled,
-  onPress,
-}: {
-  label: string;
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <AppPressable
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      className={
-        disabled
-          ? 'min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 opacity-40 dark:border-zinc-800'
-          : 'min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800'
-      }
-    >
-      <Text className="text-sm text-zinc-700 dark:text-zinc-300">{label}</Text>
-    </AppPressable>
   );
 }
