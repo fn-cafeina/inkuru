@@ -22,6 +22,7 @@ type TabBarVisibility = {
   hidden: Animated.Value;
   hideOffset: number;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  resetY: () => void;
   show: () => void;
 };
 
@@ -64,9 +65,15 @@ export function TabBarVisibilityProvider({ children }: { children: ReactNode }) 
 
   const show = useCallback(() => setHidden(false), [setHidden]);
 
+  // lastY belongs to the tab that scrolled; reset it on tab switch so the
+  // next tab's first scroll isn't measured against a foreign offset.
+  const resetY = useCallback(() => {
+    lastY.current = 0;
+  }, []);
+
   const value = useMemo(
-    () => ({ hidden, hideOffset: HIDE_OFFSET, onScroll, show }),
-    [hidden, onScroll, show],
+    () => ({ hidden, hideOffset: HIDE_OFFSET, onScroll, resetY, show }),
+    [hidden, onScroll, resetY, show],
   );
 
   return (

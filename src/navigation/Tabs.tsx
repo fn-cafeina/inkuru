@@ -54,32 +54,40 @@ export function MainTabs() {
 function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const colors = useColors();
-  const { hidden, hideOffset, show } = useTabBarVisibility();
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const { hidden, hideOffset, resetY, show } = useTabBarVisibility();
+  const [keyboardOffset] = useState(() => new Animated.Value(0));
 
   // The bar sits at the bottom of the screen, so the keyboard covers it.
   useEffect(() => {
+    const animateTo = (toValue: number) =>
+      Animated.timing(keyboardOffset, {
+        toValue,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+
     const onShow = Keyboard.addListener('keyboardDidShow', (event) =>
-      setKeyboardHeight(event.endCoordinates.height),
+      animateTo(event.endCoordinates.height),
     );
-    const onHide = Keyboard.addListener('keyboardDidHide', () =>
-      setKeyboardHeight(0),
-    );
+    const onHide = Keyboard.addListener('keyboardDidHide', () => animateTo(0));
 
     return () => {
       onShow.remove();
       onHide.remove();
     };
-  }, []);
+  }, [keyboardOffset]);
 
-  useEffect(show, [show, state.index]);
+  useEffect(() => {
+    show();
+    resetY();
+  }, [show, resetY, state.index]);
 
   const translateY = Animated.add(
     hidden.interpolate({
       inputRange: [0, 1],
       outputRange: [0, hideOffset],
     }),
-    keyboardHeight,
+    keyboardOffset,
   );
 
   return (
