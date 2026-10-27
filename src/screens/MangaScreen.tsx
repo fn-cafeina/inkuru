@@ -34,7 +34,7 @@ const VISIBLE_FACTS = new Set([
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
 export default function MangaScreen({ navigation, route }: Props) {
-  const { path } = route.params;
+  const { path, title } = route.params;
   const insets = useSafeAreaInsets();
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchManga(path, signal),
@@ -46,7 +46,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   return (
     <Screen>
       <ScreenHeader
-        title={data?.title ?? ''}
+        title={data?.title ?? title ?? ''}
         onBack={() => navigation.goBack()}
       />
 

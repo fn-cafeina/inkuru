@@ -73,7 +73,7 @@ export default function SearchScreen() {
         <SearchResults
           key={term}
           term={term}
-          onOpen={(path) => navigation.navigate('Manga', { path })}
+          onOpen={(path, title) => navigation.navigate('Manga', { path, title })}
         />
       ) : (
         <View className="flex-1 items-center justify-center px-8">
@@ -91,7 +91,7 @@ function SearchResults({
   onOpen,
 }: {
   term: string;
-  onOpen: (path: string) => void;
+  onOpen: (path: string, title: string) => void;
 }) {
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchSearch(term, signal),
@@ -131,7 +131,7 @@ function SearchResults({
       keyExtractor={(item) => item.path}
       ItemSeparatorComponent={ListDivider}
       renderItem={({ item }) => (
-        <SearchRow item={item} onPress={() => onOpen(item.path)} />
+        <SearchRow item={item} onPress={() => onOpen(item.path, item.title)} />
       )}
       keyboardShouldPersistTaps="handled"
       onScroll={onScroll}

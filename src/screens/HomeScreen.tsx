@@ -70,7 +70,8 @@ export default function HomeScreen() {
   const { onScroll } = useTabBarVisibility();
   const scrollRef = useRef<ScrollViewInstance>(null);
   useScrollToTop(scrollRef);
-  const openManga = (path: string) => navigation.navigate('Manga', { path });
+  const openManga = (path: string, title: string) =>
+    navigation.navigate('Manga', { path, title });
 
   if (loading && !home) {
     return (
@@ -142,7 +143,7 @@ function HeroCarousel({
   onPress,
 }: {
   items: HomeTrending[];
-  onPress: (path: string) => void;
+  onPress: (path: string, title: string) => void;
 }) {
   const { width } = useWindowDimensions();
   const coverWidth = Math.min(Math.round(width * 0.5), 200);
@@ -215,13 +216,13 @@ function HeroSlide({
   item: HomeTrending;
   width: number;
   coverWidth: number;
-  onPress: (path: string) => void;
+  onPress: (path: string, title: string) => void;
 }) {
   return (
     <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
-      onPress={() => onPress(item.path)}
+      onPress={() => onPress(item.path, item.title)}
       style={{ width }}
       className="px-4"
     >
@@ -319,7 +320,7 @@ function SideRail({
 }: {
   title: string;
   items: HomeSideItem[];
-  onPress: (path: string) => void;
+  onPress: (path: string, title: string) => void;
 }) {
   if (items.length === 0) {
     return null;
@@ -346,13 +347,13 @@ function SideCard({
   onPress,
 }: {
   item: HomeSideItem;
-  onPress: (path: string) => void;
+  onPress: (path: string, title: string) => void;
 }) {
   return (
     <AppPressable
       accessibilityRole="button"
       accessibilityLabel={item.title}
-      onPress={() => onPress(item.path)}
+      onPress={() => onPress(item.path, item.title)}
       className="w-24"
     >
       <Image
