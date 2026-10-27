@@ -14,6 +14,13 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
@@ -143,13 +150,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               bottomInset={insets.bottom}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
-              onOpen={(chapter) =>
-                navigation.replace('Reader', {
-                  path: chapter.path,
-                  title: chapter.title,
-                  mangaPath,
-                })
-              }
             />
             <PageCounter
               page={safePage}
@@ -336,7 +336,6 @@ function ReaderPages({
   bottomInset,
   onPageChange,
   onToggleChrome,
-  onOpen,
 }: {
   data: ReaderData;
   mode: ReaderMode;
@@ -344,17 +343,10 @@ function ReaderPages({
   bottomInset: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
-  onOpen: (chapter: MangaChapter) => void;
 }) {
   const { width } = useWindowDimensions();
-  const chapterNav = (
-    <ChapterNav
-      prev={data.prev}
-      next={data.next}
-      bottomInset={bottomInset}
-      onOpen={onOpen}
-    />
-  );
+  // Keeps the last page clear of the screen edge after ChapterNav was removed.
+  const footer = <View style={{ paddingBottom: bottomInset + 24 }} />;
 
   return mode === 'paged' ? (
     <PagedPages
@@ -364,7 +356,7 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
-      footer={chapterNav}
+      footer={footer}
     />
   ) : (
     <VerticalPages
@@ -373,7 +365,7 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
-      footer={chapterNav}
+      footer={footer}
     />
   );
 }
@@ -573,6 +565,68 @@ function PageImage({
   const [ratio, setRatio] = useState(PAGE_ASPECT_RATIO);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const ratioValue = useSharedValue(PAGE_ASPECT_RATIO);
+  const scale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedScale = useSharedValue(1);
+  const savedX = useSharedValue(0);
+  const savedY = useSharedValue(0);
+
+  const settle = () => {
+    'worklet';
+    savedScale.value = scale.value;
+
+    if (scale.value <= 1.05) {
+      scale.value = withTiming(1);
+      translateX.value = withTiming(0);
+      translateY.value = withTiming(0);
+      savedScale.value = 1;
+      savedX.value = 0;
+      savedY.value = 0;
+      runOnJS(setZoomed)(false);
+    } else {
+      runOnJS(setZoomed)(true);
+    }
+  };
+
+  const pinch = Gesture.Pinch()
+    .onUpdate((event) => {
+      scale.value = Math.min(
+        4,
+        Math.max(1, savedScale.value * event.scale),
+      );
+    })
+    .onEnd(settle);
+
+  const pan = Gesture.Pan()
+    .enabled(zoomed)
+    .onUpdate((event) => {
+      const max = ((scale.value - 1) * (width ?? 0)) / 2;
+      const maxY = max / ratioValue.value;
+      translateX.value = Math.min(
+        max,
+        Math.max(-max, savedX.value + event.translationX),
+      );
+      translateY.value = Math.min(
+        maxY,
+        Math.max(-maxY, savedY.value + event.translationY),
+      );
+    })
+    .onEnd(() => {
+      'worklet';
+      savedX.value = translateX.value;
+      savedY.value = translateY.value;
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
 
   if (failed) {
     return (
@@ -594,83 +648,58 @@ function PageImage({
     );
   }
 
-  return (
-    <AppPressable
-      accessible={false}
-      onPress={onPress}
-      disabled={!onPress}
-      android_ripple={{ color: 'transparent' }}
-      style={
-        paged ? { width: '100%', height: '100%' } : { width, aspectRatio: ratio }
-      }
-      className="bg-zinc-200 dark:bg-zinc-800"
-    >
-      <Image
-        key={attempt}
-        source={{ uri }}
-        onLoad={(event) => {
-          if (!paged) {
-            const { width: sourceWidth, height: sourceHeight } =
-              event.nativeEvent.source;
-            setRatio(sourceWidth / sourceHeight);
-          }
-        }}
-        onError={() => setFailed(true)}
-        resizeMode="contain"
-        accessibilityLabel={label}
-        className="h-full w-full"
-      />
-    </AppPressable>
+  const image = (
+    <Image
+      key={attempt}
+      source={{ uri }}
+      resizeMethod="resize"
+      onLoad={(event) => {
+        if (!paged) {
+          const { width: sourceWidth, height: sourceHeight } =
+            event.nativeEvent.source;
+          ratioValue.value = sourceWidth / sourceHeight;
+          setRatio(sourceWidth / sourceHeight);
+        }
+      }}
+      onError={() => setFailed(true)}
+      resizeMode="contain"
+      accessibilityLabel={label}
+      className="h-full w-full"
+    />
   );
-}
 
-function ChapterNav({
-  prev,
-  next,
-  bottomInset,
-  onOpen,
-}: {
-  prev?: MangaChapter;
-  next?: MangaChapter;
-  bottomInset: number;
-  onOpen: (chapter: MangaChapter) => void;
-}) {
+  // shortcut: zoom anchors to page center, not the pinch focal point; add focal
+  // transform if pinch tracking feels off. Paged mode has no zoom (blocks paging).
+  if (paged) {
+    return (
+      <AppPressable
+        accessible={false}
+        onPress={onPress}
+        disabled={!onPress}
+        android_ripple={{ color: 'transparent' }}
+        style={{ width: '100%', height: '100%' }}
+        className="bg-zinc-200 dark:bg-zinc-800"
+      >
+        {image}
+      </AppPressable>
+    );
+  }
+
   return (
-    <View className="px-4 pt-8" style={{ paddingBottom: bottomInset + 48 }}>
-      <Text className="mb-3 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        Fin del capítulo
-      </Text>
-      <View className="flex-row">
-        {prev ? (
-          <AppPressable
-            accessibilityLabel={prev.title}
-            onPress={() => onOpen(prev)}
-            className="mr-3 min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
-          >
-            <Text
-              numberOfLines={1}
-              className="text-sm text-zinc-700 dark:text-zinc-300"
-            >
-              ‹ {prev.title}
-            </Text>
-          </AppPressable>
-        ) : null}
-        {next ? (
-          <AppPressable
-            accessibilityLabel={next.title}
-            onPress={() => onOpen(next)}
-            className="min-h-12 flex-1 items-center justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
-          >
-            <Text
-              numberOfLines={1}
-              className="text-sm text-zinc-700 dark:text-zinc-300"
-            >
-              {next.title} ›
-            </Text>
-          </AppPressable>
-        ) : null}
-      </View>
-    </View>
+    <GestureDetector gesture={Gesture.Simultaneous(pinch, pan)}>
+      <Animated.View style={[{ width, aspectRatio: ratio }, animatedStyle]}>
+        <AppPressable
+          accessible={false}
+          onPress={onPress}
+          disabled={!onPress}
+          android_ripple={{ color: 'transparent' }}
+          style={{ width, aspectRatio: ratio }}
+          className="bg-zinc-200 dark:bg-zinc-800"
+        >
+          {image}
+        </AppPressable>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
