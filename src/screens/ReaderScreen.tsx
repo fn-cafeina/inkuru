@@ -28,6 +28,7 @@ import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
 import { LoadingState } from '../components/LoadingState';
 import { ScreenHeader } from '../components/ScreenHeader';
+import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
@@ -272,10 +273,8 @@ function ChapterPicker({
           className="rounded-t-2xl bg-zinc-50 dark:bg-zinc-950"
           style={{ maxHeight: '70%' }}
         >
-          <View className="flex-row items-center justify-between px-4 py-2">
-            <Text className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-              Capítulos
-            </Text>
+          <View className="flex-row items-center justify-between pr-4">
+            <SectionTitle>Capítulos</SectionTitle>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}

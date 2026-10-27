@@ -281,7 +281,7 @@ function MangaHeader({
       ) : null}
 
       {manga.synopsis ? (
-        <View className="mt-6">
+        <View>
           <SectionTitle>Sinopsis</SectionTitle>
           <Text
             numberOfLines={!expanded && longSynopsis ? 6 : undefined}
@@ -306,7 +306,7 @@ function MangaHeader({
       <View className="mt-6 flex-row items-center px-4">
         <Text
           accessibilityRole="header"
-          className="flex-1 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+          className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
         >
           {manga.chapters.length} capítulos
         </Text>

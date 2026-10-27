@@ -4,7 +4,7 @@ export function SectionTitle({ children }: { children: string }) {
   return (
     <Text
       accessibilityRole="header"
-      className="mb-3 px-4 text-base font-semibold text-zinc-900 dark:text-zinc-100"
+      className="mb-3 mt-7 px-4 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
     >
       {children}
     </Text>
