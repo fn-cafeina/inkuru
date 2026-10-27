@@ -300,7 +300,7 @@ function ChapterPicker({
                   {item.title}
                 </Text>
                 {index === current ? (
-                  <Feather name="check" size={16} color={colors.text} />
+                  <Feather name="check" size={16} color={colors.accent} />
                 ) : null}
               </AppPressable>
             )}

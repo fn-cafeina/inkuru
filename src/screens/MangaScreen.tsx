@@ -131,7 +131,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             <Feather
               name="bookmark"
               size={20}
-              color={inLibrary ? colors.primary : colors.iconInactive}
+              color={inLibrary ? colors.accent : colors.iconInactive}
             />
           </AppPressable>
         }
@@ -242,9 +242,9 @@ function MangaHeader({
         <View className="mt-4 px-4">
           <AppPressable
             onPress={() => onRead(readChapter)}
-            className="min-h-12 items-center justify-center rounded-lg bg-zinc-900 dark:bg-zinc-100"
+            className="min-h-12 items-center justify-center rounded-lg bg-accent-500"
           >
-            <Text className="text-sm font-semibold text-white dark:text-zinc-900">
+            <Text className="text-sm font-semibold text-white">
               {resumeChapter
                 ? `Continuar ${resumeChapter.title}`
                 : 'Leer primer capítulo'}

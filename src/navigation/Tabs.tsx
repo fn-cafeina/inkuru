@@ -128,7 +128,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
               className={
                 focused
-                  ? 'items-center justify-center rounded-full bg-zinc-900 px-6 dark:bg-zinc-100'
+                  ? 'items-center justify-center rounded-full bg-accent-500 px-6'
                   : 'items-center justify-center rounded-full px-6'
               }
               style={{ height: TAB_BAR_HEIGHT - 12 }}

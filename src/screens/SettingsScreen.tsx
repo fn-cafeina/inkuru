@@ -64,14 +64,14 @@ export default function SettingsScreen() {
                 onPress={() => selectMode(option.value)}
                 className={
                   selected
-                    ? 'min-h-12 flex-1 items-center justify-center rounded-md bg-zinc-900 dark:bg-zinc-100'
+                    ? 'min-h-12 flex-1 items-center justify-center rounded-md bg-accent-500'
                     : 'min-h-12 flex-1 items-center justify-center rounded-md'
                 }
               >
                 <Text
                   className={
                     selected
-                      ? 'text-sm font-semibold text-white dark:text-zinc-900'
+                      ? 'text-sm font-semibold text-white'
                       : 'text-sm text-zinc-700 dark:text-zinc-300'
                   }
                 >
