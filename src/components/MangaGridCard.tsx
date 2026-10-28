@@ -29,11 +29,11 @@ export function MangaGridCard({
       onPress={onPress}
       onLongPress={onLongPress}
       style={{ width }}
-      className="mb-4 rounded-lg"
+      className="mb-4 rounded-lg p-1"
     >
       <Image
         source={{ uri: cover }}
-        style={{ width, aspectRatio: COVER_ASPECT_RATIO }}
+        style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
         className="rounded-lg bg-zinc-200 dark:bg-zinc-800"
         resizeMode="cover"
         accessible={false}

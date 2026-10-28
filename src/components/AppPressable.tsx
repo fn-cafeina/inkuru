@@ -30,7 +30,7 @@ export function AppPressable({
           {pressFeedback && pressed ? (
             <View
               pointerEvents="none"
-              className="absolute inset-1 rounded-sm"
+              className="absolute inset-0"
               style={{ backgroundColor: colors.ripple }}
             />
           ) : null}
