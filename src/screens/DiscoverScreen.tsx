@@ -78,6 +78,20 @@ export default function DiscoverScreen() {
   );
 }
 
+function mergeItems(current: MangaListItem[], next: MangaListItem[]) {
+  const merged = [...current];
+  const seen = new Set(current.map((item) => item.path));
+
+  for (const item of next) {
+    if (!seen.has(item.path)) {
+      seen.add(item.path);
+      merged.push(item);
+    }
+  }
+
+  return merged;
+}
+
 function DiscoverResults({ term }: { term: string }) {
   const navigation = useNavigation<TabNavigation<'Discover'>>();
   const insets = useSafeAreaInsets();
@@ -96,37 +110,87 @@ function DiscoverResults({ term }: { term: string }) {
     },
     [page, term],
   );
-  const { data, hasError, loading, reload } = useRemoteData(
+  const { data, hasError, loading, fetching, reload } = useRemoteData(
     fetcher,
     `discover:${term}:${page}`,
   );
-  const [items, setItems] = useState<MangaListItem[]>(data?.items ?? []);
-  const [hasMore, setHasMore] = useState(data?.hasMore ?? false);
-  const seenRef = useRef(data);
+  const [items, setItems] = useState<MangaListItem[]>(() => data?.items ?? []);
+  const [hasMore, setHasMore] = useState(() => data?.hasMore ?? false);
+  const appliedPage = useRef(data ? page : 0);
+  const pendingPage = useRef<number | null>(null);
   const colors = useColors();
   const cardWidth = Math.floor((width - 32 - CARD_GAP * 2) / 3);
 
+  // Mirroring fetched pages into the accumulated list is the external-system
+  // sync this effect exists for; the set-state-in-effect heuristic cannot tell
+  // it apart from a cascading render.
+  /* eslint-disable react-hooks/set-state-in-effect -- accumulate fetched pages */
   useEffect(() => {
-    if (!data || data === seenRef.current) {
+    if (!data) {
       return;
     }
 
-    seenRef.current = data;
-    setItems((current) =>
-      page === 1 ? data.items : [...current, ...data.items],
-    );
+    if (page === 1) {
+      appliedPage.current = 1;
+      setItems(data.items);
+      setHasMore(data.hasMore);
+
+      if (!data.hasMore) {
+        pendingPage.current = null;
+      }
+
+      return;
+    }
+
+    if (appliedPage.current === page) {
+      if (pendingPage.current === page) {
+        pendingPage.current = null;
+      }
+
+      return;
+    }
+
+    appliedPage.current = page;
+    setItems((current) => mergeItems(current, data.items));
     setHasMore(data.hasMore);
+
+    if (pendingPage.current === page || !data.hasMore) {
+      pendingPage.current = null;
+    }
   }, [data, page]);
+
+  // A page requested while the current request was in flight resumes here, so
+  // a short list does not lose the onEndReached that fired during revalidation.
+  useEffect(() => {
+    const pending = pendingPage.current;
+
+    if (fetching || hasError || !hasMore || pending === null || pending === page) {
+      return;
+    }
+
+    setPage(pending);
+  }, [fetching, hasError, hasMore, page]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const openManga = (item: MangaListItem) =>
     navigation.navigate('Manga', { path: item.path, title: item.title });
 
   const loadMore = () => {
-    if (loading || !data || !hasMore) {
+    if (
+      hasError ||
+      !hasMore ||
+      pendingPage.current !== null ||
+      items.length === 0
+    ) {
       return;
     }
 
-    setPage((current) => current + 1);
+    // Assigned synchronously, so two onEndReached in one frame advance once.
+    pendingPage.current = page + 1;
+
+    if (!fetching) {
+      setPage(pendingPage.current);
+    }
   };
 
   if (loading && items.length === 0) {
@@ -174,16 +238,28 @@ function DiscoverResults({ term }: { term: string }) {
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
       ListFooterComponent={
         <View
-          className="items-center"
           style={{
-            paddingTop: loading ? 16 : 0,
+            paddingTop: 16,
             paddingBottom: insets.bottom + TAB_BAR_SPACE,
           }}
         >
-          {loading && items.length > 0 ? (
+          {hasError ? (
+            <AppPressable
+              accessibilityLabel="No se pudo cargar más. Reintentar"
+              onPress={reload}
+              android_ripple={{ color: colors.ripple }}
+              className="min-h-12 flex-row items-center justify-center rounded-xl border border-zinc-200 px-4 dark:border-zinc-800"
+            >
+              <Feather name="refresh-cw" size={16} color={colors.textMuted} />
+              <Text className="ml-2 text-sm text-zinc-700 dark:text-zinc-300">
+                No se pudo cargar más. Reintentar
+              </Text>
+            </AppPressable>
+          ) : fetching ? (
             <ActivityIndicator size="small" color={colors.iconInactive} />
           ) : null}
         </View>
