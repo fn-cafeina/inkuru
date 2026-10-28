@@ -38,18 +38,6 @@ import { COVER_ASPECT_RATIO } from '../theme/layout';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 
-const VISIBLE_FACTS = new Set([
-  'Estado',
-  'Tipo',
-  'Demografia',
-  'Autor',
-  'Actualizado',
-]);
-
-const FACT_LABELS: Record<string, string> = {
-  Demografia: 'Demografía',
-};
-
 const FACT_VALUES: Record<string, string> = {
   Ongoing: 'En emisión',
   Completed: 'Completa',
@@ -467,7 +455,16 @@ function MangaHeader({
 }) {
   const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
-  const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
+  const factValue = (label: string) => {
+    const value = manga.facts.find((fact) => fact.label === label)?.value;
+
+    return value ? FACT_VALUES[value] ?? value : undefined;
+  };
+  const meta = [factValue('Estado'), factValue('Tipo'), factValue('Demografia')]
+    .filter((value): value is string => Boolean(value))
+    .join(' · ');
+  const author = factValue('Autor');
+  const updated = factValue('Actualizado');
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
   const [expanded, setExpanded] = useState(false);
@@ -495,20 +492,35 @@ function MangaHeader({
           >
             {manga.title}
           </Text>
+          {meta ? (
+            <Text
+              numberOfLines={1}
+              className="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
+            >
+              {meta}
+            </Text>
+          ) : null}
+          {author ? (
+            <Text
+              numberOfLines={2}
+              className="mt-1 text-sm text-zinc-700 dark:text-zinc-300"
+            >
+              {author}
+            </Text>
+          ) : null}
+          {updated ? (
+            <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              {`Actualizado ${updated}`}
+            </Text>
+          ) : null}
         </View>
       </View>
-
-      {manga.tags.length > 0 ? (
-        <View className="mt-3 px-4">
-          <TagRow tags={manga.tags} />
-        </View>
-      ) : null}
 
       {readChapter ? (
         <View className="mt-4 px-4">
           <AppPressable
             onPress={() => onRead(readChapter)}
-            className="min-h-12 items-center justify-center rounded-lg bg-accent-500"
+            className="min-h-14 items-center justify-center rounded-lg bg-accent-500"
           >
             <Text className="text-sm font-semibold text-white">
               {resumeChapter
@@ -519,18 +531,9 @@ function MangaHeader({
         </View>
       ) : null}
 
-      {facts.length > 0 ? (
-        <View className="mt-6 px-4">
-          {facts.map((fact) => (
-            <View key={fact.label} className="flex-row py-1">
-              <Text className="w-24 text-xs text-zinc-500 dark:text-zinc-400">
-                {FACT_LABELS[fact.label] ?? fact.label}
-              </Text>
-              <Text className="flex-1 text-xs text-zinc-700 dark:text-zinc-300">
-                {FACT_VALUES[fact.value] ?? fact.value}
-              </Text>
-            </View>
-          ))}
+      {manga.tags.length > 0 ? (
+        <View className="mt-4 px-4">
+          <TagRow tags={manga.tags} />
         </View>
       ) : null}
 
@@ -617,9 +620,14 @@ function MangaSkeleton() {
         />
         <View className="ml-4 flex-1">
           <Skeleton className="h-6 w-3/4 rounded" />
+          <Skeleton className="mt-2 h-3 w-1/2 rounded" />
+          <Skeleton className="mt-2 h-4 w-2/3 rounded" />
         </View>
       </View>
-      <View className="mt-3 gap-1.5 px-4">
+      <View className="mt-4 px-4">
+        <Skeleton className="h-14 rounded-lg" />
+      </View>
+      <View className="mt-4 gap-1.5 px-4">
         <View className="flex-row gap-1.5">
           <Skeleton className="h-6 w-16 rounded-md" />
           <Skeleton className="h-6 w-20 rounded-md" />
@@ -629,9 +637,6 @@ function MangaSkeleton() {
           <Skeleton className="h-6 w-12 rounded-md" />
           <Skeleton className="h-6 w-16 rounded-md" />
         </View>
-      </View>
-      <View className="mt-4 px-4">
-        <Skeleton className="h-12 rounded-lg" />
       </View>
       <View className="mt-6 px-4">
         <Skeleton className="h-3 w-24 rounded" />
