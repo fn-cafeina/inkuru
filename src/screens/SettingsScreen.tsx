@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { ScrollView, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../components/AppPressable';
-import { ListDivider } from '../components/ListDivider';
+import { OptionChip } from '../components/OptionChip';
 import { Screen } from '../components/Screen';
+import { SectionTitle } from '../components/SectionTitle';
 import { TAB_BAR_SPACE } from '../navigation/tabBar';
+import { useColors } from '../theme/colors';
 import {
   DEFAULT_READER_MODE,
   DEFAULT_READER_QUALITY,
@@ -27,6 +29,8 @@ import type {
   ReaderQuality,
   ReaderScale,
 } from '../storage/readerSettings';
+
+type FeatherName = ComponentProps<typeof Feather>['name'];
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -92,50 +96,44 @@ export default function SettingsScreen() {
         {loaded ? (
           <>
             <SettingsGroup
+              icon="book-open"
               title="Modo de lectura"
-              helper="Tradicional: izquierda a derecha. Manga: derecha a izquierda."
             >
-              {READER_MODE_OPTIONS.map((option, index) => (
-                <View key={option.value}>
-                  {index > 0 ? <ListDivider /> : null}
-                  <RadioRow
-                    label={option.label}
-                    selected={mode === option.value}
-                    onPress={() => selectMode(option.value)}
-                  />
-                </View>
+              {READER_MODE_OPTIONS.map((option) => (
+                <OptionChip
+                  key={option.value}
+                  label={option.label}
+                  selected={mode === option.value}
+                  onPress={() => selectMode(option.value)}
+                />
               ))}
             </SettingsGroup>
 
             <SettingsGroup
+              icon="maximize"
               title="Ajuste de página"
-              helper="Se aplica al modo páginas. En cascada la página ocupa el ancho."
             >
-              {READER_SCALE_OPTIONS.map((option, index) => (
-                <View key={option.value}>
-                  {index > 0 ? <ListDivider /> : null}
-                  <RadioRow
-                    label={option.label}
-                    selected={scale === option.value}
-                    onPress={() => selectScale(option.value)}
-                  />
-                </View>
+              {READER_SCALE_OPTIONS.map((option) => (
+                <OptionChip
+                  key={option.value}
+                  label={option.label}
+                  selected={scale === option.value}
+                  onPress={() => selectScale(option.value)}
+                />
               ))}
             </SettingsGroup>
 
             <SettingsGroup
+              icon="image"
               title="Calidad de imagen"
-              helper="Más calidad usa más memoria; en tiras largas puede tardar más."
             >
-              {READER_QUALITY_OPTIONS.map((option, index) => (
-                <View key={option.value}>
-                  {index > 0 ? <ListDivider /> : null}
-                  <RadioRow
-                    label={option.label}
-                    selected={quality === option.value}
-                    onPress={() => selectQuality(option.value)}
-                  />
-                </View>
+              {READER_QUALITY_OPTIONS.map((option) => (
+                <OptionChip
+                  key={option.value}
+                  label={option.label}
+                  selected={quality === option.value}
+                  onPress={() => selectQuality(option.value)}
+                />
               ))}
             </SettingsGroup>
           </>
@@ -146,66 +144,28 @@ export default function SettingsScreen() {
 }
 
 function SettingsGroup({
+  icon,
   title,
-  helper,
   children,
 }: {
+  icon: FeatherName;
   title: string;
-  helper: string;
   children: ReactNode;
 }) {
+  const colors = useColors();
+
   return (
     <View className="mt-6 px-4">
-      <Text
-        accessibilityRole="header"
-        className="text-sm font-semibold text-zinc-900 dark:text-zinc-100"
-      >
-        {title}
-      </Text>
+      <View className="flex-row items-center gap-1.5">
+        <Feather name={icon} size={16} color={colors.accent} />
+        <SectionTitle>{title}</SectionTitle>
+      </View>
       <View
         accessibilityRole="radiogroup"
-        className="mt-2 overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+        className="mt-2 flex-row flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
       >
         {children}
       </View>
-      <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-        {helper}
-      </Text>
     </View>
-  );
-}
-
-function RadioRow({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <AppPressable
-      accessibilityRole="radio"
-      accessibilityLabel={label}
-      accessibilityState={{ checked: selected }}
-      onPress={onPress}
-      className="min-h-14 flex-row items-center px-4 py-3"
-    >
-      <Text className="mr-3 flex-1 text-base text-zinc-900 dark:text-zinc-100">
-        {label}
-      </Text>
-      <View
-        className={
-          selected
-            ? 'h-5 w-5 items-center justify-center rounded-full border-2 border-accent-500'
-            : 'h-5 w-5 items-center justify-center rounded-full border-2 border-zinc-300 dark:border-zinc-600'
-        }
-      >
-        {selected ? (
-          <View className="h-2.5 w-2.5 rounded-full bg-accent-500" />
-        ) : null}
-      </View>
-    </AppPressable>
   );
 }
