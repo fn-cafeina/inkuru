@@ -26,7 +26,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
-import { LoadingState } from '../components/LoadingState';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
@@ -43,9 +42,7 @@ import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 import { useColors } from '../theme/colors';
-
-// shortcut: observed pages are 1442x2100, used until the page reports its real size.
-const PAGE_ASPECT_RATIO = 1442 / 2100;
+import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
 
 const pageKey = (path: string) => `reader:page:${path}`;
 
@@ -158,7 +155,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <ReaderSkeleton />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
-        ) : data && restored ? (
+        ) : !data || !restored ? (
+          // A cached chapter renders immediately; the stored page offset
+          // resolves a frame later, so keep the skeleton until it lands.
+          <ReaderSkeleton />
+        ) : (
           <>
             <ReaderPages
               data={data}
@@ -174,8 +175,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               bottomInset={insets.bottom}
             />
           </>
-        ) : (
-          <LoadingState />
         )}
 
         {chromeVisible ? (
@@ -241,7 +240,7 @@ function ReaderSkeleton() {
         <Skeleton
           key={index}
           className="mb-2 rounded"
-          style={{ width, aspectRatio: PAGE_ASPECT_RATIO }}
+          style={{ width, aspectRatio: READER_PAGE_ASPECT_RATIO }}
         />
       ))}
     </View>
@@ -615,11 +614,11 @@ function PageImage({
   paged?: boolean;
   onPress?: () => void;
 }) {
-  const [ratio, setRatio] = useState(PAGE_ASPECT_RATIO);
+  const [ratio, setRatio] = useState(READER_PAGE_ASPECT_RATIO);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const [zoomed, setZoomed] = useState(false);
-  const ratioValue = useSharedValue(PAGE_ASPECT_RATIO);
+  const ratioValue = useSharedValue(READER_PAGE_ASPECT_RATIO);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
