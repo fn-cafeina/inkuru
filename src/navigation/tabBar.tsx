@@ -31,7 +31,7 @@ const TabBarVisibilityContext = createContext<TabBarVisibility | null>(null);
 export function TabBarVisibilityProvider({ children }: { children: ReactNode }) {
   const [hidden] = useState(() => new Animated.Value(0));
   const isHidden = useRef(false);
-  const lastY = useRef(0);
+  const lastY = useRef<number | null>(null);
 
   const setHidden = useCallback(
     (next: boolean) => {
@@ -51,6 +51,12 @@ export function TabBarVisibilityProvider({ children }: { children: ReactNode }) 
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const y = event.nativeEvent.contentOffset.y;
+
+      if (lastY.current === null) {
+        lastY.current = y;
+        return;
+      }
+
       const delta = y - lastY.current;
       lastY.current = y;
 
@@ -68,7 +74,7 @@ export function TabBarVisibilityProvider({ children }: { children: ReactNode }) 
   // lastY belongs to the tab that scrolled; reset it on tab switch so the
   // next tab's first scroll isn't measured against a foreign offset.
   const resetY = useCallback(() => {
-    lastY.current = 0;
+    lastY.current = null;
   }, []);
 
   const value = useMemo(
