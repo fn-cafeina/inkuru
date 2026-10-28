@@ -25,7 +25,7 @@ export function RootNavigator() {
         ...base,
         colors: {
           ...base.colors,
-          primary: colors.primary,
+          primary: colors.accent,
           background: colors.background,
           card: colors.surface,
           text: colors.text,

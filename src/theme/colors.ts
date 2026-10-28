@@ -1,5 +1,7 @@
 import { useColorScheme } from 'react-native';
 
+// `accent` must match `--color-accent-500` in global.css so class-based and
+// prop-based accents stay in sync.
 export const palette = {
   light: {
     background: '#fafafa',
@@ -9,9 +11,8 @@ export const palette = {
     textMuted: '#52525b',
     iconInactive: '#71717a',
     ripple: 'rgba(24, 24, 27, 0.12)',
-    primary: '#18181b',
-    onPrimary: '#ffffff',
     accent: '#8b5cf6',
+    onAccent: '#ffffff',
     notification: '#dc2626',
   },
   dark: {
@@ -22,9 +23,8 @@ export const palette = {
     textMuted: '#a1a1aa',
     iconInactive: '#71717a',
     ripple: 'rgba(244, 244, 245, 0.12)',
-    primary: '#f4f4f5',
-    onPrimary: '#ffffff',
     accent: '#8b5cf6',
+    onAccent: '#ffffff',
     notification: '#f87171',
   },
 } as const;

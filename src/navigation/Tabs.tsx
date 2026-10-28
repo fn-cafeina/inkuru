@@ -136,7 +136,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               <Feather
                 name={ICONS[route.name as keyof typeof ICONS]}
                 size={20}
-                color={focused ? colors.onPrimary : colors.iconInactive}
+                color={focused ? colors.onAccent : colors.iconInactive}
               />
             </AppPressable>
           );
