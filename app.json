@@ -16,6 +16,9 @@
       },
       "backgroundColor": "#fafafa",
       "predictiveBackGestureEnabled": true
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
