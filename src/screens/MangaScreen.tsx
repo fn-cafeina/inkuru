@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { LayoutChangeEvent } from 'react-native';
+import type { LayoutChangeEvent, ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -68,7 +68,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
   const [inLibrary, setInLibrary] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [activeRange, setActiveRange] = useState(0);
+  const [activeRange, setActiveRange] = useState<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -120,11 +120,20 @@ export default function MangaScreen({ navigation, route }: Props) {
   const resumeChapter = data
     ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
     : undefined;
-  const ranges = useMemo(() => chunkChapters(data?.chapters ?? []), [data]);
-  const rangeIndex = Math.min(activeRange, Math.max(ranges.length - 1, 0));
+  // Ranges always read oldest to newest; sorting only flips chapters inside a
+  // range. The source lists chapters newest first.
+  const ascending = useMemo(
+    () => [...(data?.chapters ?? [])].reverse(),
+    [data],
+  );
+  const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
+  const rangeIndex =
+    activeRange === null
+      ? Math.max(ranges.length - 1, 0)
+      : Math.min(activeRange, Math.max(ranges.length - 1, 0));
   const activeChapters = ranges[rangeIndex]?.chapters ?? [];
   const visibleChapters =
-    sortOrder === 'asc' ? [...activeChapters].reverse() : activeChapters;
+    sortOrder === 'desc' ? [...activeChapters].reverse() : activeChapters;
 
   const toggleSort = () => {
     const next = sortOrder === 'desc' ? 'asc' : 'desc';
@@ -442,6 +451,7 @@ function MangaHeader({
   onRead: (chapter: MangaChapter) => void;
 }) {
   const colors = useColors();
+  const chipRowRef = useRef<ScrollViewInstance>(null);
   const facts = manga.facts.filter((fact) => VISIBLE_FACTS.has(fact.label));
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
@@ -535,8 +545,15 @@ function MangaHeader({
       <View className="mt-6 px-4">
         {ranges.length > 1 ? (
           <ScrollView
+            ref={chipRowRef}
             horizontal
             showsHorizontalScrollIndicator={false}
+            // The newest range is last, so keep the default selection in view.
+            onContentSizeChange={() => {
+              if (ranges.length > 0 && activeRange === ranges.length - 1) {
+                chipRowRef.current?.scrollToEnd({ animated: false });
+              }
+            }}
             contentContainerClassName="gap-2 pb-3"
           >
             {ranges.map((range, index) => (
