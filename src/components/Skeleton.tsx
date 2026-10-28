@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Animated, View } from 'react-native';
 
@@ -9,11 +9,18 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-export function Skeleton({ className, style }: Props) {
-  const [opacity] = useState(() => new Animated.Value(0.5));
+// One pulse for every placeholder on screen: starting a loop per skeleton made
+// grids flicker out of phase.
+const opacity = new Animated.Value(0.5);
+let pulse: Animated.CompositeAnimation | null = null;
+let subscribers = 0;
 
-  useEffect(() => {
-    const loop = Animated.loop(
+function subscribePulse() {
+  subscribers += 1;
+
+  if (subscribers === 1) {
+    opacity.setValue(0.5);
+    pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(opacity, {
           toValue: 1,
@@ -27,13 +34,26 @@ export function Skeleton({ className, style }: Props) {
         }),
       ]),
     );
-    loop.start();
+    pulse.start();
+  }
 
-    return () => loop.stop();
-  }, [opacity]);
+  return () => {
+    subscribers -= 1;
+
+    if (subscribers === 0) {
+      pulse?.stop();
+      pulse = null;
+    }
+  };
+}
+
+export function Skeleton({ className, style }: Props) {
+  useEffect(subscribePulse, []);
 
   return (
     <Animated.View
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
       className={`bg-zinc-200 dark:bg-zinc-800 ${className ?? ''}`}
       style={[{ opacity }, style]}
     />
