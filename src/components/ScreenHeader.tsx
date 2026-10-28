@@ -24,7 +24,6 @@ export function ScreenHeader({
         onPress={onBack}
         accessibilityLabel="Volver"
         hitSlop={8}
-        borderlessRipple
         className="min-h-12 min-w-12 items-center justify-center rounded-lg"
       >
         <Feather name="chevron-left" size={24} color={colors.text} />

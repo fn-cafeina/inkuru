@@ -65,7 +65,7 @@ export default function DiscoverScreen() {
               accessibilityLabel="Limpiar búsqueda"
               onPress={clear}
               hitSlop={8}
-              className="min-h-12 items-center justify-center px-3"
+              className="min-h-12 items-center justify-center rounded-lg px-3"
             >
               <Feather name="x" size={16} color={colors.iconInactive} />
             </AppPressable>
@@ -251,7 +251,6 @@ function DiscoverResults({ term }: { term: string }) {
             <AppPressable
               accessibilityLabel="No se pudo cargar más. Reintentar"
               onPress={reload}
-              android_ripple={{ color: colors.ripple }}
               className="min-h-12 flex-row items-center justify-center rounded-lg border border-zinc-200 px-4 dark:border-zinc-800"
             >
               <Feather name="refresh-cw" size={16} color={colors.textMuted} />

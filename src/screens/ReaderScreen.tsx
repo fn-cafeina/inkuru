@@ -308,7 +308,7 @@ function ChapterPicker({
         <AppPressable
           accessible={false}
           onPress={onClose}
-          android_ripple={{ color: 'transparent' }}
+          pressFeedback={false}
           className="absolute inset-0"
         />
         <View
@@ -320,7 +320,6 @@ function ChapterPicker({
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
-              borderlessRipple
               className="min-h-12 min-w-12 items-center justify-center rounded-lg"
             >
               <Feather name="x" size={20} color={colors.text} />
