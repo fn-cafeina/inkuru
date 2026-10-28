@@ -453,7 +453,6 @@ function MangaHeader({
   onToggleSort: () => void;
   onRead: (chapter: MangaChapter) => void;
 }) {
-  const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
   const factValue = (label: string) => {
     const value = manga.facts.find((fact) => fact.label === label)?.value;
@@ -585,24 +584,24 @@ function MangaHeader({
           </ScrollView>
         ) : null}
         <View className="flex-row items-center">
-          <SectionTitle className="flex-1">
-            {`${manga.chapters.length} capítulos`}
-          </SectionTitle>
+          <View className="flex-1 flex-row items-center gap-2">
+            <SectionTitle>Capítulos</SectionTitle>
+            <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+              {manga.chapters.length}
+            </Text>
+          </View>
           <AppPressable
             accessibilityLabel={
               sortOrder === 'desc'
-                ? 'Ordenar capítulos ascendente'
-                : 'Ordenar capítulos descendente'
+                ? 'Orden actual: recientes. Cambiar a antiguos'
+                : 'Orden actual: antiguos. Cambiar a recientes'
             }
-            accessibilityState={{ selected: sortOrder === 'asc' }}
             onPress={onToggleSort}
-            className="min-h-11 min-w-11 items-center justify-center rounded-lg"
+            className="min-h-12 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
           >
-            <Feather
-              name={sortOrder === 'desc' ? 'arrow-down' : 'arrow-up'}
-              size={18}
-              color={colors.textMuted}
-            />
+            <Text className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+              {sortOrder === 'desc' ? 'Recientes' : 'Antiguos'}
+            </Text>
           </AppPressable>
         </View>
       </View>
