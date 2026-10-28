@@ -7,24 +7,32 @@ import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import {
   DEFAULT_READER_MODE,
+  DEFAULT_READER_SCALE,
   READER_MODE_OPTIONS,
+  READER_SCALE_OPTIONS,
   loadReaderMode,
+  loadReaderScale,
   saveReaderMode,
+  saveReaderScale,
 } from '../storage/readerSettings';
-import type { ReaderMode } from '../storage/readerSettings';
+import type { ReaderMode, ReaderScale } from '../storage/readerSettings';
 
 export default function SettingsScreen() {
   const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
+  const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
-      void loadReaderMode().then((value) => {
-        if (active) {
-          setMode(value ?? DEFAULT_READER_MODE);
-        }
-      });
+      void Promise.all([loadReaderMode(), loadReaderScale()]).then(
+        ([storedMode, storedScale]) => {
+          if (active) {
+            setMode(storedMode ?? DEFAULT_READER_MODE);
+            setScale(storedScale ?? DEFAULT_READER_SCALE);
+          }
+        },
+      );
 
       return () => {
         active = false;
@@ -35,6 +43,11 @@ export default function SettingsScreen() {
   const selectMode = (next: ReaderMode) => {
     setMode(next);
     void saveReaderMode(next);
+  };
+
+  const selectScale = (next: ReaderScale) => {
+    setScale(next);
+    void saveReaderScale(next);
   };
 
   return (
@@ -62,6 +75,23 @@ export default function SettingsScreen() {
         </View>
         <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
           Tradicional: izquierda a derecha. Manga: derecha a izquierda.
+        </Text>
+
+        <Text className="mt-6 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          Ajuste de página
+        </Text>
+        <View className="mt-3 flex-row flex-wrap gap-2">
+          {READER_SCALE_OPTIONS.map((option) => (
+            <OptionChip
+              key={option.value}
+              label={option.label}
+              selected={scale === option.value}
+              onPress={() => selectScale(option.value)}
+            />
+          ))}
+        </View>
+        <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Se aplica al modo páginas. En cascada la página ocupa el ancho.
         </Text>
       </View>
     </Screen>
