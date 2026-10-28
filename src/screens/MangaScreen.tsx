@@ -539,7 +539,7 @@ function MangaHeader({
 
       {manga.synopsis ? (
         <View>
-          <SectionTitle className="mb-3 mt-7 px-4">Sinopsis</SectionTitle>
+          <SectionTitle className="mb-3 mt-6 px-4">Sinopsis</SectionTitle>
           <Text
             numberOfLines={!expanded && longSynopsis ? 6 : undefined}
             className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
@@ -643,7 +643,7 @@ function MangaSkeleton() {
         <Skeleton className="mt-3 h-4 w-5/6 rounded" />
         <Skeleton className="mt-2 h-4 w-2/3 rounded" />
       </View>
-      <View className="mt-7 px-4">
+      <View className="mt-6 px-4">
         <Skeleton className="h-3 w-28 rounded" />
       </View>
       {Array.from({ length: 8 }, (_, index) => (
