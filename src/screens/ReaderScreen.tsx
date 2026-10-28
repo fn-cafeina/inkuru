@@ -26,13 +26,19 @@ import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
 import {
   DEFAULT_READER_MODE,
+  DEFAULT_READER_QUALITY,
   DEFAULT_READER_SCALE,
   READER_MODE_OPTIONS,
   loadReaderMode,
+  loadReaderQuality,
   loadReaderScale,
   saveReaderMode,
 } from '../storage/readerSettings';
-import type { ReaderMode, ReaderScale } from '../storage/readerSettings';
+import type {
+  ReaderMode,
+  ReaderQuality,
+  ReaderScale,
+} from '../storage/readerSettings';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
@@ -45,6 +51,7 @@ const pageKey = (path: string) => `reader:page:${path}`;
 // AsyncStorage resolves.
 let preferredMode: ReaderMode = DEFAULT_READER_MODE;
 let preferredScale: ReaderScale = DEFAULT_READER_SCALE;
+let preferredQuality: ReaderQuality = DEFAULT_READER_QUALITY;
 
 function modeLabel(mode: ReaderMode) {
   return (
@@ -61,6 +68,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   useKeepAwake();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [scale, setScale] = useState<ReaderScale>(preferredScale);
+  const [quality, setQuality] = useState<ReaderQuality>(preferredQuality);
   const [page, setPage] = useState(0);
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -95,11 +103,13 @@ export default function ReaderScreen({ navigation, route }: Props) {
 
     const restore = async () => {
       try {
-        const [storedMode, storedScale, storedPage] = await Promise.all([
-          loadReaderMode(),
-          loadReaderScale(),
-          AsyncStorage.getItem(pageKey(path)),
-        ]);
+        const [storedMode, storedScale, storedQuality, storedPage] =
+          await Promise.all([
+            loadReaderMode(),
+            loadReaderScale(),
+            loadReaderQuality(),
+            AsyncStorage.getItem(pageKey(path)),
+          ]);
 
         if (!active) {
           return;
@@ -113,6 +123,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
         if (storedScale) {
           preferredScale = storedScale;
           setScale(storedScale);
+        }
+
+        if (storedQuality) {
+          preferredQuality = storedQuality;
+          setQuality(storedQuality);
         }
 
         const parsedPage = Number.parseInt(storedPage ?? '', 10);
@@ -170,6 +185,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
               data={data}
               mode={mode}
               scale={scale}
+              quality={quality}
               page={safePage}
               windowHeight={windowHeight}
               bottomInset={insets.bottom}
@@ -351,6 +367,7 @@ function ReaderPages({
   data,
   mode,
   scale,
+  quality,
   page,
   windowHeight,
   bottomInset,
@@ -360,6 +377,7 @@ function ReaderPages({
   data: ReaderData;
   mode: ReaderMode;
   scale: ReaderScale;
+  quality: ReaderQuality;
   page: number;
   windowHeight: number;
   bottomInset: number;
@@ -376,6 +394,7 @@ function ReaderPages({
       width={width}
       windowHeight={windowHeight}
       scale={scale}
+      quality={quality}
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
@@ -387,6 +406,7 @@ function ReaderPages({
       width={width}
       windowHeight={windowHeight}
       scale={scale}
+      quality={quality}
       direction={mode === 'paged-ltr' ? 'ltr' : 'rtl'}
       initialPage={page}
       onPageChange={onPageChange}
@@ -401,6 +421,7 @@ function VerticalPages({
   width,
   windowHeight,
   scale,
+  quality,
   initialPage,
   onPageChange,
   onToggleChrome,
@@ -410,6 +431,7 @@ function VerticalPages({
   width: number;
   windowHeight: number;
   scale: ReaderScale;
+  quality: ReaderQuality;
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
@@ -471,6 +493,7 @@ function VerticalPages({
           width={width}
           height={windowHeight}
           scaleMode={scale}
+          quality={quality}
           paged={false}
           onTap={() => onToggleChrome()}
           onZoomChange={setZoomed}
@@ -495,6 +518,7 @@ function PagedPages({
   width,
   windowHeight,
   scale,
+  quality,
   direction,
   initialPage,
   onPageChange,
@@ -505,6 +529,7 @@ function PagedPages({
   width: number;
   windowHeight: number;
   scale: ReaderScale;
+  quality: ReaderQuality;
   direction: 'ltr' | 'rtl';
   initialPage: number;
   onPageChange: (page: number) => void;
@@ -589,6 +614,7 @@ function PagedPages({
           width={width}
           height={windowHeight}
           scaleMode={scale}
+          quality={quality}
           paged
           onTap={(x) => handlePageTap(x, index)}
           onZoomChange={setZoomed}

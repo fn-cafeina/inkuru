@@ -7,32 +7,44 @@ import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import {
   DEFAULT_READER_MODE,
+  DEFAULT_READER_QUALITY,
   DEFAULT_READER_SCALE,
   READER_MODE_OPTIONS,
+  READER_QUALITY_OPTIONS,
   READER_SCALE_OPTIONS,
   loadReaderMode,
+  loadReaderQuality,
   loadReaderScale,
   saveReaderMode,
+  saveReaderQuality,
   saveReaderScale,
 } from '../storage/readerSettings';
-import type { ReaderMode, ReaderScale } from '../storage/readerSettings';
+import type {
+  ReaderMode,
+  ReaderQuality,
+  ReaderScale,
+} from '../storage/readerSettings';
 
 export default function SettingsScreen() {
   const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
   const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
+  const [quality, setQuality] = useState<ReaderQuality>(DEFAULT_READER_QUALITY);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
-      void Promise.all([loadReaderMode(), loadReaderScale()]).then(
-        ([storedMode, storedScale]) => {
-          if (active) {
-            setMode(storedMode ?? DEFAULT_READER_MODE);
-            setScale(storedScale ?? DEFAULT_READER_SCALE);
-          }
-        },
-      );
+      void Promise.all([
+        loadReaderMode(),
+        loadReaderScale(),
+        loadReaderQuality(),
+      ]).then(([storedMode, storedScale, storedQuality]) => {
+        if (active) {
+          setMode(storedMode ?? DEFAULT_READER_MODE);
+          setScale(storedScale ?? DEFAULT_READER_SCALE);
+          setQuality(storedQuality ?? DEFAULT_READER_QUALITY);
+        }
+      });
 
       return () => {
         active = false;
@@ -48,6 +60,11 @@ export default function SettingsScreen() {
   const selectScale = (next: ReaderScale) => {
     setScale(next);
     void saveReaderScale(next);
+  };
+
+  const selectQuality = (next: ReaderQuality) => {
+    setQuality(next);
+    void saveReaderQuality(next);
   };
 
   return (
@@ -92,6 +109,23 @@ export default function SettingsScreen() {
         </View>
         <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
           Se aplica al modo páginas. En cascada la página ocupa el ancho.
+        </Text>
+
+        <Text className="mt-6 text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          Calidad de imagen
+        </Text>
+        <View className="mt-3 flex-row flex-wrap gap-2">
+          {READER_QUALITY_OPTIONS.map((option) => (
+            <OptionChip
+              key={option.value}
+              label={option.label}
+              selected={quality === option.value}
+              onPress={() => selectQuality(option.value)}
+            />
+          ))}
+        </View>
+        <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Más calidad usa más memoria; en tiras largas puede tardar más.
         </Text>
       </View>
     </Screen>

@@ -8,9 +8,11 @@ export type ReaderScale =
   | 'fill'
   | 'original'
   | 'stretch';
+export type ReaderQuality = 'balanced' | 'high' | 'maximum';
 
 export const DEFAULT_READER_MODE: ReaderMode = 'webtoon';
 export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
+export const DEFAULT_READER_QUALITY: ReaderQuality = 'balanced';
 
 export const READER_MODE_OPTIONS = [
   { value: 'webtoon', label: 'Cascada' },
@@ -27,8 +29,15 @@ export const READER_SCALE_OPTIONS = [
   { value: 'stretch', label: 'Estirar' },
 ] as const;
 
+export const READER_QUALITY_OPTIONS = [
+  { value: 'balanced', label: 'Equilibrada' },
+  { value: 'high', label: 'Alta' },
+  { value: 'maximum', label: 'Máxima' },
+] as const;
+
 const MODE_KEY = 'reader:mode';
 const SCALE_KEY = 'reader:scale';
+const QUALITY_KEY = 'reader:quality';
 
 export async function loadReaderMode(): Promise<ReaderMode | null> {
   try {
@@ -72,6 +81,28 @@ export async function loadReaderScale(): Promise<ReaderScale | null> {
 export async function saveReaderScale(scale: ReaderScale): Promise<void> {
   try {
     await AsyncStorage.setItem(SCALE_KEY, scale);
+  } catch {
+    // A storage failure must not block reading.
+  }
+}
+
+export async function loadReaderQuality(): Promise<ReaderQuality | null> {
+  try {
+    const value = await AsyncStorage.getItem(QUALITY_KEY);
+
+    return READER_QUALITY_OPTIONS.some((option) => option.value === value)
+      ? (value as ReaderQuality)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function saveReaderQuality(
+  quality: ReaderQuality,
+): Promise<void> {
+  try {
+    await AsyncStorage.setItem(QUALITY_KEY, quality);
   } catch {
     // A storage failure must not block reading.
   }
