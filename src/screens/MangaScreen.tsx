@@ -4,6 +4,7 @@ import {
   FlatList,
   Image,
   RefreshControl,
+  ScrollView,
   Text,
   View,
 } from 'react-native';
@@ -16,12 +17,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
+import { OptionChip } from '../components/OptionChip';
 import { Screen } from '../components/Screen';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../storage/library';
+import { loadMangaSort, saveMangaSort } from '../storage/mangaSettings';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
@@ -65,19 +68,26 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
   const [inLibrary, setInLibrary] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [activeRange, setActiveRange] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
-      void Promise.all([loadProgress(path), isInLibrary(path)]).then(
-        ([value, saved]) => {
-          if (active) {
-            setProgress(value);
-            setInLibrary(saved);
+      void Promise.all([
+        loadProgress(path),
+        isInLibrary(path),
+        loadMangaSort(),
+      ]).then(([value, saved, storedSort]) => {
+        if (active) {
+          setProgress(value);
+          setInLibrary(saved);
+
+          if (storedSort) {
+            setSortOrder(storedSort);
           }
-        },
-      );
+        }
+      });
 
       return () => {
         active = false;
@@ -119,6 +129,17 @@ export default function MangaScreen({ navigation, route }: Props) {
         : [],
     [data, sortOrder],
   );
+  const ranges = useMemo(() => chunkChapters(chapters), [chapters]);
+  const rangeIndex = Math.min(activeRange, Math.max(ranges.length - 1, 0));
+  const visibleChapters = ranges[rangeIndex]?.chapters ?? [];
+
+  const toggleSort = () => {
+    const next = sortOrder === 'desc' ? 'asc' : 'desc';
+
+    setSortOrder(next);
+    setActiveRange(0);
+    void saveMangaSort(next);
+  };
 
   return (
     <Screen>
@@ -154,7 +175,7 @@ export default function MangaScreen({ navigation, route }: Props) {
         <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
       ) : data ? (
         <FlatList
-          data={chapters}
+          data={visibleChapters}
           keyExtractor={(item) => item.path}
           ItemSeparatorComponent={ListDivider}
           renderItem={({ item }) => (
@@ -174,9 +195,10 @@ export default function MangaScreen({ navigation, route }: Props) {
               manga={data}
               resumeChapter={resumeChapter}
               sortOrder={sortOrder}
-              onToggleSort={() =>
-                setSortOrder((current) => (current === 'desc' ? 'asc' : 'desc'))
-              }
+              ranges={ranges}
+              activeRange={rangeIndex}
+              onSelectRange={setActiveRange}
+              onToggleSort={toggleSort}
               onRead={(chapter) =>
                 navigation.navigate('Reader', {
                   path: chapter.path,
@@ -369,16 +391,61 @@ function layoutTagRows(
   };
 }
 
+const CHAPTER_RANGE_SIZE = 50;
+
+type ChapterRange = {
+  label: string;
+  chapters: MangaChapter[];
+};
+
+function chunkChapters(chapters: MangaChapter[]): ChapterRange[] {
+  const ranges: ChapterRange[] = [];
+
+  for (let start = 0; start < chapters.length; start += CHAPTER_RANGE_SIZE) {
+    const slice = chapters.slice(start, start + CHAPTER_RANGE_SIZE);
+
+    ranges.push({ label: rangeLabel(slice, start), chapters: slice });
+  }
+
+  return ranges;
+}
+
+function rangeLabel(chapters: MangaChapter[], start: number): string {
+  const first = chapterNumber(chapters[0]?.title);
+  const last = chapterNumber(chapters[chapters.length - 1]?.title);
+
+  if (first !== undefined && last !== undefined) {
+    const low = Math.min(first, last);
+    const high = Math.max(first, last);
+
+    return low === high ? `${low}` : `${low}-${high}`;
+  }
+
+  return `${start + 1}-${start + chapters.length}`;
+}
+
+function chapterNumber(title?: string): number | undefined {
+  const match = title?.match(/\d+(?:[.,]\d+)?/);
+
+  return match ? Number(match[0].replace(',', '.')) : undefined;
+}
+
 function MangaHeader({
   manga,
   resumeChapter,
   sortOrder,
+  ranges,
+  activeRange,
+  onSelectRange,
   onToggleSort,
   onRead,
 }: {
   manga: MangaDetail;
   resumeChapter?: MangaChapter;
   sortOrder: 'asc' | 'desc';
+  ranges: ChapterRange[];
+  activeRange: number;
+  onSelectRange: (index: number) => void;
   onToggleSort: () => void;
   onRead: (chapter: MangaChapter) => void;
 }) {
@@ -473,26 +540,44 @@ function MangaHeader({
         </View>
       ) : null}
 
-      <View className="mt-6 flex-row items-center px-4">
-        <SectionTitle className="flex-1">
-          {`${manga.chapters.length} capítulos`}
-        </SectionTitle>
-        <AppPressable
-          accessibilityLabel={
-            sortOrder === 'desc'
-              ? 'Ordenar capítulos ascendente'
-              : 'Ordenar capítulos descendente'
-          }
-          accessibilityState={{ selected: sortOrder === 'asc' }}
-          onPress={onToggleSort}
-          className="min-h-11 min-w-11 items-center justify-center rounded-lg"
-        >
-          <Feather
-            name={sortOrder === 'desc' ? 'arrow-down' : 'arrow-up'}
-            size={18}
-            color={colors.textMuted}
-          />
-        </AppPressable>
+      <View className="mt-6 px-4">
+        {ranges.length > 1 ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="gap-2 pb-3"
+          >
+            {ranges.map((range, index) => (
+              <OptionChip
+                key={`${range.label}-${index}`}
+                label={range.label}
+                selected={index === activeRange}
+                onPress={() => onSelectRange(index)}
+              />
+            ))}
+          </ScrollView>
+        ) : null}
+        <View className="flex-row items-center">
+          <SectionTitle className="flex-1">
+            {`${manga.chapters.length} capítulos`}
+          </SectionTitle>
+          <AppPressable
+            accessibilityLabel={
+              sortOrder === 'desc'
+                ? 'Ordenar capítulos ascendente'
+                : 'Ordenar capítulos descendente'
+            }
+            accessibilityState={{ selected: sortOrder === 'asc' }}
+            onPress={onToggleSort}
+            className="min-h-11 min-w-11 items-center justify-center rounded-lg"
+          >
+            <Feather
+              name={sortOrder === 'desc' ? 'arrow-down' : 'arrow-up'}
+              size={18}
+              color={colors.textMuted}
+            />
+          </AppPressable>
+        </View>
       </View>
     </View>
   );
