@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import {
   FlatList,
-  Image,
   Modal,
   Text,
   useWindowDimensions,
@@ -14,18 +13,12 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, {
-  runOnJS,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
+import { ReaderPage } from '../components/ReaderPage';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
@@ -60,6 +53,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 export default function ReaderScreen({ navigation, route }: Props) {
   const { path, title, mangaPath } = route.params;
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   useKeepAwake();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [page, setPage] = useState(0);
@@ -165,6 +159,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
               data={data}
               mode={mode}
               page={safePage}
+              windowHeight={windowHeight}
               bottomInset={insets.bottom}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
@@ -344,6 +339,7 @@ function ReaderPages({
   data,
   mode,
   page,
+  windowHeight,
   bottomInset,
   onPageChange,
   onToggleChrome,
@@ -351,6 +347,7 @@ function ReaderPages({
   data: ReaderData;
   mode: ReaderMode;
   page: number;
+  windowHeight: number;
   bottomInset: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
@@ -363,6 +360,7 @@ function ReaderPages({
     <VerticalPages
       pages={data.pages}
       width={width}
+      windowHeight={windowHeight}
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
@@ -372,8 +370,8 @@ function ReaderPages({
     <PagedPages
       pages={data.pages}
       width={width}
+      windowHeight={windowHeight}
       direction={mode === 'paged-ltr' ? 'ltr' : 'rtl'}
-      page={page}
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
@@ -385,6 +383,7 @@ function ReaderPages({
 function VerticalPages({
   pages,
   width,
+  windowHeight,
   initialPage,
   onPageChange,
   onToggleChrome,
@@ -392,6 +391,7 @@ function VerticalPages({
 }: {
   pages: string[];
   width: number;
+  windowHeight: number;
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
@@ -400,6 +400,7 @@ function VerticalPages({
   const listRef = useRef<FlatList<string>>(null);
   const didRestore = useRef(false);
   const didRetry = useRef(false);
+  const [zoomed, setZoomed] = useState(false);
   const [onViewableItemsChanged] = useState(
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
@@ -446,21 +447,26 @@ function VerticalPages({
       data={pages}
       keyExtractor={(item) => item}
       renderItem={({ item, index }) => (
-        <PageImage
+        <ReaderPage
           uri={item}
-          width={width}
           label={`Página ${index + 1}`}
-          onPress={onToggleChrome}
+          width={width}
+          height={windowHeight}
+          paged={false}
+          onTap={() => onToggleChrome()}
+          onZoomChange={setZoomed}
         />
       )}
       ListFooterComponent={footer}
       showsVerticalScrollIndicator={false}
+      scrollEnabled={!zoomed}
+      removeClippedSubviews={false}
       onScrollToIndexFailed={onScrollToIndexFailed}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
-      initialNumToRender={3}
-      maxToRenderPerBatch={3}
-      windowSize={5}
+      initialNumToRender={2}
+      maxToRenderPerBatch={2}
+      windowSize={3}
     />
   );
 }
@@ -468,8 +474,8 @@ function VerticalPages({
 function PagedPages({
   pages,
   width,
+  windowHeight,
   direction,
-  page,
   initialPage,
   onPageChange,
   onToggleChrome,
@@ -477,14 +483,15 @@ function PagedPages({
 }: {
   pages: string[];
   width: number;
+  windowHeight: number;
   direction: 'ltr' | 'rtl';
-  page: number;
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
+  const [zoomed, setZoomed] = useState(false);
   const [onViewableItemsChanged] = useState(
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
@@ -504,14 +511,45 @@ function PagedPages({
     }
     listRef.current?.scrollToIndex({ index, animated: true });
   };
-  // In RTL, page 1 sits on the right, so the left edge advances.
-  const advancesRight = direction === 'ltr';
+
+  // Taps are resolved from the touch coordinate the page reports, so the pinch
+  // and the double tap keep working over the edge zones.
+  const handlePageTap = (x: number, index: number) => {
+    if (zoomed) {
+      onToggleChrome();
+      return;
+    }
+
+    const edge = width / 4;
+    // In RTL the left edge advances, mirroring the inverted list.
+    const advancesRight = direction === 'ltr';
+
+    if (advancesRight) {
+      if (x > width - edge) {
+        goToPage(index + 1);
+      } else if (x < edge) {
+        goToPage(index - 1);
+      } else {
+        onToggleChrome();
+      }
+
+      return;
+    }
+
+    if (x < edge) {
+      goToPage(index + 1);
+    } else if (x > width - edge) {
+      goToPage(index - 1);
+    } else {
+      onToggleChrome();
+    }
+  };
 
   return (
     <FlatList
       ref={listRef}
       horizontal
-      inverted={!advancesRight}
+      inverted={direction === 'rtl'}
       pagingEnabled
       data={pages}
       keyExtractor={(item) => item}
@@ -520,43 +558,34 @@ function PagedPages({
         offset: width * index,
         index,
       })}
-      initialScrollIndex={Math.min(initialPage, pages.length - 1)}
-      renderItem={({ item, index }) => {
-        const leftTarget = advancesRight ? index - 1 : index + 1;
-        const rightTarget = advancesRight ? index + 1 : index - 1;
-
-        return (
-          <View style={{ width }} className="justify-center">
-            <PageImage
-              uri={item}
-              paged
-              label={`Página ${index + 1}`}
-              onPress={onToggleChrome}
-            />
-            <PageZone
-              side="left"
-              label={advancesRight ? 'Página anterior' : 'Página siguiente'}
-              target={leftTarget}
-              width={width}
-              total={pages.length}
-              onGoToPage={goToPage}
-            />
-            <PageZone
-              side="right"
-              label={advancesRight ? 'Página siguiente' : 'Página anterior'}
-              target={rightTarget}
-              width={width}
-              total={pages.length}
-              onGoToPage={goToPage}
-            />
-          </View>
-        );
-      }}
+      initialScrollIndex={
+        pages.length > 0 ? Math.min(initialPage, pages.length - 1) : undefined
+      }
+      renderItem={({ item, index }) => (
+        <ReaderPage
+          uri={item}
+          label={`Página ${index + 1}`}
+          width={width}
+          height={windowHeight}
+          paged
+          onTap={(x) => handlePageTap(x, index)}
+          onZoomChange={setZoomed}
+          onNextPage={
+            zoomed || index >= pages.length - 1
+              ? undefined
+              : () => goToPage(index + 1)
+          }
+          onPreviousPage={
+            zoomed || index === 0 ? undefined : () => goToPage(index - 1)
+          }
+        />
+      )}
       ListFooterComponent={
-        <View style={{ width }} className="justify-center">
+        <View style={{ width, height: windowHeight }} className="justify-center">
           {footer}
         </View>
       }
+      scrollEnabled={!zoomed}
       showsHorizontalScrollIndicator={false}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
@@ -564,194 +593,6 @@ function PagedPages({
       maxToRenderPerBatch={2}
       windowSize={3}
     />
-  );
-}
-
-function PageZone({
-  side,
-  label,
-  target,
-  width,
-  total,
-  onGoToPage,
-}: {
-  side: 'left' | 'right';
-  label: string;
-  target: number;
-  width: number;
-  total: number;
-  onGoToPage: (index: number) => void;
-}) {
-  const disabled = target < 0 || target >= total;
-
-  return (
-    <AppPressable
-      accessibilityLabel={label}
-      accessibilityState={{ disabled }}
-      disabled={disabled}
-      onPress={() => onGoToPage(target)}
-      android_ripple={{ color: 'transparent' }}
-      className={
-        side === 'left'
-          ? 'absolute bottom-0 left-0 top-0'
-          : 'absolute bottom-0 right-0 top-0'
-      }
-      style={{ width: width / 4 }}
-    />
-  );
-}
-
-function PageImage({
-  uri,
-  label,
-  width,
-  paged = false,
-  onPress,
-}: {
-  uri: string;
-  label: string;
-  width?: number;
-  paged?: boolean;
-  onPress?: () => void;
-}) {
-  const [ratio, setRatio] = useState(READER_PAGE_ASPECT_RATIO);
-  const [attempt, setAttempt] = useState(0);
-  const [failed, setFailed] = useState(false);
-  const [zoomed, setZoomed] = useState(false);
-  const ratioValue = useSharedValue(READER_PAGE_ASPECT_RATIO);
-  const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const savedScale = useSharedValue(1);
-  const savedX = useSharedValue(0);
-  const savedY = useSharedValue(0);
-
-  const settle = () => {
-    'worklet';
-    savedScale.value = scale.value;
-
-    if (scale.value <= 1.05) {
-      scale.value = withTiming(1);
-      translateX.value = withTiming(0);
-      translateY.value = withTiming(0);
-      savedScale.value = 1;
-      savedX.value = 0;
-      savedY.value = 0;
-      runOnJS(setZoomed)(false);
-    } else {
-      runOnJS(setZoomed)(true);
-    }
-  };
-
-  const pinch = Gesture.Pinch()
-    .onUpdate((event) => {
-      scale.value = Math.min(
-        4,
-        Math.max(1, savedScale.value * event.scale),
-      );
-    })
-    .onEnd(settle);
-
-  const pan = Gesture.Pan()
-    .enabled(zoomed)
-    .onUpdate((event) => {
-      const max = ((scale.value - 1) * (width ?? 0)) / 2;
-      const maxY = max / ratioValue.value;
-      translateX.value = Math.min(
-        max,
-        Math.max(-max, savedX.value + event.translationX),
-      );
-      translateY.value = Math.min(
-        maxY,
-        Math.max(-maxY, savedY.value + event.translationY),
-      );
-    })
-    .onEnd(() => {
-      'worklet';
-      savedX.value = translateX.value;
-      savedY.value = translateY.value;
-    });
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { scale: scale.value },
-    ],
-  }));
-
-  if (failed) {
-    return (
-      <AppPressable
-        accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
-        onPress={() => {
-          setFailed(false);
-          setAttempt((current) => current + 1);
-        }}
-        style={
-          paged ? { width: '100%', height: '100%' } : { width, aspectRatio: ratio }
-        }
-        className="items-center justify-center bg-zinc-200 px-6 dark:bg-zinc-800"
-      >
-        <Text className="text-center text-xs text-zinc-600 dark:text-zinc-400">
-          No se pudo cargar. Toca para reintentar.
-        </Text>
-      </AppPressable>
-    );
-  }
-
-  const image = (
-    <Image
-      key={attempt}
-      source={{ uri }}
-      resizeMethod="resize"
-      onLoad={(event) => {
-        if (!paged) {
-          const { width: sourceWidth, height: sourceHeight } =
-            event.nativeEvent.source;
-          ratioValue.value = sourceWidth / sourceHeight;
-          setRatio(sourceWidth / sourceHeight);
-        }
-      }}
-      onError={() => setFailed(true)}
-      resizeMode="contain"
-      accessibilityLabel={label}
-      className="h-full w-full"
-    />
-  );
-
-  // shortcut: zoom anchors to page center, not the pinch focal point; add focal
-  // transform if pinch tracking feels off. Paged mode has no zoom (blocks paging).
-  if (paged) {
-    return (
-      <AppPressable
-        accessible={false}
-        onPress={onPress}
-        disabled={!onPress}
-        android_ripple={{ color: 'transparent' }}
-        style={{ width: '100%', height: '100%' }}
-        className="bg-zinc-200 dark:bg-zinc-800"
-      >
-        {image}
-      </AppPressable>
-    );
-  }
-
-  return (
-    <GestureDetector gesture={Gesture.Simultaneous(pinch, pan)}>
-      <Animated.View style={[{ width, aspectRatio: ratio }, animatedStyle]}>
-        <AppPressable
-          accessible={false}
-          onPress={onPress}
-          disabled={!onPress}
-          android_ripple={{ color: 'transparent' }}
-          style={{ width, aspectRatio: ratio }}
-          className="bg-zinc-200 dark:bg-zinc-800"
-        >
-          {image}
-        </AppPressable>
-      </Animated.View>
-    </GestureDetector>
   );
 }
 
