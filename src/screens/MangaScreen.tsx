@@ -24,7 +24,12 @@ import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../storage/library';
-import { loadMangaSort, saveMangaSort } from '../storage/mangaSettings';
+import {
+  loadMangaRange,
+  loadMangaSort,
+  saveMangaRange,
+  saveMangaSort,
+} from '../storage/mangaSettings';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
@@ -78,13 +83,18 @@ export default function MangaScreen({ navigation, route }: Props) {
         loadProgress(path),
         isInLibrary(path),
         loadMangaSort(),
-      ]).then(([value, saved, storedSort]) => {
+        loadMangaRange(path),
+      ]).then(([value, saved, storedSort, storedRange]) => {
         if (active) {
           setProgress(value);
           setInLibrary(saved);
 
           if (storedSort) {
             setSortOrder(storedSort);
+          }
+
+          if (storedRange !== null) {
+            setActiveRange(storedRange);
           }
         }
       });
@@ -129,7 +139,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
   const rangeIndex =
     activeRange === null
-      ? Math.max(ranges.length - 1, 0)
+      ? 0
       : Math.min(activeRange, Math.max(ranges.length - 1, 0));
   const activeChapters = ranges[rangeIndex]?.chapters ?? [];
   const visibleChapters =
@@ -140,6 +150,11 @@ export default function MangaScreen({ navigation, route }: Props) {
 
     setSortOrder(next);
     void saveMangaSort(next);
+  };
+
+  const selectRange = (index: number) => {
+    setActiveRange(index);
+    void saveMangaRange(path, index);
   };
 
   return (
@@ -198,7 +213,7 @@ export default function MangaScreen({ navigation, route }: Props) {
               sortOrder={sortOrder}
               ranges={ranges}
               activeRange={rangeIndex}
-              onSelectRange={setActiveRange}
+              onSelectRange={selectRange}
               onToggleSort={toggleSort}
               onRead={(chapter) =>
                 navigation.navigate('Reader', {
@@ -548,7 +563,7 @@ function MangaHeader({
             ref={chipRowRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            // The newest range is last, so keep the default selection in view.
+            // A saved selection on the last range would start off screen.
             onContentSizeChange={() => {
               if (ranges.length > 0 && activeRange === ranges.length - 1) {
                 chipRowRef.current?.scrollToEnd({ animated: false });
