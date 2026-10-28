@@ -124,6 +124,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             }
             accessibilityState={{ selected: inLibrary }}
             disabled={!data}
+            borderlessRipple
             onPress={() => {
               void toggleLibrary();
             }}
@@ -324,6 +325,7 @@ function MangaHeader({
               : 'Ordenar capítulos descendente'
           }
           accessibilityState={{ selected: sortOrder === 'asc' }}
+          borderlessRipple
           onPress={onToggleSort}
           className="min-h-11 min-w-11 items-center justify-center rounded-full"
         >

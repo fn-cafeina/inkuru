@@ -278,6 +278,7 @@ function ChapterPicker({
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
+              borderlessRipple
               className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
               <Feather name="x" size={20} color={colors.text} />

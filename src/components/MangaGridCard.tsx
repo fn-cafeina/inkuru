@@ -1,5 +1,6 @@
 import { Image, Text } from 'react-native';
 
+import { useColors } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import { AppPressable } from './AppPressable';
 
@@ -22,12 +23,15 @@ export function MangaGridCard({
   onLongPress,
   accessibilityHint,
 }: Props) {
+  const colors = useColors();
+
   return (
     <AppPressable
       accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
       accessibilityHint={accessibilityHint}
       onPress={onPress}
       onLongPress={onLongPress}
+      android_ripple={{ color: colors.ripple, foreground: true }}
       style={{ width }}
       className="mb-4"
     >
