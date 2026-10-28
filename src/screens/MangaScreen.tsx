@@ -646,7 +646,7 @@ function MangaSkeleton() {
         <Skeleton className="h-3 w-28 rounded" />
       </View>
       {Array.from({ length: 8 }, (_, index) => (
-        <View key={index} className="px-4 py-3">
+        <View key={index} className="min-h-14 justify-center px-4 py-3">
           <Skeleton
             className="h-4 rounded"
             style={{ width: `${55 + (index % 3) * 15}%` }}
@@ -669,7 +669,7 @@ function ChapterRow({
       accessibilityRole="button"
       accessibilityLabel={item.title}
       onPress={onPress}
-      className="min-h-12 flex-row items-center px-4 py-3"
+      className="min-h-14 flex-row items-center px-4 py-3"
     >
       <Text
         numberOfLines={1}
