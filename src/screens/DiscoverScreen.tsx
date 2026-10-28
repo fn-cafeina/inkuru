@@ -47,7 +47,7 @@ export default function DiscoverScreen() {
         <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           Explorar
         </Text>
-        <View className="mt-3 min-h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <View className="mt-3 min-h-12 flex-row items-center rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
           <TextInput
             value={input}
             onChangeText={setInput}
@@ -252,7 +252,7 @@ function DiscoverResults({ term }: { term: string }) {
               accessibilityLabel="No se pudo cargar más. Reintentar"
               onPress={reload}
               android_ripple={{ color: colors.ripple }}
-              className="min-h-12 flex-row items-center justify-center rounded-xl border border-zinc-200 px-4 dark:border-zinc-800"
+              className="min-h-12 flex-row items-center justify-center rounded-lg border border-zinc-200 px-4 dark:border-zinc-800"
             >
               <Feather name="refresh-cw" size={16} color={colors.textMuted} />
               <Text className="ml-2 text-sm text-zinc-700 dark:text-zinc-300">

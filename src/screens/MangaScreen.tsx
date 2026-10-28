@@ -137,7 +137,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             onPress={() => {
               void toggleLibrary();
             }}
-            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            className="min-h-12 min-w-12 items-center justify-center rounded-lg"
           >
             <Feather
               name="bookmark"
@@ -230,7 +230,7 @@ function MangaHeader({
     <View>
       <View className="flex-row px-4">
         <View
-          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
+          className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
           style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
         >
           <Image
@@ -255,7 +255,7 @@ function MangaHeader({
           {manga.tags.map((tag) => (
             <View
               key={tag}
-              className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
+              className="rounded-md bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
             >
               <Text className="text-xs text-zinc-600 dark:text-zinc-300">
                 {tag}
@@ -269,7 +269,7 @@ function MangaHeader({
         <View className="mt-4 px-4">
           <AppPressable
             onPress={() => onRead(readChapter)}
-            className="min-h-12 items-center justify-center rounded-xl bg-accent-500"
+            className="min-h-12 items-center justify-center rounded-lg bg-accent-500"
           >
             <Text className="text-sm font-semibold text-white">
               {resumeChapter
@@ -331,7 +331,7 @@ function MangaHeader({
           accessibilityState={{ selected: sortOrder === 'asc' }}
           borderlessRipple
           onPress={onToggleSort}
-          className="min-h-11 min-w-11 items-center justify-center rounded-full"
+          className="min-h-11 min-w-11 items-center justify-center rounded-lg"
         >
           <Feather
             name={sortOrder === 'desc' ? 'arrow-down' : 'arrow-up'}
@@ -349,7 +349,7 @@ function MangaSkeleton() {
     <View>
       <View className="flex-row px-4">
         <Skeleton
-          className="rounded-xl"
+          className="rounded-lg"
           style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
         />
         <View className="ml-4 flex-1">
@@ -357,12 +357,12 @@ function MangaSkeleton() {
         </View>
       </View>
       <View className="mt-3 flex-row gap-1.5 px-4">
-        <Skeleton className="h-6 w-16 rounded-full" />
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-6 w-14 rounded-full" />
+        <Skeleton className="h-6 w-16 rounded-md" />
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-6 w-14 rounded-md" />
       </View>
       <View className="mt-4 px-4">
-        <Skeleton className="h-12 rounded-xl" />
+        <Skeleton className="h-12 rounded-lg" />
       </View>
       <View className="mt-6 px-4">
         <Skeleton className="h-3 w-24 rounded" />

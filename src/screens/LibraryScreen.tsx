@@ -115,7 +115,7 @@ export default function LibraryScreen() {
           </Text>
           <AppPressable
             onPress={() => navigation.navigate('Discover')}
-            className="mt-6 min-h-12 items-center justify-center rounded-xl bg-accent-500 px-5"
+            className="mt-6 min-h-12 items-center justify-center rounded-lg bg-accent-500 px-5"
           >
             <Text className="text-sm font-semibold text-white">
               Explorar catálogo

@@ -231,14 +231,14 @@ export default function ReaderScreen({ navigation, route }: Props) {
                   <AppPressable
                     accessibilityLabel="Lista de capítulos"
                     onPress={() => setPickerOpen(true)}
-                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800"
+                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800"
                   >
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
                   <AppPressable
                     accessibilityLabel={`Modo de lectura: ${modeLabel(mode)}. Cambiar`}
                     onPress={toggleMode}
-                    className="min-h-12 justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
+                    className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
                   >
                     <Text className="text-xs text-zinc-700 dark:text-zinc-300">
                       {modeLabel(mode)}
@@ -312,7 +312,7 @@ function ChapterPicker({
           className="absolute inset-0"
         />
         <View
-          className="rounded-t-2xl bg-zinc-50 dark:bg-zinc-950"
+          className="rounded-t-xl bg-zinc-50 dark:bg-zinc-950"
           style={{ maxHeight: '70%' }}
         >
           <View className="flex-row items-center justify-between pr-4">
@@ -321,7 +321,7 @@ function ChapterPicker({
               accessibilityLabel="Cerrar"
               onPress={onClose}
               borderlessRipple
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+              className="min-h-12 min-w-12 items-center justify-center rounded-lg"
             >
               <Feather name="x" size={20} color={colors.text} />
             </AppPressable>
@@ -680,7 +680,7 @@ function PageCounter({
     <View
       pointerEvents="none"
       style={{ bottom: bottomInset + 12 }}
-      className="absolute right-4 rounded-full bg-zinc-900 px-3 py-1 dark:bg-zinc-100"
+      className="absolute right-4 rounded-md bg-zinc-900 px-3 py-1 dark:bg-zinc-100"
     >
       <Text className="text-xs text-white dark:text-zinc-900">
         {page + 1} / {total}

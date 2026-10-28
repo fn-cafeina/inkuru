@@ -48,7 +48,7 @@ export function ReaderTransition({
           <AppPressable
             accessibilityLabel={`Leer ${next.title}`}
             onPress={() => onOpenNext(next)}
-            className="mt-6 min-h-12 items-center justify-center rounded-xl bg-accent-500 px-6"
+            className="mt-6 min-h-12 items-center justify-center rounded-lg bg-accent-500 px-6"
           >
             <Text className="text-sm font-semibold text-white">
               Leer siguiente capítulo
@@ -64,7 +64,7 @@ export function ReaderTransition({
       <AppPressable
         accessibilityLabel="Elegir capítulo"
         onPress={onOpenPicker}
-        className="mt-3 min-h-12 items-center justify-center rounded-xl border border-zinc-200 px-6 dark:border-zinc-800"
+        className="mt-3 min-h-12 items-center justify-center rounded-lg border border-zinc-200 px-6 dark:border-zinc-800"
       >
         <Text className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Elegir capítulo

@@ -67,7 +67,7 @@ export function MangaGridSkeleton({ cardWidth }: { cardWidth: number }) {
       {Array.from({ length: 9 }, (_, index) => (
         <View key={index} style={{ width: cardWidth }}>
           <Skeleton
-            className="rounded-xl"
+            className="rounded-lg"
             style={{ width: cardWidth, aspectRatio: COVER_ASPECT_RATIO }}
           />
           <Skeleton className="mt-2 h-4 rounded" />

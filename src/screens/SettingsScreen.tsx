@@ -149,8 +149,8 @@ function OptionChip({
       onPress={onPress}
       className={
         selected
-          ? 'min-h-11 items-center justify-center rounded-full border border-transparent bg-accent-500 px-3'
-          : 'min-h-11 items-center justify-center rounded-full border border-zinc-200 px-3 dark:border-zinc-800'
+          ? 'min-h-11 items-center justify-center rounded-lg border border-transparent bg-accent-500 px-3'
+          : 'min-h-11 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800'
       }
     >
       <Text

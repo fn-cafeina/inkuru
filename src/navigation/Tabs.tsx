@@ -102,7 +102,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         transform: [{ translateY }],
       }}
     >
-      <View className="flex-row rounded-full border border-zinc-200 bg-white p-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+      <View className="flex-row rounded-xl border border-zinc-200 bg-white p-1.5 dark:border-zinc-800 dark:bg-zinc-900">
         {state.routes.map((route, index) => {
           const focused = state.index === index;
 
@@ -128,8 +128,8 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
               className={
                 focused
-                  ? 'items-center justify-center rounded-full bg-accent-500 px-6'
-                  : 'items-center justify-center rounded-full px-6'
+                  ? 'items-center justify-center rounded-md bg-accent-500 px-6'
+                  : 'items-center justify-center rounded-md px-6'
               }
               style={{ height: TAB_BAR_HEIGHT - 12 }}
             >
