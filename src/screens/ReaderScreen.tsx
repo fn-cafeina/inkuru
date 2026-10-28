@@ -19,6 +19,7 @@ import { AppPressable } from '../components/AppPressable';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
 import { ReaderPage } from '../components/ReaderPage';
+import { ReaderTransition } from '../components/ReaderTransition';
 import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
@@ -95,6 +96,19 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const colors = useColors();
   const toggleChrome = () => setChromeVisible((visible) => !visible);
+  const openChapter = (chapter: MangaChapter) => {
+    setPickerOpen(false);
+
+    if (chapter.path === path) {
+      return;
+    }
+
+    navigation.replace('Reader', {
+      path: chapter.path,
+      title: chapter.title,
+      mangaPath,
+    });
+  };
   const total = data?.pages.length ?? 0;
   const safePage = total > 0 ? Math.min(page, total - 1) : page;
 
@@ -189,8 +203,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
               page={safePage}
               windowHeight={windowHeight}
               bottomInset={insets.bottom}
+              title={title}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
+              onOpenNext={openChapter}
+              onOpenPicker={() => setPickerOpen(true)}
             />
             <PageCounter
               page={safePage}
@@ -238,16 +255,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           chapters={data?.chapters ?? []}
           current={data?.chapterIndex ?? -1}
           onClose={() => setPickerOpen(false)}
-          onSelect={(chapter) => {
-            setPickerOpen(false);
-            if (chapter.path !== path) {
-              navigation.replace('Reader', {
-                path: chapter.path,
-                title: chapter.title,
-                mangaPath,
-              });
-            }
-          }}
+          onSelect={openChapter}
         />
       </View>
     </View>
@@ -371,8 +379,11 @@ function ReaderPages({
   page,
   windowHeight,
   bottomInset,
+  title,
   onPageChange,
   onToggleChrome,
+  onOpenNext,
+  onOpenPicker,
 }: {
   data: ReaderData;
   mode: ReaderMode;
@@ -381,12 +392,24 @@ function ReaderPages({
   page: number;
   windowHeight: number;
   bottomInset: number;
+  title: string;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
+  onOpenNext: (chapter: MangaChapter) => void;
+  onOpenPicker: () => void;
 }) {
   const { width } = useWindowDimensions();
-  // Keeps the last page clear of the screen edge after ChapterNav was removed.
-  const footer = <View style={{ paddingBottom: bottomInset + 24 }} />;
+  const footer = (
+    <ReaderTransition
+      currentTitle={data.title || title}
+      next={data.next}
+      width={width}
+      height={windowHeight}
+      bottomInset={bottomInset}
+      onOpenNext={onOpenNext}
+      onOpenPicker={onOpenPicker}
+    />
+  );
 
   return mode === 'webtoon' ? (
     <VerticalPages
