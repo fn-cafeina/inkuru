@@ -120,24 +120,16 @@ export default function MangaScreen({ navigation, route }: Props) {
   const resumeChapter = data
     ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
     : undefined;
-  const chapters = useMemo(
-    () =>
-      data
-        ? sortOrder === 'asc'
-          ? [...data.chapters].reverse()
-          : data.chapters
-        : [],
-    [data, sortOrder],
-  );
-  const ranges = useMemo(() => chunkChapters(chapters), [chapters]);
+  const ranges = useMemo(() => chunkChapters(data?.chapters ?? []), [data]);
   const rangeIndex = Math.min(activeRange, Math.max(ranges.length - 1, 0));
-  const visibleChapters = ranges[rangeIndex]?.chapters ?? [];
+  const activeChapters = ranges[rangeIndex]?.chapters ?? [];
+  const visibleChapters =
+    sortOrder === 'asc' ? [...activeChapters].reverse() : activeChapters;
 
   const toggleSort = () => {
     const next = sortOrder === 'desc' ? 'asc' : 'desc';
 
     setSortOrder(next);
-    setActiveRange(0);
     void saveMangaSort(next);
   };
 
