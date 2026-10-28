@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { AppPressable } from '../components/AppPressable';
+import { OptionChip } from '../components/OptionChip';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
 import {
@@ -129,39 +129,5 @@ export default function SettingsScreen() {
         </Text>
       </View>
     </Screen>
-  );
-}
-
-function OptionChip({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <AppPressable
-      accessibilityRole="radio"
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      className={
-        selected
-          ? 'min-h-11 items-center justify-center rounded-lg border border-transparent bg-accent-500 px-3'
-          : 'min-h-11 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800'
-      }
-    >
-      <Text
-        className={
-          selected
-            ? 'text-sm font-semibold text-white'
-            : 'text-sm text-zinc-700 dark:text-zinc-300'
-        }
-      >
-        {label}
-      </Text>
-    </AppPressable>
   );
 }
