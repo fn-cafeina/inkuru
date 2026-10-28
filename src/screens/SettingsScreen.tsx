@@ -5,24 +5,24 @@ import { useFocusEffect } from '@react-navigation/native';
 import { AppPressable } from '../components/AppPressable';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
-import { loadReaderMode, saveReaderMode } from '../storage/readerSettings';
+import {
+  DEFAULT_READER_MODE,
+  READER_MODE_OPTIONS,
+  loadReaderMode,
+  saveReaderMode,
+} from '../storage/readerSettings';
 import type { ReaderMode } from '../storage/readerSettings';
 
-const MODES: { value: ReaderMode; label: string }[] = [
-  { value: 'vertical', label: 'Cascada' },
-  { value: 'paged', label: 'Páginas' },
-];
-
 export default function SettingsScreen() {
-  const [mode, setMode] = useState<ReaderMode>('vertical');
+  const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
       void loadReaderMode().then((value) => {
-        if (active && value) {
-          setMode(value);
+        if (active) {
+          setMode(value ?? DEFAULT_READER_MODE);
         }
       });
 
@@ -46,42 +46,58 @@ export default function SettingsScreen() {
       </View>
 
       <SectionTitle className="mb-3 mt-7 px-4">Lector</SectionTitle>
-      <View className="mx-4">
+      <View className="px-4">
         <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
           Modo de lectura
         </Text>
-        <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Se aplica al abrir un capítulo.
-        </Text>
-        <View className="mt-3 flex-row rounded-xl border border-zinc-200 p-1 dark:border-zinc-800">
-          {MODES.map((option) => {
-            const selected = mode === option.value;
-
-            return (
-              <AppPressable
-                key={option.value}
-                accessibilityState={{ selected }}
-                onPress={() => selectMode(option.value)}
-                className={
-                  selected
-                    ? 'min-h-12 flex-1 items-center justify-center rounded-md bg-accent-500'
-                    : 'min-h-12 flex-1 items-center justify-center rounded-md'
-                }
-              >
-                <Text
-                  className={
-                    selected
-                      ? 'text-sm font-semibold text-white'
-                      : 'text-sm text-zinc-700 dark:text-zinc-300'
-                  }
-                >
-                  {option.label}
-                </Text>
-              </AppPressable>
-            );
-          })}
+        <View className="mt-3 flex-row flex-wrap gap-2">
+          {READER_MODE_OPTIONS.map((option) => (
+            <OptionChip
+              key={option.value}
+              label={option.label}
+              selected={mode === option.value}
+              onPress={() => selectMode(option.value)}
+            />
+          ))}
         </View>
+        <Text className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Tradicional: izquierda a derecha. Manga: derecha a izquierda.
+        </Text>
       </View>
     </Screen>
+  );
+}
+
+function OptionChip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <AppPressable
+      accessibilityRole="radio"
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      className={
+        selected
+          ? 'min-h-11 items-center justify-center rounded-full border border-transparent bg-accent-500 px-3'
+          : 'min-h-11 items-center justify-center rounded-full border border-zinc-200 px-3 dark:border-zinc-800'
+      }
+    >
+      <Text
+        className={
+          selected
+            ? 'text-sm font-semibold text-white'
+            : 'text-sm text-zinc-700 dark:text-zinc-300'
+        }
+      >
+        {label}
+      </Text>
+    </AppPressable>
   );
 }

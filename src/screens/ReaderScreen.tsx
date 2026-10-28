@@ -32,7 +32,12 @@ import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import { saveProgress } from '../storage/readerProgress';
-import { loadReaderMode, saveReaderMode } from '../storage/readerSettings';
+import {
+  DEFAULT_READER_MODE,
+  READER_MODE_OPTIONS,
+  loadReaderMode,
+  saveReaderMode,
+} from '../storage/readerSettings';
 import type { ReaderMode } from '../storage/readerSettings';
 import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
@@ -45,7 +50,13 @@ const PAGE_ASPECT_RATIO = 1442 / 2100;
 const pageKey = (path: string) => `reader:page:${path}`;
 
 // Keeps the last mode for the next mount while AsyncStorage resolves.
-let preferredMode: ReaderMode = 'vertical';
+let preferredMode: ReaderMode = DEFAULT_READER_MODE;
+
+function modeLabel(mode: ReaderMode) {
+  return (
+    READER_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? ''
+  );
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
@@ -68,7 +79,12 @@ export default function ReaderScreen({ navigation, route }: Props) {
   );
 
   const toggleMode = () => {
-    const next = mode === 'vertical' ? 'paged' : 'vertical';
+    const index = READER_MODE_OPTIONS.findIndex(
+      (option) => option.value === mode,
+    );
+    const next =
+      READER_MODE_OPTIONS[(index + 1) % READER_MODE_OPTIONS.length].value;
+
     preferredMode = next;
     setMode(next);
     void saveReaderMode(next);
@@ -181,16 +197,12 @@ export default function ReaderScreen({ navigation, route }: Props) {
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
                   <AppPressable
-                    accessibilityLabel={
-                      mode === 'vertical'
-                        ? 'Cambiar a modo páginas'
-                        : 'Cambiar a modo cascada'
-                    }
+                    accessibilityLabel={`Modo de lectura: ${modeLabel(mode)}. Cambiar`}
                     onPress={toggleMode}
                     className="min-h-12 justify-center rounded-xl border border-zinc-200 px-3 dark:border-zinc-800"
                   >
                     <Text className="text-xs text-zinc-700 dark:text-zinc-300">
-                      {mode === 'vertical' ? 'Páginas' : 'Cascada'}
+                      {modeLabel(mode)}
                     </Text>
                   </AppPressable>
                 </View>
@@ -348,20 +360,21 @@ function ReaderPages({
   // Keeps the last page clear of the screen edge after ChapterNav was removed.
   const footer = <View style={{ paddingBottom: bottomInset + 24 }} />;
 
-  return mode === 'paged' ? (
-    <PagedPages
+  return mode === 'webtoon' ? (
+    <VerticalPages
       pages={data.pages}
       width={width}
-      page={page}
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
       footer={footer}
     />
   ) : (
-    <VerticalPages
+    <PagedPages
       pages={data.pages}
       width={width}
+      direction={mode === 'paged-ltr' ? 'ltr' : 'rtl'}
+      page={page}
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
@@ -456,6 +469,7 @@ function VerticalPages({
 function PagedPages({
   pages,
   width,
+  direction,
   page,
   initialPage,
   onPageChange,
@@ -464,6 +478,7 @@ function PagedPages({
 }: {
   pages: string[];
   width: number;
+  direction: 'ltr' | 'rtl';
   page: number;
   initialPage: number;
   onPageChange: (page: number) => void;
@@ -490,13 +505,14 @@ function PagedPages({
     }
     listRef.current?.scrollToIndex({ index, animated: true });
   };
+  // In RTL, page 1 sits on the right, so the left edge advances.
+  const advancesRight = direction === 'ltr';
 
   return (
-    // Manga reads right to left, so page 1 sits on the right and the chapter end on the left.
     <FlatList
       ref={listRef}
       horizontal
-      inverted
+      inverted={!advancesRight}
       pagingEnabled
       data={pages}
       keyExtractor={(item) => item}
@@ -506,34 +522,37 @@ function PagedPages({
         index,
       })}
       initialScrollIndex={Math.min(initialPage, pages.length - 1)}
-      renderItem={({ item, index }) => (
-        <View style={{ width }} className="justify-center">
-          <PageImage
-            uri={item}
-            paged
-            label={`Página ${index + 1}`}
-            onPress={onToggleChrome}
-          />
-          <AppPressable
-            accessibilityLabel="Página siguiente"
-            accessibilityState={{ disabled: page >= pages.length - 1 }}
-            disabled={page >= pages.length - 1}
-            onPress={() => goToPage(page + 1)}
-            android_ripple={{ color: 'transparent' }}
-            className="absolute bottom-0 left-0 top-0"
-            style={{ width: width / 4 }}
-          />
-          <AppPressable
-            accessibilityLabel="Página anterior"
-            accessibilityState={{ disabled: page === 0 }}
-            disabled={page === 0}
-            onPress={() => goToPage(page - 1)}
-            android_ripple={{ color: 'transparent' }}
-            className="absolute bottom-0 right-0 top-0"
-            style={{ width: width / 4 }}
-          />
-        </View>
-      )}
+      renderItem={({ item, index }) => {
+        const leftTarget = advancesRight ? index - 1 : index + 1;
+        const rightTarget = advancesRight ? index + 1 : index - 1;
+
+        return (
+          <View style={{ width }} className="justify-center">
+            <PageImage
+              uri={item}
+              paged
+              label={`Página ${index + 1}`}
+              onPress={onToggleChrome}
+            />
+            <PageZone
+              side="left"
+              label={advancesRight ? 'Página anterior' : 'Página siguiente'}
+              target={leftTarget}
+              width={width}
+              total={pages.length}
+              onGoToPage={goToPage}
+            />
+            <PageZone
+              side="right"
+              label={advancesRight ? 'Página siguiente' : 'Página anterior'}
+              target={rightTarget}
+              width={width}
+              total={pages.length}
+              onGoToPage={goToPage}
+            />
+          </View>
+        );
+      }}
       ListFooterComponent={
         <View style={{ width }} className="justify-center">
           {footer}
@@ -545,6 +564,40 @@ function PagedPages({
       initialNumToRender={1}
       maxToRenderPerBatch={2}
       windowSize={3}
+    />
+  );
+}
+
+function PageZone({
+  side,
+  label,
+  target,
+  width,
+  total,
+  onGoToPage,
+}: {
+  side: 'left' | 'right';
+  label: string;
+  target: number;
+  width: number;
+  total: number;
+  onGoToPage: (index: number) => void;
+}) {
+  const disabled = target < 0 || target >= total;
+
+  return (
+    <AppPressable
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={() => onGoToPage(target)}
+      android_ripple={{ color: 'transparent' }}
+      className={
+        side === 'left'
+          ? 'absolute bottom-0 left-0 top-0'
+          : 'absolute bottom-0 right-0 top-0'
+      }
+      style={{ width: width / 4 }}
     />
   );
 }
