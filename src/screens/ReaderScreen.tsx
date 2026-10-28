@@ -274,7 +274,7 @@ function ChapterPicker({
           style={{ maxHeight: '70%' }}
         >
           <View className="flex-row items-center justify-between pr-4">
-            <SectionTitle>Capítulos</SectionTitle>
+            <SectionTitle className="px-4">Capítulos</SectionTitle>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}

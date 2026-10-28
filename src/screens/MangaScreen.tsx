@@ -290,7 +290,7 @@ function MangaHeader({
 
       {manga.synopsis ? (
         <View>
-          <SectionTitle>Sinopsis</SectionTitle>
+          <SectionTitle className="mb-3 mt-7 px-4">Sinopsis</SectionTitle>
           <Text
             numberOfLines={!expanded && longSynopsis ? 6 : undefined}
             className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
@@ -312,12 +312,9 @@ function MangaHeader({
       ) : null}
 
       <View className="mt-6 flex-row items-center px-4">
-        <Text
-          accessibilityRole="header"
-          className="flex-1 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
-        >
-          {manga.chapters.length} capítulos
-        </Text>
+        <SectionTitle className="flex-1">
+          {`${manga.chapters.length} capítulos`}
+        </SectionTitle>
         <AppPressable
           accessibilityLabel={
             sortOrder === 'desc'

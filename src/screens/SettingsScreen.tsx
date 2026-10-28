@@ -45,7 +45,7 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
-      <SectionTitle>Lector</SectionTitle>
+      <SectionTitle className="mb-3 mt-7 px-4">Lector</SectionTitle>
       <View className="mx-4">
         <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
           Modo de lectura
