@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AccessibilityActionInfo } from 'react-native';
 import { Image, PixelRatio, Text, View } from 'react-native';
 import {
@@ -144,6 +144,7 @@ export function ReaderPage({
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const zoomedRef = useRef(false);
 
   const ratio = source ? source.width / source.height : READER_PAGE_ASPECT_RATIO;
   // Zoom is applied around the viewport centre, so the focal point is
@@ -174,9 +175,21 @@ export function ReaderPage({
   const startFocalY = useSharedValue(0);
 
   const notifyZoom = (next: boolean) => {
+    zoomedRef.current = next;
     setZoomed(next);
     onZoomChange(next);
   };
+
+  // A row can be recycled while zoomed (list windowing, data reload); release
+  // the parent's scroll lock so the list does not stay frozen.
+  useEffect(
+    () => () => {
+      if (zoomedRef.current) {
+        onZoomChange(false);
+      }
+    },
+    [onZoomChange],
+  );
 
   const settle = () => {
     'worklet';
