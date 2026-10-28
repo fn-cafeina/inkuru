@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -109,6 +109,15 @@ export default function MangaScreen({ navigation, route }: Props) {
   const resumeChapter = data
     ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
     : undefined;
+  const chapters = useMemo(
+    () =>
+      data
+        ? sortOrder === 'asc'
+          ? [...data.chapters].reverse()
+          : data.chapters
+        : [],
+    [data, sortOrder],
+  );
 
   return (
     <Screen>
@@ -145,9 +154,7 @@ export default function MangaScreen({ navigation, route }: Props) {
         <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
       ) : data ? (
         <FlatList
-          data={
-            sortOrder === 'asc' ? [...data.chapters].reverse() : data.chapters
-          }
+          data={chapters}
           keyExtractor={(item) => item.path}
           ItemSeparatorComponent={ListDivider}
           renderItem={({ item }) => (
