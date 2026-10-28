@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Text,
   useWindowDimensions,
@@ -19,7 +18,7 @@ import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
-import { loadLibrary, removeFromLibrary } from '../storage/library';
+import { loadLibrary } from '../storage/library';
 import type { LibraryEntry } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
@@ -69,32 +68,6 @@ export default function LibraryScreen() {
     }, []),
   );
 
-  const removeEntry = async (path: string) => {
-    const ok = await removeFromLibrary(path);
-
-    if (!ok) {
-      Alert.alert('No se pudo actualizar la biblioteca');
-      return;
-    }
-
-    setEntries((current) =>
-      current ? current.filter((entry) => entry.path !== path) : current,
-    );
-  };
-
-  const confirmRemove = (entry: LibraryEntry) => {
-    Alert.alert('Quitar de la biblioteca', entry.title, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Quitar',
-        style: 'destructive',
-        onPress: () => {
-          void removeEntry(entry.path);
-        },
-      },
-    ]);
-  };
-
   return (
     <Screen>
       <View className="px-4 pb-4 pt-3">
@@ -142,8 +115,6 @@ export default function LibraryScreen() {
                   title: item.title,
                 })
               }
-              onLongPress={() => confirmRemove(item)}
-              accessibilityHint="Mantén pulsado para quitar de la biblioteca"
             />
           )}
           onScroll={onScroll}
