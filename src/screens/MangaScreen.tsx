@@ -30,7 +30,7 @@ import {
   saveMangaRange,
   saveMangaSort,
 } from '../storage/mangaSettings';
-import { loadProgress } from '../storage/readerProgress';
+import { loadProgress, loadReadChapters } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
 import { useColors } from '../theme/colors';
@@ -46,6 +46,8 @@ const FACT_VALUES: Record<string, string> = {
   Hiatus: 'En pausa',
 };
 
+type ChapterState = 'current' | 'read';
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
 export default function MangaScreen({ navigation, route }: Props) {
@@ -59,6 +61,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const { data, hasError, loading, reload, refreshing, refresh } =
     useRemoteData(fetcher, `manga:${path}`);
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
+  const [readChapters, setReadChapters] = useState<string[]>([]);
   const [inLibrary, setInLibrary] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [activeRange, setActiveRange] = useState<number | null>(null);
@@ -69,12 +72,14 @@ export default function MangaScreen({ navigation, route }: Props) {
 
       void Promise.all([
         loadProgress(path),
+        loadReadChapters(path),
         isInLibrary(path),
         loadMangaSort(),
         loadMangaRange(path),
-      ]).then(([value, saved, storedSort, storedRange]) => {
+      ]).then(([value, reads, saved, storedSort, storedRange]) => {
         if (active) {
           setProgress(value);
+          setReadChapters(reads);
           setInLibrary(saved);
 
           if (storedSort) {
@@ -132,6 +137,14 @@ export default function MangaScreen({ navigation, route }: Props) {
   const activeChapters = ranges[rangeIndex]?.chapters ?? [];
   const visibleChapters =
     sortOrder === 'desc' ? [...activeChapters].reverse() : activeChapters;
+  const readSet = useMemo(() => new Set(readChapters), [readChapters]);
+  const chapterState = (chapterPath: string): ChapterState | undefined => {
+    if (chapterPath === progress?.chapterPath) {
+      return 'current';
+    }
+
+    return readSet.has(chapterPath) ? 'read' : undefined;
+  };
 
   const toggleSort = () => {
     const next = sortOrder === 'desc' ? 'asc' : 'desc';
@@ -185,6 +198,7 @@ export default function MangaScreen({ navigation, route }: Props) {
           renderItem={({ item }) => (
             <ChapterRow
               item={item}
+              state={chapterState(item.path)}
               onPress={() =>
                 navigation.navigate('Reader', {
                   path: item.path,
@@ -197,6 +211,7 @@ export default function MangaScreen({ navigation, route }: Props) {
           ListHeaderComponent={
             <MangaHeader
               manga={data}
+              readCount={readSet.size}
               resumeChapter={resumeChapter}
               sortOrder={sortOrder}
               ranges={ranges}
@@ -436,6 +451,7 @@ function chapterNumber(title?: string): number | undefined {
 
 function MangaHeader({
   manga,
+  readCount,
   resumeChapter,
   sortOrder,
   ranges,
@@ -445,6 +461,7 @@ function MangaHeader({
   onRead,
 }: {
   manga: MangaDetail;
+  readCount: number;
   resumeChapter?: MangaChapter;
   sortOrder: 'asc' | 'desc';
   ranges: ChapterRange[];
@@ -459,11 +476,17 @@ function MangaHeader({
 
     return value ? FACT_VALUES[value] ?? value : undefined;
   };
-  const meta = [factValue('Estado'), factValue('Tipo'), factValue('Demografia')]
-    .filter((value): value is string => Boolean(value))
-    .join(' · ');
+  const status = factValue('Estado');
   const author = factValue('Autor');
   const updated = factValue('Actualizado');
+  const details = manga.facts.filter(
+    (fact) =>
+      fact.value && !['Estado', 'Autor', 'Actualizado'].includes(fact.label),
+  );
+  const progressPercent =
+    manga.chapters.length > 0
+      ? Math.min(100, Math.round((readCount / manga.chapters.length) * 100))
+      : 0;
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
   const [expanded, setExpanded] = useState(false);
@@ -474,8 +497,8 @@ function MangaHeader({
     <View>
       <View className="flex-row px-4">
         <View
-          className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800"
-          style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
+          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
+          style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
         >
           <Image
             source={{ uri: manga.cover }}
@@ -491,18 +514,17 @@ function MangaHeader({
           >
             {manga.title}
           </Text>
-          {meta ? (
-            <Text
-              numberOfLines={1}
-              className="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
-            >
-              {meta}
-            </Text>
+          {status ? (
+            <View className="mt-2 self-start rounded-full bg-accent-500 px-2.5 py-1">
+              <Text className="text-xs font-semibold uppercase text-white">
+                {status}
+              </Text>
+            </View>
           ) : null}
           {author ? (
             <Text
               numberOfLines={2}
-              className="mt-1 text-sm text-zinc-700 dark:text-zinc-300"
+              className="mt-2 text-sm text-zinc-700 dark:text-zinc-300"
             >
               {author}
             </Text>
@@ -530,9 +552,54 @@ function MangaHeader({
         </View>
       ) : null}
 
+      {readCount > 0 ? (
+        <View className="mt-3 px-4">
+          <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+            <View
+              className="h-full rounded-full bg-accent-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </View>
+          <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+            {`${readCount}/${manga.chapters.length} capítulos leídos · ${progressPercent}%`}
+          </Text>
+        </View>
+      ) : null}
+
       {manga.tags.length > 0 ? (
         <View className="mt-4 px-4">
           <TagRow tags={manga.tags} />
+        </View>
+      ) : null}
+
+      {details.length > 0 ? (
+        <View>
+          <SectionTitle className="mb-2 mt-6 px-4">Detalles</SectionTitle>
+          <View className="mx-4 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            {details.map((fact, index) => (
+              <View
+                key={fact.label}
+                className={
+                  index > 0
+                    ? 'flex-row border-t border-zinc-100 px-3 py-2.5 dark:border-zinc-800'
+                    : 'flex-row px-3 py-2.5'
+                }
+              >
+                <Text
+                  numberOfLines={1}
+                  className="w-32 text-xs text-zinc-500 dark:text-zinc-400"
+                >
+                  {fact.label}
+                </Text>
+                <Text
+                  numberOfLines={2}
+                  className="flex-1 text-sm text-zinc-900 dark:text-zinc-100"
+                >
+                  {FACT_VALUES[fact.value] ?? fact.value}
+                </Text>
+              </View>
+            ))}
+          </View>
         </View>
       ) : null}
 
@@ -590,19 +657,26 @@ function MangaHeader({
               {manga.chapters.length}
             </Text>
           </View>
-          <AppPressable
-            accessibilityLabel={
-              sortOrder === 'desc'
-                ? 'Orden actual: recientes. Cambiar a antiguos'
-                : 'Orden actual: antiguos. Cambiar a recientes'
-            }
-            onPress={onToggleSort}
-            className="min-h-12 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
-          >
-            <Text className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-              {sortOrder === 'desc' ? 'Recientes' : 'Antiguos'}
-            </Text>
-          </AppPressable>
+          <View className="flex-row gap-2">
+            <OptionChip
+              label="Recientes"
+              selected={sortOrder === 'desc'}
+              onPress={() => {
+                if (sortOrder !== 'desc') {
+                  onToggleSort();
+                }
+              }}
+            />
+            <OptionChip
+              label="Antiguos"
+              selected={sortOrder === 'asc'}
+              onPress={() => {
+                if (sortOrder !== 'asc') {
+                  onToggleSort();
+                }
+              }}
+            />
+          </View>
         </View>
       </View>
     </View>
@@ -614,12 +688,12 @@ function MangaSkeleton() {
     <View>
       <View className="flex-row px-4">
         <Skeleton
-          className="rounded-lg"
-          style={{ width: 112, aspectRatio: COVER_ASPECT_RATIO }}
+          className="rounded-xl"
+          style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
         />
         <View className="ml-4 flex-1">
           <Skeleton className="h-6 w-3/4 rounded" />
-          <Skeleton className="mt-2 h-3 w-1/2 rounded" />
+          <Skeleton className="mt-2 h-6 w-24 rounded-full" />
           <Skeleton className="mt-2 h-4 w-2/3 rounded" />
         </View>
       </View>
@@ -657,23 +731,35 @@ function MangaSkeleton() {
   );
 }
 
+const CHAPTER_TITLE_CLASS: Record<ChapterState | 'unread', string> = {
+  current: 'flex-1 text-sm font-semibold text-accent-500',
+  read: 'flex-1 text-sm text-zinc-400 line-through dark:text-zinc-500',
+  unread: 'flex-1 text-sm text-zinc-900 dark:text-zinc-100',
+};
+
 function ChapterRow({
   item,
+  state,
   onPress,
 }: {
   item: MangaChapter;
+  state?: ChapterState;
   onPress: () => void;
 }) {
   return (
     <AppPressable
       accessibilityRole="button"
-      accessibilityLabel={item.title}
+      accessibilityLabel={
+        state === 'current' ? `${item.title}, leyendo` : item.title
+      }
       onPress={onPress}
-      className="min-h-14 flex-row items-center px-4 py-3"
+      className={`min-h-14 flex-row items-center border-l-2 px-4 py-3 ${
+        state === 'current' ? 'border-accent-500' : 'border-transparent'
+      }`}
     >
       <Text
         numberOfLines={1}
-        className="flex-1 text-sm text-zinc-900 dark:text-zinc-100"
+        className={CHAPTER_TITLE_CLASS[state ?? 'unread']}
       >
         {item.title}
       </Text>
