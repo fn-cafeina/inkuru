@@ -56,3 +56,45 @@ export async function saveProgress(
     // Progress is a convenience; a storage failure must not block reading.
   }
 }
+
+const readKey = (mangaPath: string) => `reader:read:${mangaPath}`;
+
+export async function loadReadChapters(mangaPath: string): Promise<string[]> {
+  try {
+    const raw = await AsyncStorage.getItem(readKey(mangaPath));
+
+    if (!raw) {
+      return [];
+    }
+
+    const value: unknown = JSON.parse(raw);
+
+    if (!Array.isArray(value)) {
+      return [];
+    }
+
+    return value.filter((item): item is string => typeof item === 'string');
+  } catch {
+    return [];
+  }
+}
+
+export async function markChapterRead(
+  mangaPath: string,
+  chapterPath: string,
+): Promise<void> {
+  try {
+    const current = await loadReadChapters(mangaPath);
+
+    if (current.includes(chapterPath)) {
+      return;
+    }
+
+    await AsyncStorage.setItem(
+      readKey(mangaPath),
+      JSON.stringify([...current, chapterPath]),
+    );
+  } catch {
+    // Read marks are a convenience; a storage failure must not block reading.
+  }
+}

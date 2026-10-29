@@ -24,7 +24,7 @@ import { ScreenHeader } from '../components/ScreenHeader';
 import { SectionTitle } from '../components/SectionTitle';
 import { Skeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
-import { saveProgress } from '../storage/readerProgress';
+import { markChapterRead, saveProgress } from '../storage/readerProgress';
 import {
   DEFAULT_READER_MODE,
   DEFAULT_READER_QUALITY,
@@ -177,8 +177,13 @@ export default function ReaderScreen({ navigation, route }: Props) {
         chapterTitle: data?.title || title,
         page: safePage,
       });
+
+      // Reaching the last page is the honest "chapter finished" signal.
+      if (total > 0 && safePage >= total - 1) {
+        void markChapterRead(mangaPath, path);
+      }
     }
-  }, [data?.title, mangaPath, path, restored, safePage, title]);
+  }, [data?.title, mangaPath, path, restored, safePage, title, total]);
 
   return (
     // The reader owns the top inset so pages reach the status bar when the chrome is hidden.
