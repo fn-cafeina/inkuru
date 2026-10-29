@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import {
   FlatList,
   Modal,
+  ScrollView,
   Text,
   useWindowDimensions,
   View,
@@ -11,13 +12,23 @@ import type { ListViewToken } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useKeepAwake } from 'expo-keep-awake';
+import { Image } from 'expo-image';
+import {
+  activateKeepAwakeAsync,
+  deactivateKeepAwake,
+} from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import {
+  CHAPTER_ROW_HEIGHT,
+  CHAPTER_ROW_STEP,
+  ChapterRow,
+} from '../components/ChapterRow';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
+import { OptionChip } from '../components/OptionChip';
 import { ReaderPage } from '../components/ReaderPage';
 import { ReaderTransition } from '../components/ReaderTransition';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -30,10 +41,15 @@ import {
   DEFAULT_READER_QUALITY,
   DEFAULT_READER_SCALE,
   READER_MODE_OPTIONS,
+  READER_QUALITY_OPTIONS,
+  READER_SCALE_OPTIONS,
+  loadKeepAwake,
   loadReaderMode,
   loadReaderQuality,
   loadReaderScale,
   saveReaderMode,
+  saveReaderQuality,
+  saveReaderScale,
 } from '../storage/readerSettings';
 import type {
   ReaderMode,
@@ -45,6 +61,7 @@ import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 import { useColors } from '../theme/colors';
 import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
+import { CARD, OUTLINE_CONTROL } from '../theme/styles';
 
 const pageKey = (path: string) => `reader:page:${path}`;
 
@@ -56,7 +73,8 @@ let preferredQuality: ReaderQuality = DEFAULT_READER_QUALITY;
 
 function modeLabel(mode: ReaderMode) {
   return (
-    READER_MODE_OPTIONS.find((option) => option.value === mode)?.label ?? ''
+    READER_MODE_OPTIONS.find((option) => option.value === mode)?.label ??
+    READER_MODE_OPTIONS[0].label
   );
 }
 
@@ -66,13 +84,15 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const { path, title, mangaPath } = route.params;
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
-  useKeepAwake();
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [scale, setScale] = useState<ReaderScale>(preferredScale);
   const [quality, setQuality] = useState<ReaderQuality>(preferredQuality);
   const [page, setPage] = useState(0);
-  const [chromeVisible, setChromeVisible] = useState(true);
+  // Reading starts immersive; only an explicit center tap reveals the chrome.
+  const [chromeVisible, setChromeVisible] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [keepAwake, setKeepAwake] = useState(true);
   const [restored, setRestored] = useState(false);
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchReader(path, signal),
@@ -83,16 +103,20 @@ export default function ReaderScreen({ navigation, route }: Props) {
     `reader:${path}`,
   );
 
-  const toggleMode = () => {
-    const index = READER_MODE_OPTIONS.findIndex(
-      (option) => option.value === mode,
-    );
-    const next =
-      READER_MODE_OPTIONS[(index + 1) % READER_MODE_OPTIONS.length].value;
-
+  const selectMode = (next: ReaderMode) => {
     preferredMode = next;
     setMode(next);
     void saveReaderMode(next);
+  };
+  const selectScale = (next: ReaderScale) => {
+    preferredScale = next;
+    setScale(next);
+    void saveReaderScale(next);
+  };
+  const selectQuality = (next: ReaderQuality) => {
+    preferredQuality = next;
+    setQuality(next);
+    void saveReaderQuality(next);
   };
   const colors = useColors();
   const toggleChrome = () => setChromeVisible((visible) => !visible);
@@ -117,13 +141,19 @@ export default function ReaderScreen({ navigation, route }: Props) {
 
     const restore = async () => {
       try {
-        const [storedMode, storedScale, storedQuality, storedPage] =
-          await Promise.all([
-            loadReaderMode(),
-            loadReaderScale(),
-            loadReaderQuality(),
-            AsyncStorage.getItem(pageKey(path)),
-          ]);
+        const [
+          storedMode,
+          storedScale,
+          storedQuality,
+          storedKeepAwake,
+          storedPage,
+        ] = await Promise.all([
+          loadReaderMode(),
+          loadReaderScale(),
+          loadReaderQuality(),
+          loadKeepAwake(),
+          AsyncStorage.getItem(pageKey(path)),
+        ]);
 
         if (!active) {
           return;
@@ -143,6 +173,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
           preferredQuality = storedQuality;
           setQuality(storedQuality);
         }
+
+        setKeepAwake(storedKeepAwake);
 
         const parsedPage = Number.parseInt(storedPage ?? '', 10);
         if (Number.isFinite(parsedPage) && parsedPage > 0) {
@@ -185,6 +217,31 @@ export default function ReaderScreen({ navigation, route }: Props) {
     }
   }, [data?.title, mangaPath, path, restored, safePage, title, total]);
 
+  useEffect(() => {
+    if (!keepAwake) {
+      return;
+    }
+
+    void activateKeepAwakeAsync('reader');
+
+    return () => {
+      deactivateKeepAwake('reader');
+    };
+  }, [keepAwake]);
+
+  // Warm the adjacent pages so swipes do not wait on the network.
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    for (const index of [safePage - 1, safePage + 1, safePage + 2]) {
+      if (index >= 0 && index < data.pages.length) {
+        void Image.prefetch(data.pages[index]);
+      }
+    }
+  }, [data, safePage]);
+
   return (
     // The reader owns the top inset so pages reach the status bar when the chrome is hidden.
     <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
@@ -194,9 +251,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <ReaderSkeleton />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
-        ) : !data || !restored ? (
-          // A cached chapter renders immediately; the stored page offset
-          // resolves a frame later, so keep the skeleton until it lands.
+        ) : !data ? (
           <ReaderSkeleton />
         ) : (
           <>
@@ -212,13 +267,38 @@ export default function ReaderScreen({ navigation, route }: Props) {
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
               onOpenNext={openChapter}
+              onOpenPrev={openChapter}
               onOpenPicker={() => setPickerOpen(true)}
             />
-            <PageCounter
-              page={safePage}
-              total={data.pages.length}
-              bottomInset={insets.bottom}
-            />
+            {chromeVisible ? (
+              <PageCounter
+                page={safePage}
+                total={data.pages.length}
+                bottomInset={insets.bottom}
+              />
+            ) : null}
+            {hasError ? (
+              <View
+                pointerEvents="box-none"
+                className="absolute left-0 right-0 top-0 items-center"
+                style={{ paddingTop: insets.top + (chromeVisible ? 64 : 8) }}
+              >
+                <AppPressable
+                  accessibilityLabel="No se pudo actualizar. Reintentar"
+                  onPress={reload}
+                  className="min-h-10 flex-row items-center rounded-lg bg-zinc-900 px-3 dark:bg-zinc-100"
+                >
+                  <Feather
+                    name="refresh-cw"
+                    size={14}
+                    color={colors.background}
+                  />
+                  <Text className="ml-2 text-xs text-white dark:text-zinc-900">
+                    No se pudo actualizar. Reintentar
+                  </Text>
+                </AppPressable>
+              </View>
+            ) : null}
           </>
         )}
 
@@ -233,17 +313,32 @@ export default function ReaderScreen({ navigation, route }: Props) {
               onBack={() => navigation.goBack()}
               action={
                 <View className="flex-row items-center">
+                  {data?.prev ? (
+                    <AppPressable
+                      accessibilityLabel={`Capítulo anterior: ${data.prev.title}`}
+                      onPress={() => {
+                        const prev = data.prev;
+
+                        if (prev) {
+                          openChapter(prev);
+                        }
+                      }}
+                      className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
+                    >
+                      <Feather name="skip-back" size={18} color={colors.text} />
+                    </AppPressable>
+                  ) : null}
                   <AppPressable
                     accessibilityLabel="Lista de capítulos"
                     onPress={() => setPickerOpen(true)}
-                    className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800"
+                    className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
                   >
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
                   <AppPressable
-                    accessibilityLabel={`Modo de lectura: ${modeLabel(mode)}. Cambiar`}
-                    onPress={toggleMode}
-                    className="min-h-12 justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800"
+                    accessibilityLabel={`Ajustes de lectura. Modo actual: ${modeLabel(mode)}`}
+                    onPress={() => setSettingsOpen(true)}
+                    className={`min-h-12 justify-center rounded-lg px-3 ${OUTLINE_CONTROL}`}
                   >
                     <Text className="text-xs text-zinc-700 dark:text-zinc-300">
                       {modeLabel(mode)}
@@ -261,6 +356,16 @@ export default function ReaderScreen({ navigation, route }: Props) {
           current={data?.chapterIndex ?? -1}
           onClose={() => setPickerOpen(false)}
           onSelect={openChapter}
+        />
+        <ReaderSettingsSheet
+          visible={settingsOpen}
+          mode={mode}
+          scale={scale}
+          quality={quality}
+          onClose={() => setSettingsOpen(false)}
+          onSelectMode={selectMode}
+          onSelectScale={selectScale}
+          onSelectQuality={selectQuality}
         />
       </View>
     </View>
@@ -308,7 +413,7 @@ function ChapterPicker({
     >
       <View
         className="flex-1 justify-end"
-        style={{ backgroundColor: 'rgba(9, 9, 11, 0.5)' }}
+        style={{ backgroundColor: colors.scrim }}
       >
         <AppPressable
           accessible={false}
@@ -334,10 +439,10 @@ function ChapterPicker({
             data={chapters}
             keyExtractor={(item) => item.path}
             ItemSeparatorComponent={ListDivider}
-            // shortcut: rows are min-h-12 plus a 1px divider, keep the layout in sync.
+            // Rows are CHAPTER_ROW_HEIGHT plus a 1px divider (CHAPTER_ROW_STEP).
             getItemLayout={(_, index) => ({
-              length: 49,
-              offset: 49 * index,
+              length: CHAPTER_ROW_HEIGHT,
+              offset: CHAPTER_ROW_STEP * index,
               index,
             })}
             initialScrollIndex={
@@ -346,29 +451,125 @@ function ChapterPicker({
                 : undefined
             }
             renderItem={({ item, index }) => (
-              <AppPressable
-                accessibilityLabel={item.title}
-                accessibilityState={{ selected: index === current }}
+              <ChapterRow
+                title={item.title}
+                state={index === current ? 'selected' : undefined}
                 onPress={() => onSelect(item)}
-                className="min-h-12 flex-row items-center justify-between px-4 py-3"
-              >
-                <Text
-                  numberOfLines={1}
-                  className={
-                    index === current
-                      ? 'flex-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100'
-                      : 'flex-1 text-sm text-zinc-700 dark:text-zinc-300'
-                  }
-                >
-                  {item.title}
-                </Text>
-                {index === current ? (
-                  <Feather name="check" size={16} color={colors.accent} />
-                ) : null}
-              </AppPressable>
+              />
             )}
             contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
           />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ChipGroup<T extends string>({
+  title,
+  options,
+  value,
+  onSelect,
+}: {
+  title: string;
+  options: readonly { value: T; label: string }[];
+  value: T;
+  onSelect: (value: T) => void;
+}) {
+  return (
+    <View>
+      <SectionTitle>{title}</SectionTitle>
+      <View className={`mt-2 flex-row flex-wrap gap-2 rounded-xl p-3 ${CARD}`}>
+        {options.map((option) => (
+          <OptionChip
+            key={option.value}
+            label={option.label}
+            selected={value === option.value}
+            onPress={() => onSelect(option.value)}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function ReaderSettingsSheet({
+  visible,
+  mode,
+  scale,
+  quality,
+  onClose,
+  onSelectMode,
+  onSelectScale,
+  onSelectQuality,
+}: {
+  visible: boolean;
+  mode: ReaderMode;
+  scale: ReaderScale;
+  quality: ReaderQuality;
+  onClose: () => void;
+  onSelectMode: (mode: ReaderMode) => void;
+  onSelectScale: (scale: ReaderScale) => void;
+  onSelectQuality: (quality: ReaderQuality) => void;
+}) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={onClose}
+    >
+      <View
+        className="flex-1 justify-end"
+        style={{ backgroundColor: colors.scrim }}
+      >
+        <AppPressable
+          accessible={false}
+          onPress={onClose}
+          pressFeedback={false}
+          className="absolute inset-0"
+        />
+        <View
+          className="rounded-t-xl bg-zinc-50 dark:bg-zinc-950"
+          style={{ maxHeight: '85%' }}
+        >
+          <View className="flex-row items-center justify-between pr-4">
+            <SectionTitle className="px-4">Ajustes de lectura</SectionTitle>
+            <AppPressable
+              accessibilityLabel="Cerrar"
+              onPress={onClose}
+              className="min-h-12 min-w-12 items-center justify-center rounded-lg"
+            >
+              <Feather name="x" size={20} color={colors.text} />
+            </AppPressable>
+          </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+            contentContainerClassName="px-4 gap-4"
+          >
+            <ChipGroup
+              title="Modo de lectura"
+              options={READER_MODE_OPTIONS}
+              value={mode}
+              onSelect={onSelectMode}
+            />
+            <ChipGroup
+              title="Ajuste de página"
+              options={READER_SCALE_OPTIONS}
+              value={scale}
+              onSelect={onSelectScale}
+            />
+            <ChipGroup
+              title="Calidad de imagen"
+              options={READER_QUALITY_OPTIONS}
+              value={quality}
+              onSelect={onSelectQuality}
+            />
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -387,6 +588,7 @@ function ReaderPages({
   onPageChange,
   onToggleChrome,
   onOpenNext,
+  onOpenPrev,
   onOpenPicker,
 }: {
   data: ReaderData;
@@ -400,6 +602,7 @@ function ReaderPages({
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
   onOpenNext: (chapter: MangaChapter) => void;
+  onOpenPrev: (chapter: MangaChapter) => void;
   onOpenPicker: () => void;
 }) {
   const { width } = useWindowDimensions();
@@ -407,10 +610,12 @@ function ReaderPages({
     <ReaderTransition
       currentTitle={data.title || title}
       next={data.next}
+      prev={data.prev}
       width={width}
       height={windowHeight}
       bottomInset={bottomInset}
       onOpenNext={onOpenNext}
+      onOpenPrev={onOpenPrev}
       onOpenPicker={onOpenPicker}
     />
   );
@@ -508,6 +713,14 @@ function VerticalPages({
     }, 120);
   };
 
+  const goToPage = (index: number) => {
+    if (index < 0 || index >= pages.length) {
+      return;
+    }
+
+    listRef.current?.scrollToIndex({ index, animated: true });
+  };
+
   return (
     <FlatList
       ref={listRef}
@@ -524,6 +737,14 @@ function VerticalPages({
           paged={false}
           onTap={() => onToggleChrome()}
           onZoomChange={setZoomed}
+          onNextPage={
+            zoomed || index >= pages.length - 1
+              ? undefined
+              : () => goToPage(index + 1)
+          }
+          onPreviousPage={
+            zoomed || index === 0 ? undefined : () => goToPage(index - 1)
+          }
         />
       )}
       ListFooterComponent={footer}
@@ -564,6 +785,7 @@ function PagedPages({
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
+  const didRestore = useRef(false);
   const [zoomed, setZoomed] = useState(false);
   const [onViewableItemsChanged] = useState(
     () =>
@@ -578,6 +800,19 @@ function PagedPages({
     itemVisiblePercentThreshold: 50,
   }));
 
+  // The stored page can land after mount; jump once it does.
+  useEffect(() => {
+    if (didRestore.current) {
+      return;
+    }
+
+    didRestore.current = true;
+
+    if (initialPage > 0 && initialPage < pages.length) {
+      listRef.current?.scrollToIndex({ index: initialPage, animated: false });
+    }
+  }, [initialPage, pages.length]);
+
   const goToPage = (index: number) => {
     if (index < 0 || index >= pages.length) {
       return;
@@ -589,11 +824,12 @@ function PagedPages({
   // and the double tap keep working over the edge zones.
   const handlePageTap = (x: number, index: number) => {
     if (zoomed) {
-      onToggleChrome();
       return;
     }
 
-    const edge = width / 4;
+    // Outer thirds advance; only the center third touches the chrome, so a
+    // page-advance tap never reveals the controls.
+    const edge = width / 3;
     // In RTL the left edge advances, mirroring the inverted list.
     const advancesRight = direction === 'ltr';
 
@@ -683,6 +919,9 @@ function PageCounter({
   return (
     <View
       pointerEvents="none"
+      accessible
+      accessibilityRole="text"
+      accessibilityLabel={`Página ${page + 1} de ${total}`}
       style={{ bottom: bottomInset + 12 }}
       className="absolute right-4 rounded-md bg-zinc-900 px-3 py-1 dark:bg-zinc-100"
     >

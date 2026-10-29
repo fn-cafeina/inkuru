@@ -107,3 +107,23 @@ export async function saveReaderQuality(
     // A storage failure must not block reading.
   }
 }
+
+const KEEP_AWAKE_KEY = 'reader:keepAwake';
+
+export async function loadKeepAwake(): Promise<boolean> {
+  try {
+    const value = await AsyncStorage.getItem(KEEP_AWAKE_KEY);
+
+    return value === null ? true : value === 'true';
+  } catch {
+    return true;
+  }
+}
+
+export async function saveKeepAwake(keepAwake: boolean): Promise<void> {
+  try {
+    await AsyncStorage.setItem(KEEP_AWAKE_KEY, String(keepAwake));
+  } catch {
+    // A storage failure must not block reading.
+  }
+}

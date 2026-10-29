@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AccessibilityActionInfo } from 'react-native';
-import { Image, PixelRatio, Text, View } from 'react-native';
+import { PixelRatio, Text, View } from 'react-native';
 import {
   GestureDetector,
   useExclusiveGestures,
@@ -15,6 +15,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../storage/readerSettings';
 import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
@@ -46,31 +47,6 @@ type Props = {
 };
 
 type SourceSize = { width: number; height: number };
-
-/**
- * Decode resolution relative to the view. Higher values keep the bitmap sharp
- * when zoomed, at the cost of memory.
- */
-function resizeMultiplierFor(
-  quality: ReaderQuality,
-  scaleMode: ReaderScale,
-  paged: boolean,
-): number {
-  // `original` must not invent pixels: the page is already drawn 1:1.
-  if (scaleMode === 'original') {
-    return 1;
-  }
-
-  switch (quality) {
-    case 'high':
-      return paged ? 2.5 : 2;
-    case 'maximum':
-      return paged ? 3 : 2.5;
-    case 'balanced':
-    default:
-      return paged ? 2 : 1.5;
-  }
-}
 
 /**
  * Page box in points. Paged mode honours the page-fitting preference;
@@ -418,15 +394,17 @@ export function ReaderPage({
               key={attempt}
               source={{ uri }}
               style={{ width: baseWidth, height: baseHeight }}
-              resizeMode={source ? 'stretch' : 'contain'}
-              // `resize` downsamples to the view size and reports the sampled
-              // size back, which would hide the intrinsic size `original` needs.
-              resizeMethod={scaleMode === 'original' ? 'none' : 'resize'}
-              resizeMultiplier={resizeMultiplierFor(quality, scaleMode, paged)}
-              fadeDuration={0}
+              contentFit={source ? 'fill' : 'contain'}
+              cachePolicy="memory-disk"
+              // `original` and the sharper quality tiers decode the full
+              // bitmap; `balanced` downsamples to the view size.
+              allowDownscaling={
+                quality === 'balanced' && scaleMode !== 'original'
+              }
+              transition={150}
               onLoad={(event) => {
                 const { width: sourceWidth, height: sourceHeight } =
-                  event.nativeEvent.source;
+                  event.source;
 
                 if (sourceWidth > 0 && sourceHeight > 0) {
                   setSource({ width: sourceWidth, height: sourceHeight });
