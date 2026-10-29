@@ -1,6 +1,12 @@
+import { useEffect } from 'react';
 import { Feather } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { useColors } from '../theme/colors';
 import { AppPressable } from './AppPressable';
@@ -10,13 +16,25 @@ export function ScreenHeader({
   subtitle,
   onBack,
   action,
+  titleVisible = true,
 }: {
   title: string;
   subtitle?: string;
   onBack: () => void;
   action?: ReactNode;
+  /** Keep false until the content scrolls past its hero title. */
+  titleVisible?: boolean;
 }) {
   const colors = useColors();
+  const titleOpacity = useSharedValue(titleVisible ? 1 : 0);
+
+  useEffect(() => {
+    titleOpacity.value = withTiming(titleVisible ? 1 : 0, { duration: 150 });
+  }, [titleOpacity, titleVisible]);
+
+  const titleStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+  }));
 
   return (
     <View className="flex-row items-center px-2 py-2">
@@ -28,10 +46,14 @@ export function ScreenHeader({
       >
         <Feather name="chevron-left" size={24} color={colors.text} />
       </AppPressable>
-      <View className="ml-1 flex-1">
+      <Animated.View
+        style={titleStyle}
+        className="ml-1 flex-1"
+        importantForAccessibility={titleVisible ? 'auto' : 'no-hide-descendants'}
+      >
         <Text
           numberOfLines={1}
-          className="text-base font-semibold text-zinc-900 dark:text-zinc-100"
+          className="text-base font-semibold text-zinc-900 dark:text-zinc-50"
         >
           {title}
         </Text>
@@ -43,7 +65,7 @@ export function ScreenHeader({
             {subtitle}
           </Text>
         ) : null}
-      </View>
+      </Animated.View>
       {action ? <View className="ml-2">{action}</View> : null}
     </View>
   );

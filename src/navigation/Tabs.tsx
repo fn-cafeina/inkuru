@@ -10,6 +10,7 @@ import DiscoverScreen from '../screens/DiscoverScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { useColors } from '../theme/colors';
+import { CARD } from '../theme/styles';
 import {
   TabBarVisibilityProvider,
   TAB_BAR_HEIGHT,
@@ -102,7 +103,7 @@ function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         transform: [{ translateY }],
       }}
     >
-      <View className="flex-row rounded-xl border border-zinc-200 bg-white p-1.5 dark:border-zinc-800 dark:bg-zinc-900">
+      <View className={`flex-row rounded-xl p-1.5 ${CARD}`}>
         {state.routes.map((route, index) => {
           const focused = state.index === index;
 

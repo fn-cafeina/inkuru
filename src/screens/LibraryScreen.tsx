@@ -1,10 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import {
-  FlatList,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { FlatList, useWindowDimensions, View } from 'react-native';
 import {
   useFocusEffect,
   useNavigation,
@@ -12,8 +7,10 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../components/AppPressable';
+import { Button } from '../components/Button';
+import { EmptyState } from '../components/EmptyState';
 import { MangaGridCard } from '../components/MangaGridCard';
+import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
@@ -22,8 +19,7 @@ import { loadLibrary } from '../storage/library';
 import type { LibraryEntry } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
-
-const CARD_GAP = 12;
+import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
 
 export default function LibraryScreen() {
   const navigation = useNavigation<TabNavigation<'Library'>>();
@@ -34,7 +30,7 @@ export default function LibraryScreen() {
   useScrollToTop(listRef);
   const [entries, setEntries] = useState<LibraryEntry[] | null>(null);
   const [progress, setProgress] = useState<Record<string, ReaderProgress>>({});
-  const cardWidth = Math.floor((width - 32 - CARD_GAP * 2) / 3);
+  const cardWidth = mangaCardWidth(width);
 
   useFocusEffect(
     useCallback(() => {
@@ -70,31 +66,23 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      <View className="px-4 pb-4 pt-3">
-        <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Biblioteca
-        </Text>
-      </View>
+      <PageTitle>Biblioteca</PageTitle>
 
       {!entries ? (
         <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-            Tu biblioteca está vacía
-          </Text>
-          <Text className="mt-2 text-center text-sm text-zinc-500 dark:text-zinc-400">
-            Guarda mangas desde su detalle para tenerlos a mano.
-          </Text>
-          <AppPressable
-            onPress={() => navigation.navigate('Discover')}
-            className="mt-6 min-h-12 items-center justify-center rounded-lg bg-accent-500 px-5"
-          >
-            <Text className="text-sm font-semibold text-white">
+        <EmptyState
+          title="Tu biblioteca está vacía"
+          subtitle="Guarda mangas desde su detalle para tenerlos a mano."
+          action={
+            <Button
+              variant="primary"
+              onPress={() => navigation.navigate('Discover')}
+            >
               Explorar catálogo
-            </Text>
-          </AppPressable>
-        </View>
+            </Button>
+          }
+        />
       ) : (
         <FlatList
           ref={listRef}

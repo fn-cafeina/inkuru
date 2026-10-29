@@ -8,13 +8,21 @@ import {
   Text,
   View,
 } from 'react-native';
-import type { LayoutChangeEvent, ScrollViewInstance } from 'react-native';
+import type {
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollViewInstance,
+} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import { Button } from '../components/Button';
+import { ChapterRow } from '../components/ChapterRow';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { ListDivider } from '../components/ListDivider';
 import { OptionChip } from '../components/OptionChip';
@@ -35,6 +43,7 @@ import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
 import { useColors } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
+import { CARD } from '../theme/styles';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -65,6 +74,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [inLibrary, setInLibrary] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [activeRange, setActiveRange] = useState<number | null>(null);
+  const [barTitleVisible, setBarTitleVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -158,10 +168,19 @@ export default function MangaScreen({ navigation, route }: Props) {
     void saveMangaRange(path, index);
   };
 
+  const onListScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const visible = event.nativeEvent.contentOffset.y > 120;
+
+    if (visible !== barTitleVisible) {
+      setBarTitleVisible(visible);
+    }
+  };
+
   return (
     <Screen>
       <ScreenHeader
         title={data?.title ?? title ?? ''}
+        titleVisible={barTitleVisible}
         onBack={() => navigation.goBack()}
         action={
           <AppPressable
@@ -197,7 +216,8 @@ export default function MangaScreen({ navigation, route }: Props) {
           ItemSeparatorComponent={ListDivider}
           renderItem={({ item }) => (
             <ChapterRow
-              item={item}
+              title={item.title}
+              date={item.date}
               state={chapterState(item.path)}
               onPress={() =>
                 navigation.navigate('Reader', {
@@ -229,15 +249,14 @@ export default function MangaScreen({ navigation, route }: Props) {
           }
           ListFooterComponent={<View style={{ height: insets.bottom + 24 }} />}
           ListEmptyComponent={
-            <View className="px-4 py-6">
-              <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-                Sin capítulos disponibles.
-              </Text>
-            </View>
+            <EmptyState title="Sin capítulos disponibles" />
           }
+          onScroll={onListScroll}
+          scrollEventThrottle={16}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={refresh} />
           }
+          contentContainerStyle={{ flexGrow: 1 }}
           contentContainerClassName="pb-2"
           showsVerticalScrollIndicator={false}
         />
@@ -259,7 +278,7 @@ function TagChip({
   return (
     <View
       onLayout={onLayout}
-      className="rounded-md bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
+      className="rounded-lg bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
     >
       <Text className="text-xs text-zinc-600 dark:text-zinc-300">{label}</Text>
     </View>
@@ -510,7 +529,7 @@ function MangaHeader({
         <View className="ml-4 flex-1">
           <Text
             numberOfLines={3}
-            className="text-xl font-semibold text-zinc-900 dark:text-zinc-100"
+            className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
           >
             {manga.title}
           </Text>
@@ -539,16 +558,15 @@ function MangaHeader({
 
       {readChapter ? (
         <View className="mt-4 px-4">
-          <AppPressable
+          <Button
+            variant="primary"
+            size="lg"
             onPress={() => onRead(readChapter)}
-            className="min-h-14 items-center justify-center rounded-lg bg-accent-500"
           >
-            <Text className="text-sm font-semibold text-white">
-              {resumeChapter
-                ? `Continuar ${resumeChapter.title}`
-                : 'Leer primer capítulo'}
-            </Text>
-          </AppPressable>
+            {resumeChapter
+              ? `Continuar ${resumeChapter.title}`
+              : 'Leer primer capítulo'}
+          </Button>
         </View>
       ) : null}
 
@@ -575,13 +593,15 @@ function MangaHeader({
       {details.length > 0 ? (
         <View>
           <SectionTitle className="mb-2 mt-6 px-4">Detalles</SectionTitle>
-          <View className="mx-4 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          <View
+            className={`mx-4 overflow-hidden rounded-xl ${CARD}`}
+          >
             {details.map((fact, index) => (
               <View
                 key={fact.label}
                 className={
                   index > 0
-                    ? 'flex-row border-t border-zinc-100 px-3 py-2.5 dark:border-zinc-800'
+                    ? 'flex-row border-t border-zinc-200 px-3 py-2.5 dark:border-zinc-800'
                     : 'flex-row px-3 py-2.5'
                 }
               >
@@ -728,46 +748,5 @@ function MangaSkeleton() {
         </View>
       ))}
     </View>
-  );
-}
-
-const CHAPTER_TITLE_CLASS: Record<ChapterState | 'unread', string> = {
-  current: 'flex-1 text-sm font-semibold text-accent-500',
-  read: 'flex-1 text-sm text-zinc-400 line-through dark:text-zinc-500',
-  unread: 'flex-1 text-sm text-zinc-900 dark:text-zinc-100',
-};
-
-function ChapterRow({
-  item,
-  state,
-  onPress,
-}: {
-  item: MangaChapter;
-  state?: ChapterState;
-  onPress: () => void;
-}) {
-  return (
-    <AppPressable
-      accessibilityRole="button"
-      accessibilityLabel={
-        state === 'current' ? `${item.title}, leyendo` : item.title
-      }
-      onPress={onPress}
-      className={`min-h-14 flex-row items-center border-l-2 px-4 py-3 ${
-        state === 'current' ? 'border-accent-500' : 'border-transparent'
-      }`}
-    >
-      <Text
-        numberOfLines={1}
-        className={CHAPTER_TITLE_CLASS[state ?? 'unread']}
-      >
-        {item.title}
-      </Text>
-      {item.date ? (
-        <Text className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-          {item.date}
-        </Text>
-      ) : null}
-    </AppPressable>
   );
 }

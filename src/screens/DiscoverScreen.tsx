@@ -12,8 +12,10 @@ import { useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { MangaGridCard } from '../components/MangaGridCard';
+import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
@@ -22,8 +24,8 @@ import type { TabNavigation } from '../navigation/types';
 import { fetchCatalog, fetchSearch } from '../source/leercapitulo';
 import type { CatalogPage, MangaListItem } from '../source/leercapitulo';
 import { useColors } from '../theme/colors';
-
-const CARD_GAP = 12;
+import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
+import { CARD, OUTLINE_CONTROL } from '../theme/styles';
 
 export default function DiscoverScreen() {
   const colors = useColors();
@@ -43,11 +45,9 @@ export default function DiscoverScreen() {
 
   return (
     <Screen>
-      <View className="px-4 pb-3 pt-3">
-        <Text className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Explorar
-        </Text>
-        <View className="mt-3 min-h-12 flex-row items-center rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <PageTitle>Explorar</PageTitle>
+      <View className="px-4">
+        <View className={`min-h-12 flex-row items-center rounded-lg ${CARD}`}>
           <TextInput
             value={input}
             onChangeText={setInput}
@@ -119,7 +119,7 @@ function DiscoverResults({ term }: { term: string }) {
   const appliedPage = useRef(data ? page : 0);
   const pendingPage = useRef<number | null>(null);
   const colors = useColors();
-  const cardWidth = Math.floor((width - 32 - CARD_GAP * 2) / 3);
+  const cardWidth = mangaCardWidth(width);
 
   // Mirroring fetched pages into the accumulated list is the external-system
   // sync this effect exists for; the set-state-in-effect heuristic cannot tell
@@ -205,14 +205,10 @@ function DiscoverResults({ term }: { term: string }) {
 
   if (items.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-          Sin resultados.
-        </Text>
-        <Text className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400">
-          Prueba con otro título o revisa la ortografía.
-        </Text>
-      </View>
+      <EmptyState
+        title="Sin resultados"
+        subtitle="Prueba con otro título o revisa la ortografía."
+      />
     );
   }
 
@@ -251,7 +247,7 @@ function DiscoverResults({ term }: { term: string }) {
             <AppPressable
               accessibilityLabel="No se pudo cargar más. Reintentar"
               onPress={reload}
-              className="min-h-12 flex-row items-center justify-center rounded-lg border border-zinc-200 px-4 dark:border-zinc-800"
+              className={`min-h-12 flex-row items-center justify-center rounded-lg px-4 ${OUTLINE_CONTROL}`}
             >
               <Feather name="refresh-cw" size={16} color={colors.textMuted} />
               <Text className="ml-2 text-sm text-zinc-700 dark:text-zinc-300">

@@ -1,15 +1,18 @@
 import { useCallback, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { OptionChip } from '../components/OptionChip';
+import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { SectionTitle } from '../components/SectionTitle';
-import { TAB_BAR_SPACE } from '../navigation/tabBar';
+import { Skeleton } from '../components/Skeleton';
+import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import { useColors } from '../theme/colors';
+import { CARD } from '../theme/styles';
 import {
   DEFAULT_READER_MODE,
   DEFAULT_READER_QUALITY,
@@ -17,9 +20,11 @@ import {
   READER_MODE_OPTIONS,
   READER_QUALITY_OPTIONS,
   READER_SCALE_OPTIONS,
+  loadKeepAwake,
   loadReaderMode,
   loadReaderQuality,
   loadReaderScale,
+  saveKeepAwake,
   saveReaderMode,
   saveReaderQuality,
   saveReaderScale,
@@ -34,9 +39,11 @@ type FeatherName = ComponentProps<typeof Feather>['name'];
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const { onScroll } = useTabBarVisibility();
   const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
   const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
   const [quality, setQuality] = useState<ReaderQuality>(DEFAULT_READER_QUALITY);
+  const [keepAwake, setKeepAwake] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
   useFocusEffect(
@@ -47,11 +54,13 @@ export default function SettingsScreen() {
         loadReaderMode(),
         loadReaderScale(),
         loadReaderQuality(),
-      ]).then(([storedMode, storedScale, storedQuality]) => {
+        loadKeepAwake(),
+      ]).then(([storedMode, storedScale, storedQuality, storedKeepAwake]) => {
         if (active) {
           setMode(storedMode ?? DEFAULT_READER_MODE);
           setScale(storedScale ?? DEFAULT_READER_SCALE);
           setQuality(storedQuality ?? DEFAULT_READER_QUALITY);
+          setKeepAwake(storedKeepAwake);
           setLoaded(true);
         }
       });
@@ -77,21 +86,23 @@ export default function SettingsScreen() {
     void saveReaderQuality(next);
   };
 
+  const selectKeepAwake = (next: boolean) => {
+    setKeepAwake(next);
+    void saveKeepAwake(next);
+  };
+
   return (
     <Screen>
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           paddingBottom: insets.bottom + TAB_BAR_SPACE,
         }}
       >
-        <Text
-          accessibilityRole="header"
-          className="px-4 pt-4 text-2xl font-semibold text-zinc-900 dark:text-zinc-50"
-        >
-          Ajustes
-        </Text>
+        <PageTitle>Ajustes</PageTitle>
 
         {loaded ? (
           <>
@@ -136,10 +147,38 @@ export default function SettingsScreen() {
                 />
               ))}
             </SettingsGroup>
+
+            <SettingsGroup icon="smartphone" title="Pantalla despierta">
+              <OptionChip
+                label="Sí"
+                selected={keepAwake}
+                onPress={() => selectKeepAwake(true)}
+              />
+              <OptionChip
+                label="No"
+                selected={!keepAwake}
+                onPress={() => selectKeepAwake(false)}
+              />
+            </SettingsGroup>
           </>
-        ) : null}
+        ) : (
+          <SettingsSkeleton />
+        )}
       </ScrollView>
     </Screen>
+  );
+}
+
+function SettingsSkeleton() {
+  return (
+    <View>
+      {[0, 1, 2].map((index) => (
+        <View key={index} className="mt-6 px-4">
+          <Skeleton className="h-4 w-32 rounded" />
+          <Skeleton className="mt-2 h-24 rounded-xl" />
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -162,7 +201,7 @@ function SettingsGroup({
       </View>
       <View
         accessibilityRole="radiogroup"
-        className="mt-2 flex-row flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+        className={`mt-2 flex-row flex-wrap gap-2 rounded-xl p-3 ${CARD}`}
       >
         {children}
       </View>
