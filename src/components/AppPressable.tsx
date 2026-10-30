@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 
 import { useColors } from '../theme/colors';
 
@@ -8,7 +8,7 @@ type Props = ComponentProps<typeof Pressable> & {
   pressFeedback?: boolean;
 };
 
-/** Pressable whose pressed tint follows its rounded shape. */
+/** Pressable whose ripple follows its rounded shape. */
 export function AppPressable({
   accessibilityRole = 'button',
   pressFeedback = true,
@@ -17,17 +17,22 @@ export function AppPressable({
   ...rest
 }: Props) {
   const colors = useColors();
+  const ripple =
+    pressFeedback && Platform.OS === 'android'
+      ? { color: colors.ripple }
+      : undefined;
 
   return (
     <Pressable
       accessibilityRole={accessibilityRole}
+      android_ripple={ripple}
       className={`overflow-hidden ${className ?? ''}`}
       {...rest}
     >
       {({ pressed }) => (
         <>
           {typeof children === 'function' ? children({ pressed }) : children}
-          {pressFeedback && pressed ? (
+          {pressFeedback && Platform.OS !== 'android' && pressed ? (
             <View
               pointerEvents="none"
               className="absolute inset-0"
