@@ -19,32 +19,32 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../components/AppPressable';
-import { Button } from '../components/Button';
-import { ChapterRow } from '../components/ChapterRow';
-import { EmptyState } from '../components/EmptyState';
-import { ErrorState } from '../components/ErrorState';
-import { ListDivider } from '../components/ListDivider';
-import { OptionChip } from '../components/OptionChip';
-import { Screen } from '../components/Screen';
-import { ScreenHeader } from '../components/ScreenHeader';
-import { SectionTitle } from '../components/SectionTitle';
-import { Skeleton } from '../components/Skeleton';
-import { useRemoteData } from '../hooks/useRemoteData';
-import { addToLibrary, isInLibrary, removeFromLibrary } from '../storage/library';
+import { AppPressable } from '../../components/AppPressable';
+import { Button } from '../../components/Button';
+import { ChapterRow } from '../../components/ChapterRow';
+import { EmptyState } from '../../components/EmptyState';
+import { ErrorState } from '../../components/ErrorState';
+import { ListDivider } from '../../components/ListDivider';
+import { OptionChip } from '../../components/OptionChip';
+import { Screen } from '../../components/Screen';
+import { ScreenHeader } from '../../components/ScreenHeader';
+import { SectionTitle } from '../../components/SectionTitle';
+import { Skeleton } from '../../components/Skeleton';
+import { useRemoteData } from '../../hooks/useRemoteData';
+import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
 import {
   loadMangaRange,
   loadMangaSort,
   saveMangaRange,
   saveMangaSort,
-} from '../storage/mangaSettings';
-import { loadProgress, loadReadChapters } from '../storage/readerProgress';
-import type { ReaderProgress } from '../storage/readerProgress';
-import { fetchManga } from '../source/leercapitulo';
-import { useColors } from '../theme/colors';
-import { COVER_ASPECT_RATIO } from '../theme/layout';
-import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../storage/mangaSettings';
+import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
+import type { ReaderProgress } from '../../storage/readerProgress';
+import { fetchManga } from '../../source/leercapitulo';
+import { useColors } from '../../theme/colors';
+import { COVER_ASPECT_RATIO } from '../../theme/layout';
+import type { MangaChapter, MangaDetail } from '../../source/leercapitulo';
+import type { RootStackParamList } from '../../navigation/types';
 
 const FACT_VALUES: Record<string, string> = {
   Ongoing: 'En emisión',
