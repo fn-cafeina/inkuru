@@ -277,6 +277,7 @@ export function ReaderPage({
   const doubleTap = useTapGesture({
     numberOfTaps: 2,
     maxDelay: 250,
+    maxDistance: 12,
     onDeactivate: (event) => {
       if (event.canceled) {
         return;
@@ -331,6 +332,7 @@ export function ReaderPage({
   const singleTap = useTapGesture({
     numberOfTaps: 1,
     maxDelay: 250,
+    maxDistance: 12,
     onDeactivate: (event) => {
       if (!event.canceled) {
         runOnJS(onTap)(event.x);
