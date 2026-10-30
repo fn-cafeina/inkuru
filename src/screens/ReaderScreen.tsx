@@ -17,6 +17,7 @@ import {
   activateKeepAwakeAsync,
   deactivateKeepAwake,
 } from 'expo-keep-awake';
+import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -118,7 +119,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
     void saveReaderQuality(next);
   };
   const colors = useColors();
-  const toggleChrome = () => setChromeVisible((visible) => !visible);
+  const hideChrome = useCallback(() => setChromeVisible(false), []);
+  const toggleChrome = useCallback(
+    () => setChromeVisible((visible) => !visible),
+    [],
+  );
   const openChapter = (chapter: MangaChapter) => {
     setPickerOpen(false);
 
@@ -228,6 +233,21 @@ export default function ReaderScreen({ navigation, route }: Props) {
     };
   }, [keepAwake]);
 
+  // True immersive: hiding both bars resizes the window. Sync the visibility
+  // with the chrome (with a grace period so taps don't fight the timer) and
+  // hide the chrome again when the user goes back to reading.
+  useEffect(() => {
+    NavigationBar.setHidden(!chromeVisible);
+
+    if (chromeVisible) {
+      const timer = setTimeout(hideChrome, 3000);
+
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [chromeVisible, hideChrome]);
+
   // Warm the adjacent pages so swipes do not wait on the network.
   useEffect(() => {
     if (!data) {
@@ -244,7 +264,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   return (
     // The reader owns the top inset so pages reach the status bar when the chrome is hidden.
     <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
-      <StatusBar hidden={!chromeVisible} />
+      <StatusBar hidden={!chromeVisible} hideTransitionAnimation="fade" />
       <View className="flex-1">
         {loading && !data ? (
           <ReaderSkeleton height={windowHeight} />
@@ -265,6 +285,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
               title={title}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
+              onReadActivity={hideChrome}
               onOpenNext={openChapter}
               onOpenPrev={openChapter}
               onOpenPicker={() => setPickerOpen(true)}
@@ -578,6 +599,7 @@ function ReaderPages({
   title,
   onPageChange,
   onToggleChrome,
+  onReadActivity,
   onOpenNext,
   onOpenPrev,
   onOpenPicker,
@@ -592,6 +614,7 @@ function ReaderPages({
   title: string;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
+  onReadActivity: () => void;
   onOpenNext: (chapter: MangaChapter) => void;
   onOpenPrev: (chapter: MangaChapter) => void;
   onOpenPicker: () => void;
@@ -621,6 +644,7 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
+      onReadActivity={onReadActivity}
       footer={footer}
     />
   ) : (
@@ -634,6 +658,7 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
+      onReadActivity={onReadActivity}
       footer={footer}
     />
   );
@@ -648,6 +673,7 @@ function VerticalPages({
   initialPage,
   onPageChange,
   onToggleChrome,
+  onReadActivity,
   footer,
 }: {
   pages: string[];
@@ -658,6 +684,7 @@ function VerticalPages({
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
+  onReadActivity: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
@@ -717,6 +744,7 @@ function VerticalPages({
       ref={listRef}
       data={pages}
       keyExtractor={(item) => item}
+      onScrollBeginDrag={onReadActivity}
       renderItem={({ item, index }) => (
         <ReaderPage
           uri={item}
@@ -762,6 +790,7 @@ function PagedPages({
   initialPage,
   onPageChange,
   onToggleChrome,
+  onReadActivity,
   footer,
 }: {
   pages: string[];
@@ -773,6 +802,7 @@ function PagedPages({
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
+  onReadActivity: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
@@ -808,6 +838,7 @@ function PagedPages({
     if (index < 0 || index >= pages.length) {
       return;
     }
+    onReadActivity();
     listRef.current?.scrollToIndex({ index, animated: true });
   };
 
