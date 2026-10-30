@@ -10,7 +10,7 @@ export function SectionTitle({
   return (
     <Text
       accessibilityRole="header"
-      className={`text-sm font-medium text-zinc-900 dark:text-zinc-100 ${className ?? ''}`}
+      className={`text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 ${className ?? ''}`}
     >
       {children}
     </Text>

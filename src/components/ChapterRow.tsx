@@ -11,8 +11,8 @@ export const CHAPTER_ROW_HEIGHT = 56;
 export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 
 const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
-  current: 'flex-1 text-sm font-semibold text-accent-500',
-  selected: 'flex-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100',
+  current: 'flex-1 text-sm font-semibold',
+  selected: 'flex-1 text-sm font-semibold',
   read: 'flex-1 text-sm text-zinc-400 line-through dark:text-zinc-500',
   none: 'flex-1 text-sm text-zinc-900 dark:text-zinc-100',
 };
@@ -29,20 +29,22 @@ export function ChapterRow({
   onPress: () => void;
 }) {
   const colors = useColors();
+  const highlighted = state === 'current' || state === 'selected';
 
   return (
     <AppPressable
       accessibilityRole="button"
       accessibilityLabel={state === 'current' ? `${title}, leyendo` : title}
-      accessibilityState={{
-        selected: state === 'current' || state === 'selected',
-      }}
+      accessibilityState={{ selected: highlighted }}
       onPress={onPress}
-      className={`min-h-14 flex-row items-center border-l-2 px-4 py-3 ${
-        state === 'current' ? 'border-accent-500' : 'border-transparent'
-      }`}
+      style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
+      className="min-h-14 flex-row items-center px-4 py-3"
     >
-      <Text numberOfLines={1} className={TITLE_CLASS[state ?? 'none']}>
+      <Text
+        numberOfLines={1}
+        className={TITLE_CLASS[state ?? 'none']}
+        style={highlighted ? { color: colors.onAccentContainer } : undefined}
+      >
         {title}
       </Text>
       {date ? (
