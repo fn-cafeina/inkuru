@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../components/AppPressable';
 import { EmptyState } from '../components/EmptyState';
@@ -19,7 +18,6 @@ import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
-import { TAB_BAR_SPACE, useTabBarVisibility } from '../navigation/tabBar';
 import type { TabNavigation } from '../navigation/types';
 import { fetchCatalog, fetchSearch } from '../source/leercapitulo';
 import type { CatalogPage, MangaListItem } from '../source/leercapitulo';
@@ -94,8 +92,6 @@ function mergeItems(current: MangaListItem[], next: MangaListItem[]) {
 
 function DiscoverResults({ term }: { term: string }) {
   const navigation = useNavigation<TabNavigation<'Discover'>>();
-  const insets = useSafeAreaInsets();
-  const { onScroll } = useTabBarVisibility();
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(1);
   const listRef = useRef<FlatList<MangaListItem>>(null);
@@ -229,20 +225,13 @@ function DiscoverResults({ term }: { term: string }) {
           onPress={() => openManga(item)}
         />
       )}
-      onScroll={onScroll}
-      scrollEventThrottle={16}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
       ListFooterComponent={
-        <View
-          style={{
-            paddingTop: 16,
-            paddingBottom: insets.bottom + TAB_BAR_SPACE,
-          }}
-        >
+        <View className="py-4">
           {hasError ? (
             <AppPressable
               accessibilityLabel="No se pudo cargar más. Reintentar"
