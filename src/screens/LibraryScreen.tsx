@@ -68,8 +68,8 @@ export default function LibraryScreen() {
         <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
         <EmptyState
-          title="Tu biblioteca está vacía"
-          subtitle="Guarda mangas desde su detalle para tenerlos a mano."
+          title="Biblioteca vacía"
+          subtitle="Guarda un manga para retomarlo aquí."
           action={
             <Button
               variant="primary"

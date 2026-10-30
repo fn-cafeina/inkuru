@@ -23,12 +23,12 @@ export function MangaGridCard({
       accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
       onPress={onPress}
       style={{ width }}
-      className="mb-4 rounded-lg p-1"
+      className="mb-4 rounded-xl p-1"
     >
       <Image
         source={{ uri: cover }}
         style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
-        className="rounded-lg bg-zinc-200 dark:bg-zinc-800"
+        className="rounded-xl bg-zinc-200 dark:bg-zinc-800"
         resizeMode="cover"
         accessible={false}
       />

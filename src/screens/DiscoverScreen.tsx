@@ -23,7 +23,6 @@ import { fetchCatalog, fetchSearch } from '../source/leercapitulo';
 import type { CatalogPage, MangaListItem } from '../source/leercapitulo';
 import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
-import { CARD, OUTLINE_CONTROL } from '../theme/styles';
 
 export default function DiscoverScreen() {
   const colors = useColors();
@@ -44,8 +43,11 @@ export default function DiscoverScreen() {
   return (
     <Screen>
       <PageTitle>Explorar</PageTitle>
-      <View className="px-4">
-        <View className={`min-h-12 flex-row items-center rounded-lg ${CARD}`}>
+      <View className="px-4 pb-3">
+        <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-zinc-900">
+          <View className="pl-3 pr-1">
+            <Feather name="search" size={18} color={colors.iconInactive} />
+          </View>
           <TextInput
             value={input}
             onChangeText={setInput}
@@ -54,16 +56,16 @@ export default function DiscoverScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
-            placeholder="Buscar manga..."
+            placeholder="Buscar manga"
             placeholderTextColor={colors.iconInactive}
-            className="min-h-12 flex-1 px-3 text-sm text-zinc-900 dark:text-zinc-100"
+            className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
           />
           {input ? (
             <AppPressable
               accessibilityLabel="Limpiar búsqueda"
               onPress={clear}
               hitSlop={8}
-              className="min-h-12 items-center justify-center rounded-lg px-3"
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
               <Feather name="x" size={16} color={colors.iconInactive} />
             </AppPressable>
@@ -203,7 +205,7 @@ function DiscoverResults({ term }: { term: string }) {
     return (
       <EmptyState
         title="Sin resultados"
-        subtitle="Prueba con otro título o revisa la ortografía."
+        subtitle="Prueba con otro título."
       />
     );
   }
@@ -236,7 +238,7 @@ function DiscoverResults({ term }: { term: string }) {
             <AppPressable
               accessibilityLabel="No se pudo cargar más. Reintentar"
               onPress={reload}
-              className={`min-h-12 flex-row items-center justify-center rounded-lg px-4 ${OUTLINE_CONTROL}`}
+              className="min-h-12 flex-row items-center justify-center rounded-full border border-zinc-200 px-4 dark:border-zinc-800"
             >
               <Feather name="refresh-cw" size={16} color={colors.textMuted} />
               <Text className="ml-2 text-sm text-zinc-700 dark:text-zinc-300">
