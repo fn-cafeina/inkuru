@@ -789,8 +789,8 @@ function VerticalPages({
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       initialNumToRender={2}
-      maxToRenderPerBatch={2}
-      windowSize={3}
+      maxToRenderPerBatch={3}
+      windowSize={5}
     />
   );
 }
@@ -934,12 +934,13 @@ function PagedPages({
         </View>
       }
       scrollEnabled={!zoomed}
+      removeClippedSubviews={false}
       showsHorizontalScrollIndicator={false}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       initialNumToRender={1}
-      maxToRenderPerBatch={2}
-      windowSize={3}
+      maxToRenderPerBatch={3}
+      windowSize={5}
     />
   );
 }

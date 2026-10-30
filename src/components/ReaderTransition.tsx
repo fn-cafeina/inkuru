@@ -32,7 +32,7 @@ export function ReaderTransition({
     <Animated.View
       entering={FadeInDown.duration(250)}
       style={{ width, height, paddingBottom: bottomInset + 24 }}
-      className="items-center justify-center bg-zinc-50 px-6 dark:bg-zinc-950"
+      className="items-center justify-center bg-zinc-950 px-6 dark:bg-zinc-950"
     >
       <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
         Fin del capítulo
