@@ -19,6 +19,18 @@ const FACT_VALUES: Record<string, string> = {
   Hiatus: 'En pausa',
 };
 
+type Props = {
+  manga: MangaDetail;
+  readCount: number;
+  resumeChapter?: MangaChapter;
+  sortOrder: 'asc' | 'desc';
+  ranges: ChapterRange[];
+  activeRange: number;
+  onSelectRange: (index: number) => void;
+  onToggleSort: () => void;
+  onRead: (chapter: MangaChapter) => void;
+};
+
 export function MangaHeader({
   manga,
   readCount,
@@ -29,79 +41,24 @@ export function MangaHeader({
   onSelectRange,
   onToggleSort,
   onRead,
-}: {
-  manga: MangaDetail;
-  readCount: number;
-  resumeChapter?: MangaChapter;
-  sortOrder: 'asc' | 'desc';
-  ranges: ChapterRange[];
-  activeRange: number;
-  onSelectRange: (index: number) => void;
-  onToggleSort: () => void;
-  onRead: (chapter: MangaChapter) => void;
-}) {
+}: Props) {
   const chipRowRef = useRef<ScrollViewInstance>(null);
   const factValue = (label: string) => {
     const value = manga.facts.find((fact) => fact.label === label)?.value;
 
     return value ? FACT_VALUES[value] ?? value : undefined;
   };
-  const status = factValue('Estado');
-  const author = factValue('Autor');
-  const updated = factValue('Actualizado');
-  const progressPercent =
-    manga.chapters.length > 0
-      ? Math.min(100, Math.round((readCount / manga.chapters.length) * 100))
-      : 0;
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
-  const [expanded, setExpanded] = useState(false);
-  // shortcut: length heuristic, measure the rendered lines if the synopsis copy changes.
-  const longSynopsis = manga.synopsis.length > 280;
 
   return (
     <View>
-      <View className="flex-row px-4">
-        <View
-          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
-          style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
-        >
-          <Image
-            source={{ uri: manga.cover }}
-            className="h-full w-full"
-            resizeMode="cover"
-            accessible={false}
-          />
-        </View>
-        <View className="ml-4 flex-1">
-          <Text
-            numberOfLines={3}
-            className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
-          >
-            {manga.title}
-          </Text>
-          {status ? (
-            <View className="mt-2 self-start rounded-full bg-accent-500 px-2.5 py-1">
-              <Text className="text-xs font-semibold uppercase text-white">
-                {status}
-              </Text>
-            </View>
-          ) : null}
-          {author ? (
-            <Text
-              numberOfLines={2}
-              className="mt-2 text-sm text-zinc-700 dark:text-zinc-300"
-            >
-              {author}
-            </Text>
-          ) : null}
-          {updated ? (
-            <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {`Actualizado ${updated}`}
-            </Text>
-          ) : null}
-        </View>
-      </View>
+      <MangaCoverInfo
+        manga={manga}
+        status={factValue('Estado')}
+        author={factValue('Autor')}
+        updated={factValue('Actualizado')}
+      />
 
       {readChapter ? (
         <View className="mt-4 px-4">
@@ -118,17 +75,7 @@ export function MangaHeader({
       ) : null}
 
       {readCount > 0 ? (
-        <View className="mt-3 px-4">
-          <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-            <View
-              className="h-full rounded-full bg-accent-500"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </View>
-          <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-            {`${readCount}/${manga.chapters.length} capítulos leídos · ${progressPercent}%`}
-          </Text>
-        </View>
+        <MangaProgress readCount={readCount} total={manga.chapters.length} />
       ) : null}
 
       {manga.tags.length > 0 ? (
@@ -137,28 +84,7 @@ export function MangaHeader({
         </View>
       ) : null}
 
-      {manga.synopsis ? (
-        <View>
-          <SectionTitle className="mb-3 mt-6 px-4">Sinopsis</SectionTitle>
-          <Text
-            numberOfLines={!expanded && longSynopsis ? 6 : undefined}
-            className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
-          >
-            {manga.synopsis}
-          </Text>
-          {longSynopsis ? (
-            <AppPressable
-              accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
-              onPress={() => setExpanded((value) => !value)}
-              className="mt-1 min-h-12 justify-center px-4 self-start"
-            >
-              <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                {expanded ? 'Ver menos' : 'Ver más'}
-              </Text>
-            </AppPressable>
-          ) : null}
-        </View>
-      ) : null}
+      {manga.synopsis ? <MangaSynopsis synopsis={manga.synopsis} /> : null}
 
       <View className="mt-6 px-4">
         {ranges.length > 1 ? (
@@ -213,6 +139,116 @@ export function MangaHeader({
           </View>
         </View>
       </View>
+    </View>
+  );
+}
+
+function MangaCoverInfo({
+  manga,
+  status,
+  author,
+  updated,
+}: {
+  manga: MangaDetail;
+  status?: string;
+  author?: string;
+  updated?: string;
+}) {
+  return (
+    <View className="flex-row px-4">
+      <View
+        className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
+        style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
+      >
+        <Image
+          source={{ uri: manga.cover }}
+          className="h-full w-full"
+          resizeMode="cover"
+          accessible={false}
+        />
+      </View>
+      <View className="ml-4 flex-1">
+        <Text
+          numberOfLines={3}
+          className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
+        >
+          {manga.title}
+        </Text>
+        {status ? (
+          <View className="mt-2 self-start rounded-full bg-accent-500 px-2.5 py-1">
+            <Text className="text-xs font-semibold uppercase text-white">
+              {status}
+            </Text>
+          </View>
+        ) : null}
+        {author ? (
+          <Text
+            numberOfLines={2}
+            className="mt-2 text-sm text-zinc-700 dark:text-zinc-300"
+          >
+            {author}
+          </Text>
+        ) : null}
+        {updated ? (
+          <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            {`Actualizado ${updated}`}
+          </Text>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function MangaProgress({
+  readCount,
+  total,
+}: {
+  readCount: number;
+  total: number;
+}) {
+  const progressPercent =
+    total > 0 ? Math.min(100, Math.round((readCount / total) * 100)) : 0;
+
+  return (
+    <View className="mt-3 px-4">
+      <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+        <View
+          className="h-full rounded-full bg-accent-500"
+          style={{ width: `${progressPercent}%` }}
+        />
+      </View>
+      <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+        {`${readCount}/${total} capítulos leídos · ${progressPercent}%`}
+      </Text>
+    </View>
+  );
+}
+
+function MangaSynopsis({ synopsis }: { synopsis: string }) {
+  const [expanded, setExpanded] = useState(false);
+  // shortcut: length heuristic, measure the rendered lines if the synopsis copy changes.
+  const longSynopsis = synopsis.length > 280;
+
+  return (
+    <View>
+      <SectionTitle className="mb-3 mt-6 px-4">Sinopsis</SectionTitle>
+      <Text
+        numberOfLines={!expanded && longSynopsis ? 6 : undefined}
+        className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
+      >
+        {synopsis}
+      </Text>
+      {longSynopsis ? (
+        <AppPressable
+          accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
+          onPress={() => setExpanded((value) => !value)}
+          className="mt-1 min-h-12 justify-center px-4 self-start"
+        >
+          <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+            {expanded ? 'Ver menos' : 'Ver más'}
+          </Text>
+        </AppPressable>
+      ) : null}
     </View>
   );
 }

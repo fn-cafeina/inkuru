@@ -7,6 +7,20 @@ export type ChapterRange = {
   chapters: MangaChapter[];
 };
 
+export type ChapterState = 'current' | 'read';
+
+export function getChapterState(
+  chapterPath: string,
+  currentPath: string | undefined,
+  readChapters: ReadonlySet<string>,
+): ChapterState | undefined {
+  if (chapterPath === currentPath) {
+    return 'current';
+  }
+
+  return readChapters.has(chapterPath) ? 'read' : undefined;
+}
+
 export function chunkChapters(chapters: MangaChapter[]): ChapterRange[] {
   const ranges: ChapterRange[] = [];
 
