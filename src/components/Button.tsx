@@ -5,20 +5,12 @@ import { useColors } from '../theme/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'lg';
+type Tone = 'auto' | 'dark';
 
-const VARIANTS: Record<Variant, { container: string; label: string }> = {
-  primary: {
-    container: 'bg-accent-500',
-    label: 'text-sm font-semibold',
-  },
-  secondary: {
-    container: 'border border-zinc-200 dark:border-zinc-800',
-    label: 'text-sm font-medium text-zinc-700 dark:text-zinc-300',
-  },
-  ghost: {
-    container: '',
-    label: 'text-sm font-medium text-zinc-500 dark:text-zinc-400',
-  },
+const LABELS: Record<Variant, string> = {
+  primary: 'text-sm font-semibold',
+  secondary: 'text-sm font-medium',
+  ghost: 'text-sm font-medium',
 };
 
 const SIZES: Record<Size, string> = {
@@ -29,26 +21,44 @@ const SIZES: Record<Size, string> = {
 export function Button({
   variant = 'primary',
   size = 'sm',
+  tone = 'auto',
   onPress,
   children,
 }: {
   variant?: Variant;
   size?: Size;
+  tone?: Tone;
   onPress: () => void;
   children: string;
 }) {
   const colors = useColors();
-  const styles = VARIANTS[variant];
+  const onDark = tone === 'dark';
+  const textColor =
+    variant === 'primary'
+      ? colors.onAccent
+      : onDark
+        ? variant === 'secondary'
+          ? '#e4e4e7'
+          : '#a1a1aa'
+        : variant === 'secondary'
+          ? colors.text
+          : colors.textMuted;
+  const containerStyle =
+    variant === 'primary'
+      ? { backgroundColor: colors.accent }
+      : variant === 'secondary'
+        ? { borderColor: onDark ? '#3f3f46' : colors.border }
+        : undefined;
 
   return (
     <AppPressable
       onPress={onPress}
-      className={`items-center justify-center rounded-lg ${styles.container} ${SIZES[size]}`}
+      style={containerStyle}
+      className={`items-center justify-center rounded-full ${
+        variant === 'secondary' ? 'border' : ''
+      } ${SIZES[size]}`}
     >
-      <Text
-        className={styles.label}
-        style={variant === 'primary' ? { color: colors.onAccent } : undefined}
-      >
+      <Text className={LABELS[variant]} style={{ color: textColor }}>
         {children}
       </Text>
     </AppPressable>

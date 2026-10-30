@@ -1,6 +1,7 @@
 import { Text } from 'react-native';
 
 import { AppPressable } from './AppPressable';
+import { useColors } from '../theme/colors';
 
 export function OptionChip({
   label,
@@ -11,24 +12,24 @@ export function OptionChip({
   selected: boolean;
   onPress: () => void;
 }) {
+  const colors = useColors();
+
   return (
     <AppPressable
       accessibilityRole="radio"
       accessibilityLabel={label}
       accessibilityState={{ selected }}
       onPress={onPress}
-      className={
+      style={
         selected
-          ? 'min-h-12 items-center justify-center rounded-lg border border-transparent bg-accent-500 px-3'
-          : 'min-h-12 items-center justify-center rounded-lg border border-zinc-200 px-3 dark:border-zinc-800'
+          ? { backgroundColor: colors.accentContainer, borderColor: 'transparent' }
+          : { borderColor: colors.border }
       }
+      className="min-h-10 items-center justify-center rounded-full border px-3.5"
     >
       <Text
-        className={
-          selected
-            ? 'text-sm font-semibold text-white'
-            : 'text-sm text-zinc-700 dark:text-zinc-300'
-        }
+        className={selected ? 'text-sm font-semibold' : 'text-sm'}
+        style={{ color: selected ? colors.onAccentContainer : colors.text }}
       >
         {label}
       </Text>
