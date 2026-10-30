@@ -2,6 +2,7 @@ import { View } from 'react-native';
 
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
+import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 
 export function MangaSkeleton() {
   return (
@@ -9,7 +10,7 @@ export function MangaSkeleton() {
       <View className="flex-row px-4">
         <Skeleton
           className="rounded-xl"
-          style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
+          style={{ width: MANGA_COVER_WIDTH, aspectRatio: COVER_ASPECT_RATIO }}
         />
         <View className="ml-4 flex-1">
           <Skeleton className="h-6 w-3/4 rounded" />

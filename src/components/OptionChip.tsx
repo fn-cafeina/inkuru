@@ -7,18 +7,21 @@ export function OptionChip({
   label,
   selected,
   onPress,
+  accessibilityLabel,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  accessibilityLabel?: string;
 }) {
   const colors = useColors();
 
   return (
     <AppPressable
       accessibilityRole="radio"
-      accessibilityLabel={label}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected }}
+      hitSlop={4}
       onPress={onPress}
       style={
         selected

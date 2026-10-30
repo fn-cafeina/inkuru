@@ -22,10 +22,11 @@ export function ChoiceRow({
       accessibilityLabel={label}
       accessibilityState={{ selected }}
       onPress={onPress}
-      className={`min-h-14 flex-row items-center px-4 ${
-        divider ? 'border-t border-zinc-200 dark:border-zinc-800' : ''
-      }`}
+      className="min-h-14 flex-row items-center px-4"
     >
+      {divider ? (
+        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-zinc-800" />
+      ) : null}
       <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
         {label}
       </Text>

@@ -8,6 +8,7 @@ import { OptionChip } from '../../../components/OptionChip';
 import { SectionTitle } from '../../../components/SectionTitle';
 import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
+import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
 import { TagRow } from './TagRow';
@@ -161,7 +162,7 @@ function MangaCoverInfo({
     <View className="flex-row px-4">
       <View
         className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
-        style={{ width: 144, aspectRatio: COVER_ASPECT_RATIO }}
+        style={{ width: MANGA_COVER_WIDTH, aspectRatio: COVER_ASPECT_RATIO }}
       >
         <Image
           source={{ uri: manga.cover }}
@@ -220,7 +221,7 @@ function MangaProgress({
     total > 0 ? Math.min(100, Math.round((readCount / total) * 100)) : 0;
 
   return (
-    <View className="mt-3 px-4">
+    <View className="mt-4 px-4">
       <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
         <View
           className="h-full rounded-full"

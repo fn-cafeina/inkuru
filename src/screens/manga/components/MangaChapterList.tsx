@@ -90,7 +90,6 @@ export function MangaChapterList({
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
       contentContainerStyle={{ flexGrow: 1 }}
-      contentContainerClassName="pb-2"
       showsVerticalScrollIndicator={false}
     />
   );

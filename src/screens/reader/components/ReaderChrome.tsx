@@ -40,8 +40,9 @@ export function ReaderChrome({
         >
           <AppPressable
             accessibilityLabel="No se pudo actualizar. Reintentar"
+            hitSlop={4}
             onPress={onRetry}
-            className="min-h-10 flex-row items-center rounded-full bg-zinc-900 px-3 dark:bg-zinc-100"
+            className="min-h-10 flex-row items-center rounded-full bg-zinc-900 px-4 dark:bg-zinc-100"
           >
             <Feather name="refresh-cw" size={14} color={colors.background} />
             <Text className="ml-2 text-xs text-white dark:text-zinc-900">

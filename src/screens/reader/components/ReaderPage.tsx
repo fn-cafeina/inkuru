@@ -107,7 +107,7 @@ export function ReaderPage({
                 ? { width: '100%', height: '100%' }
                 : { width, height: baseHeight }
             }
-            className="items-center justify-center px-6"
+            className="items-center justify-center px-4"
           >
             <Text className="text-center text-xs text-zinc-300">
               No se pudo cargar. Toca para reintentar.

@@ -16,6 +16,7 @@ import type {
   ReaderScale,
 } from '../../../storage/readerSettings';
 import { useColors } from '../../../theme/colors';
+import { SHEET_MAX_HEIGHT } from '../../../theme/spacing';
 
 export function ReaderSettingsSheet({
   visible,
@@ -58,9 +59,9 @@ export function ReaderSettingsSheet({
         />
         <View
           className="rounded-t-2xl"
-          style={{ backgroundColor: colors.surface, maxHeight: '85%' }}
+          style={{ backgroundColor: colors.surface, maxHeight: SHEET_MAX_HEIGHT }}
         >
-          <View className="flex-row items-center justify-between px-4">
+          <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
               className="text-base font-semibold"
               style={{ color: colors.text }}
@@ -78,9 +79,13 @@ export function ReaderSettingsSheet({
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
-            contentContainerClassName="px-4 pb-2"
+            contentContainerClassName="px-4"
           >
-            <SettingSection title="Modo de lectura" groupRole="radiogroup">
+            <SettingSection
+              title="Modo de lectura"
+              groupRole="radiogroup"
+              className="mt-2"
+            >
               {READER_MODE_OPTIONS.map((option, index) => (
                 <ChoiceRow
                   key={option.value}

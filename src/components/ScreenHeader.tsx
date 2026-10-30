@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useColors } from '../theme/colors';
+import { APP_BAR_GAP } from '../theme/spacing';
 import { AppPressable } from './AppPressable';
 
 export function ScreenHeader({
@@ -41,7 +42,10 @@ export function ScreenHeader({
   }));
 
   return (
-    <View className="flex-row items-center px-2 py-1">
+    <View
+      className="flex-row items-center px-2 py-1"
+      style={{ marginBottom: APP_BAR_GAP }}
+    >
       <AppPressable
         onPress={onBack}
         accessibilityLabel="Volver"

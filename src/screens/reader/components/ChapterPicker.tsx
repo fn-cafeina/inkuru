@@ -11,6 +11,7 @@ import {
 import { ListDivider } from '../../../components/ListDivider';
 import type { MangaChapter } from '../../../source/leercapitulo';
 import { useColors } from '../../../theme/colors';
+import { APP_BAR_GAP, SHEET_MAX_HEIGHT } from '../../../theme/spacing';
 
 export function ChapterPicker({
   visible,
@@ -47,9 +48,9 @@ export function ChapterPicker({
         />
         <View
           className="rounded-t-2xl"
-          style={{ backgroundColor: colors.surface, maxHeight: '70%' }}
+          style={{ backgroundColor: colors.surface, maxHeight: SHEET_MAX_HEIGHT }}
         >
-          <View className="flex-row items-center justify-between px-4">
+          <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
               className="text-base font-semibold"
               style={{ color: colors.text }}
@@ -86,7 +87,10 @@ export function ChapterPicker({
                 onPress={() => onSelect(item)}
               />
             )}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+            contentContainerStyle={{
+              paddingTop: APP_BAR_GAP,
+              paddingBottom: insets.bottom + 16,
+            }}
           />
         </View>
       </View>

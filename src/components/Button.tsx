@@ -14,8 +14,8 @@ const LABELS: Record<Variant, string> = {
 };
 
 const SIZES: Record<Size, string> = {
-  sm: 'min-h-12 px-5',
-  lg: 'min-h-14 px-5',
+  sm: 'min-h-12 px-4',
+  lg: 'min-h-14 px-4',
 };
 
 export function Button({

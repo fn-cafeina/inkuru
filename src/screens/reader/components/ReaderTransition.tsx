@@ -32,7 +32,7 @@ export function ReaderTransition({
     <Animated.View
       entering={FadeInDown.duration(250)}
       style={{ width, height, paddingBottom: bottomInset + 24 }}
-      className="items-center justify-center bg-zinc-950 px-6"
+      className="items-center justify-center bg-zinc-950 px-4"
     >
       <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
         Fin del capítulo
@@ -51,35 +51,28 @@ export function ReaderTransition({
           <Text className="mt-3 text-center text-base text-zinc-300">
             {next.title}
           </Text>
-          <View className="mt-6 self-stretch">
-            <Button
-              variant="primary"
-              size="lg"
-              onPress={() => onOpenNext(next)}
-            >
-              Siguiente capítulo
-            </Button>
-          </View>
         </>
       ) : (
-        <Text className="text-center text-sm text-zinc-400">
+        <Text className="mt-3 text-center text-sm text-zinc-400">
           Último capítulo.
         </Text>
       )}
 
-      <View className="mt-3 self-stretch">
+      <View className="mt-6 self-stretch gap-3">
+        {next ? (
+          <Button variant="primary" size="lg" onPress={() => onOpenNext(next)}>
+            Siguiente capítulo
+          </Button>
+        ) : null}
         <Button variant="secondary" tone="dark" onPress={onOpenPicker}>
           Elegir capítulo
         </Button>
-      </View>
-
-      {prev ? (
-        <View className="mt-1 self-stretch">
+        {prev ? (
           <Button variant="ghost" tone="dark" onPress={() => onOpenPrev(prev)}>
             Capítulo anterior
           </Button>
-        </View>
-      ) : null}
+        ) : null}
+      </View>
     </Animated.View>
   );
 }
