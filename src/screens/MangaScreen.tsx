@@ -43,7 +43,6 @@ import type { ReaderProgress } from '../storage/readerProgress';
 import { fetchManga } from '../source/leercapitulo';
 import { useColors } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
-import { CARD } from '../theme/styles';
 import type { MangaChapter, MangaDetail } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -498,10 +497,6 @@ function MangaHeader({
   const status = factValue('Estado');
   const author = factValue('Autor');
   const updated = factValue('Actualizado');
-  const details = manga.facts.filter(
-    (fact) =>
-      fact.value && !['Estado', 'Autor', 'Actualizado'].includes(fact.label),
-  );
   const progressPercent =
     manga.chapters.length > 0
       ? Math.min(100, Math.round((readCount / manga.chapters.length) * 100))
@@ -587,39 +582,6 @@ function MangaHeader({
       {manga.tags.length > 0 ? (
         <View className="mt-4 px-4">
           <TagRow tags={manga.tags} />
-        </View>
-      ) : null}
-
-      {details.length > 0 ? (
-        <View>
-          <SectionTitle className="mb-2 mt-6 px-4">Detalles</SectionTitle>
-          <View
-            className={`mx-4 overflow-hidden rounded-xl ${CARD}`}
-          >
-            {details.map((fact, index) => (
-              <View
-                key={fact.label}
-                className={
-                  index > 0
-                    ? 'flex-row border-t border-zinc-200 px-3 py-2.5 dark:border-zinc-800'
-                    : 'flex-row px-3 py-2.5'
-                }
-              >
-                <Text
-                  numberOfLines={1}
-                  className="w-32 text-xs text-zinc-500 dark:text-zinc-400"
-                >
-                  {fact.label}
-                </Text>
-                <Text
-                  numberOfLines={2}
-                  className="flex-1 text-sm text-zinc-900 dark:text-zinc-100"
-                >
-                  {FACT_VALUES[fact.value] ?? fact.value}
-                </Text>
-              </View>
-            ))}
-          </View>
         </View>
       ) : null}
 
