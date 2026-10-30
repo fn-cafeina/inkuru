@@ -138,6 +138,14 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const total = data?.pages.length ?? 0;
   const safePage = total > 0 ? Math.min(page, total - 1) : page;
+  const headerSubtitle = data
+    ? [
+        data.mangaTitle ? data.title || title : undefined,
+        total > 0 ? `${safePage + 1}/${total}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : undefined;
 
   useEffect(() => {
     let active = true;
@@ -332,25 +340,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
           >
             <ScreenHeader
               title={data?.mangaTitle ?? data?.title ?? title}
-              subtitle={data?.mangaTitle ? data.title || title : undefined}
+              subtitle={headerSubtitle}
               onBack={() => navigation.goBack()}
               action={
                 <View className="flex-row items-center">
-                  {data?.prev ? (
-                    <AppPressable
-                      accessibilityLabel={`Capítulo anterior: ${data.prev.title}`}
-                      onPress={() => {
-                        const prev = data.prev;
-
-                        if (prev) {
-                          openChapter(prev);
-                        }
-                      }}
-                      className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
-                    >
-                      <Feather name="skip-back" size={18} color={colors.text} />
-                    </AppPressable>
-                  ) : null}
                   <AppPressable
                     accessibilityLabel="Lista de capítulos"
                     onPress={() => setPickerOpen(true)}
@@ -358,25 +351,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
                   >
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
-                  {data?.next ? (
-                    <AppPressable
-                      accessibilityLabel={`Capítulo siguiente: ${data.next.title}`}
-                      onPress={() => {
-                        const next = data.next;
-
-                        if (next) {
-                          openChapter(next);
-                        }
-                      }}
-                      className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
-                    >
-                      <Feather
-                        name="skip-forward"
-                        size={18}
-                        color={colors.text}
-                      />
-                    </AppPressable>
-                  ) : null}
                   <AppPressable
                     accessibilityLabel="Ajustes de lectura"
                     onPress={() => setSettingsOpen(true)}
@@ -388,16 +362,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               }
             />
           </View>
-        ) : null}
-
-        {chromeVisible && data ? (
-          <ReaderToolbar
-            mode={mode}
-            page={safePage}
-            total={data.pages.length}
-            bottomInset={insets.bottom}
-            onSelectMode={selectMode}
-          />
         ) : null}
 
         <ChapterPicker
@@ -963,45 +927,5 @@ function PagedPages({
       maxToRenderPerBatch={3}
       windowSize={5}
     />
-  );
-}
-
-function ReaderToolbar({
-  mode,
-  page,
-  total,
-  bottomInset,
-  onSelectMode,
-}: {
-  mode: ReaderMode;
-  page: number;
-  total: number;
-  bottomInset: number;
-  onSelectMode: (mode: ReaderMode) => void;
-}) {
-  return (
-    <View
-      className="absolute left-4 right-4 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2"
-      style={{ bottom: bottomInset + 12 }}
-    >
-      <Text
-        accessible
-        accessibilityRole="text"
-        accessibilityLabel={`Página ${page + 1} de ${total}`}
-        className="mb-2 text-center text-xs text-zinc-400"
-      >
-        {page + 1} / {total}
-      </Text>
-      <View className="flex-row gap-2">
-        {READER_MODE_OPTIONS.map((option) => (
-          <OptionChip
-            key={option.value}
-            label={option.label}
-            selected={mode === option.value}
-            onPress={() => onSelectMode(option.value)}
-          />
-        ))}
-      </View>
-    </View>
   );
 }
