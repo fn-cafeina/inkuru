@@ -8,6 +8,7 @@ import { OptionChip } from '../../../components/OptionChip';
 import { SectionTitle } from '../../../components/SectionTitle';
 import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
+import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
 import { TagRow } from './TagRow';
 
@@ -154,6 +155,8 @@ function MangaCoverInfo({
   author?: string;
   updated?: string;
 }) {
+  const colors = useColors();
+
   return (
     <View className="flex-row px-4">
       <View
@@ -175,8 +178,14 @@ function MangaCoverInfo({
           {manga.title}
         </Text>
         {status ? (
-          <View className="mt-2 self-start rounded-full bg-accent-500 px-2.5 py-1">
-            <Text className="text-xs font-semibold uppercase text-white">
+          <View
+            className="mt-2 self-start rounded-full px-2.5 py-1"
+            style={{ backgroundColor: colors.accentContainer }}
+          >
+            <Text
+              className="text-xs font-semibold uppercase"
+              style={{ color: colors.onAccentContainer }}
+            >
               {status}
             </Text>
           </View>
@@ -206,6 +215,7 @@ function MangaProgress({
   readCount: number;
   total: number;
 }) {
+  const colors = useColors();
   const progressPercent =
     total > 0 ? Math.min(100, Math.round((readCount / total) * 100)) : 0;
 
@@ -213,8 +223,8 @@ function MangaProgress({
     <View className="mt-3 px-4">
       <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
         <View
-          className="h-full rounded-full bg-accent-500"
-          style={{ width: `${progressPercent}%` }}
+          className="h-full rounded-full"
+          style={{ width: `${progressPercent}%`, backgroundColor: colors.accent }}
         />
       </View>
       <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
@@ -225,6 +235,7 @@ function MangaProgress({
 }
 
 function MangaSynopsis({ synopsis }: { synopsis: string }) {
+  const colors = useColors();
   const [expanded, setExpanded] = useState(false);
   // shortcut: length heuristic, measure the rendered lines if the synopsis copy changes.
   const longSynopsis = synopsis.length > 280;
@@ -244,7 +255,10 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
           onPress={() => setExpanded((value) => !value)}
           className="mt-1 min-h-12 justify-center px-4 self-start"
         >
-          <Text className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+          <Text
+            className="text-sm font-medium"
+            style={{ color: colors.accent }}
+          >
             {expanded ? 'Ver menos' : 'Ver más'}
           </Text>
         </AppPressable>

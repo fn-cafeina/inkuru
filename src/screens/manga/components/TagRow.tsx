@@ -15,7 +15,7 @@ function TagChip({
   return (
     <View
       onLayout={onLayout}
-      className="rounded-lg bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
+      className="rounded-full bg-zinc-100 px-2.5 py-1 dark:bg-zinc-800"
     >
       <Text className="text-xs text-zinc-600 dark:text-zinc-300">{label}</Text>
     </View>

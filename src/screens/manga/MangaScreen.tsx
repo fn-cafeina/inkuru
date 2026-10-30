@@ -152,7 +152,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             onPress={() => {
               void toggleLibrary();
             }}
-            className="min-h-12 min-w-12 items-center justify-center rounded-lg"
+            className="min-h-12 min-w-12 items-center justify-center rounded-full"
           >
             <Feather
               name="bookmark"
