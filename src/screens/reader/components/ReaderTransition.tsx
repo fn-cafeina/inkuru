@@ -1,8 +1,8 @@
 import { Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import type { MangaChapter } from '../source/leercapitulo';
-import { Button } from './Button';
+import type { MangaChapter } from '../../../source/leercapitulo';
+import { Button } from '../../../components/Button';
 
 type Props = {
   currentTitle: string;

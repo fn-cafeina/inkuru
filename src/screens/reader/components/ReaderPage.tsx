@@ -17,11 +17,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 
-import type { ReaderQuality, ReaderScale } from '../storage/readerSettings';
-import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
-import { AppPressable } from './AppPressable';
-import { Skeleton } from './Skeleton';
-import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
+import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
+import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
+import { AppPressable } from '../../../components/AppPressable';
+import { Skeleton } from '../../../components/Skeleton';
+import { clamp, translationBounds, zoomAroundPoint } from '../readerZoom';
 
 const MAX_ZOOM = 4;
 const DOUBLE_TAP_ZOOM = 2;
