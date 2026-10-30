@@ -16,6 +16,16 @@ function assertEqual<T>(actual: T, expected: T, label: string): void {
   }
 }
 
+function item<T>(values: readonly T[], index: number): T {
+  const value = values[index];
+
+  if (value === undefined) {
+    throw new Error(`Índice ${index} fuera de rango`);
+  }
+
+  return value;
+}
+
 function expectThrow(fn: () => void, label: string): void {
   let rejected = false;
 
@@ -61,12 +71,12 @@ assertEqual(
 assert(manga.synopsis.includes('"One Piece"'), 'sinopsis decodificada');
 assertEqual(manga.chapters.length, 2, 'capítulos del manga');
 assertEqual(
-  manga.chapters[0].path,
+  item(manga.chapters, 0).path,
   '/leer/psvkfbmjgo/one-piece/1196/',
   'primer capítulo',
 );
-assertEqual(manga.chapters[0].title, 'Capitulo 1196', 'título del primer capítulo');
-assertEqual(manga.chapters[0].date, '2026-10-17', 'fecha del primer capítulo');
+assertEqual(item(manga.chapters, 0).title, 'Capitulo 1196', 'título del primer capítulo');
+assertEqual(item(manga.chapters, 0).date, '2026-10-17', 'fecha del primer capítulo');
 
 const reader = parseReader(READER_FIXTURE);
 
@@ -75,13 +85,13 @@ assertEqual(reader.mangaTitle, 'One Piece', 'manga del lector');
 assertEqual(reader.chapters.length, 3, 'capítulos del lector');
 assertEqual(reader.chapterIndex, 1, 'índice del capítulo actual');
 assertEqual(
-  reader.chapters[reader.chapterIndex].title,
+  item(reader.chapters, reader.chapterIndex).title,
   'Capitulo 1195',
   'capítulo actual del lector',
 );
 assertEqual(reader.pages.length, 2, 'páginas del lector');
 assertEqual(
-  reader.pages[0],
+  item(reader.pages, 0),
   'https://es2s12-2127.t34798ndc.com/B0C3Xdh/J6Y/Uy/Gb/xZ/PE/Pj/GG/sG/b2/mj/Zx/mN/29/qy/s2/29/ZN/eIZgRe5/EE9s/UE.dIk.jpg',
   'primera página',
 );
@@ -101,19 +111,19 @@ assertEqual(reader.next?.title, 'Capitulo 1196', 'título siguiente');
 const search = parseSearch(SEARCH_FIXTURE);
 
 assertEqual(search.length, 2, 'resultados de búsqueda');
-assertEqual(search[0].title, 'One Piece Full Color', 'título de búsqueda');
+assertEqual(item(search, 0).title, 'One Piece Full Color', 'título de búsqueda');
 assertEqual(
-  search[0].cover,
+  item(search, 0).cover,
   'https://www.leercapitulo.co/covers/50/1ab355791858e5d163d1b9d69cf70c.jpg?v1793004892973',
   'portada de búsqueda',
 );
 assertEqual(
-  search[0].path,
+  item(search, 0).path,
   '/manga/7c12f0hx4w/one-piece-full-color/',
   'ruta de búsqueda',
 );
 assertEqual(
-  search[0].lastChapter,
+  item(search, 0).lastChapter,
   'Capitulo 1055',
   'último capítulo de búsqueda',
 );
@@ -130,24 +140,24 @@ expectThrow(
 const catalog = parseCatalog(CATALOG_FIXTURE);
 
 assertEqual(catalog.items.length, 2, 'mangas del catálogo');
-assertEqual(catalog.items[0].title, 'One Piece', 'título del catálogo');
+assertEqual(item(catalog.items, 0).title, 'One Piece', 'título del catálogo');
 assertEqual(
-  catalog.items[0].cover,
+  item(catalog.items, 0).cover,
   'https://www.leercapitulo.co/covers/4f/1067e3fadaf8ec9edd6b71368445a7.jpg?v1793004892973',
   'portada del catálogo',
 );
 assertEqual(
-  catalog.items[0].path,
+  item(catalog.items, 0).path,
   '/manga/psvkfbmjgo/one-piece/',
   'ruta del catálogo',
 );
 assertEqual(
-  catalog.items[0].lastChapter,
+  item(catalog.items, 0).lastChapter,
   'Capitulo 1196',
   'último capítulo del catálogo',
 );
 assertEqual(
-  catalog.items[1].title,
+  item(catalog.items, 1).title,
   "To Hell with Being Heir, I'm going to Heal",
   'entidades HTML del catálogo',
 );
