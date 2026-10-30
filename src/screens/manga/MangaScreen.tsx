@@ -13,19 +13,18 @@ import { MangaChapterList } from './components/MangaChapterList';
 import { MangaSkeleton } from './components/MangaSkeleton';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
-import {
-  loadMangaRange,
-  loadMangaSort,
-  saveMangaRange,
-  saveMangaSort,
-} from '../../storage/mangaSettings';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { fetchManga } from '../../source/leercapitulo';
 import type { MangaDetail } from '../../source/leercapitulo';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
-import { chunkChapters } from './chapters';
+import {
+  ascendingChapters,
+  chunkChapters,
+  displayChapters,
+} from './chapters';
+import type { ChapterSort } from './chapters';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
@@ -46,8 +45,8 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [progress, setProgress] = useState<ReaderProgress | null>(null);
   const [readChapters, setReadChapters] = useState<string[]>([]);
   const [inLibrary, setInLibrary] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [activeRange, setActiveRange] = useState<number | null>(null);
+  const [sortOrder, setSortOrder] = useState<ChapterSort>('asc');
+  const [activeRange, setActiveRange] = useState(0);
   const [barTitleVisible, setBarTitleVisible] = useState(false);
 
   useFocusEffect(
@@ -58,21 +57,11 @@ export default function MangaScreen({ navigation, route }: Props) {
         loadProgress(path),
         loadReadChapters(path),
         isInLibrary(path),
-        loadMangaSort(),
-        loadMangaRange(path),
-      ]).then(([value, reads, saved, storedSort, storedRange]) => {
+      ]).then(([value, reads, saved]) => {
         if (active) {
           setProgress(value);
           setReadChapters(reads);
           setInLibrary(saved);
-
-          if (storedSort) {
-            setSortOrder(storedSort);
-          }
-
-          if (storedRange !== null) {
-            setActiveRange(storedRange);
-          }
         }
       });
 
@@ -110,28 +99,23 @@ export default function MangaScreen({ navigation, route }: Props) {
   // Ranges always read oldest to newest; sorting only flips chapters inside a
   // range. The source lists chapters newest first.
   const ascending = useMemo(
-    () => [...(data?.chapters ?? [])].reverse(),
+    () => ascendingChapters(data?.chapters ?? []),
     [data],
   );
   const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
-  const rangeIndex =
-    activeRange === null
-      ? 0
-      : Math.min(activeRange, Math.max(ranges.length - 1, 0));
+  const rangeIndex = Math.min(
+    activeRange,
+    Math.max(ranges.length - 1, 0),
+  );
   const activeChapters = ranges[rangeIndex]?.chapters ?? [];
-  const visibleChapters =
-    sortOrder === 'desc' ? [...activeChapters].reverse() : activeChapters;
+  const visibleChapters = displayChapters(activeChapters, sortOrder);
 
   const toggleSort = () => {
-    const next = sortOrder === 'desc' ? 'asc' : 'desc';
-
-    setSortOrder(next);
-    void saveMangaSort(next);
+    setSortOrder((current) => (current === 'desc' ? 'asc' : 'desc'));
   };
 
   const selectRange = (index: number) => {
     setActiveRange(index);
-    void saveMangaRange(path, index);
   };
 
   return (

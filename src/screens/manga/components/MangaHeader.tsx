@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Image, ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
@@ -44,6 +45,7 @@ export function MangaHeader({
   onToggleSort,
   onRead,
 }: Props) {
+  const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
   const factValue = (label: string) => {
     const value = manga.facts.find((fact) => fact.label === label)?.value;
@@ -90,27 +92,36 @@ export function MangaHeader({
 
       <View className="mt-6 px-4">
         {ranges.length > 1 ? (
-          <ScrollView
-            ref={chipRowRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            // A saved selection on the last range would start off screen.
-            onContentSizeChange={() => {
-              if (ranges.length > 0 && activeRange === ranges.length - 1) {
-                chipRowRef.current?.scrollToEnd({ animated: false });
-              }
-            }}
-            contentContainerClassName="gap-2 pb-3"
-          >
-            {ranges.map((range, index) => (
-              <OptionChip
-                key={`${range.label}-${index}`}
-                label={range.label}
-                selected={index === activeRange}
-                onPress={() => onSelectRange(index)}
-              />
-            ))}
-          </ScrollView>
+          <>
+            <SectionTitle className="mb-2">Rangos</SectionTitle>
+            <View
+              accessibilityRole="radiogroup"
+              accessibilityLabel="Rangos de capítulos"
+            >
+              <ScrollView
+                ref={chipRowRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                // Keep the last range visible when it becomes selected.
+                onContentSizeChange={() => {
+                  if (ranges.length > 0 && activeRange === ranges.length - 1) {
+                    chipRowRef.current?.scrollToEnd({ animated: false });
+                  }
+                }}
+                contentContainerClassName="gap-2 pb-3"
+              >
+                {ranges.map((range, index) => (
+                  <OptionChip
+                    key={`${range.label}-${index}`}
+                    label={range.label}
+                    accessibilityLabel={`Capítulos ${range.label.replace('-', ' a ')}`}
+                    selected={index === activeRange}
+                    onPress={() => onSelectRange(index)}
+                  />
+                ))}
+              </ScrollView>
+            </View>
+          </>
         ) : null}
         <View className="flex-row items-center">
           <View className="flex-1 flex-row items-center gap-2">
@@ -119,26 +130,23 @@ export function MangaHeader({
               {manga.chapters.length}
             </Text>
           </View>
-          <View className="flex-row gap-2">
-            <OptionChip
-              label="Recientes"
-              selected={sortOrder === 'desc'}
-              onPress={() => {
-                if (sortOrder !== 'desc') {
-                  onToggleSort();
-                }
-              }}
+          <AppPressable
+            accessibilityLabel={
+              sortOrder === 'asc'
+                ? 'Ordenar capítulos: más recientes primero'
+                : 'Ordenar capítulos: más antiguos primero'
+            }
+            accessibilityHint="Toca para invertir el orden"
+            hitSlop={4}
+            onPress={onToggleSort}
+            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+          >
+            <Feather
+              name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+              size={18}
+              color={colors.text}
             />
-            <OptionChip
-              label="Antiguos"
-              selected={sortOrder === 'asc'}
-              onPress={() => {
-                if (sortOrder !== 'asc') {
-                  onToggleSort();
-                }
-              }}
-            />
-          </View>
+          </AppPressable>
         </View>
       </View>
     </View>

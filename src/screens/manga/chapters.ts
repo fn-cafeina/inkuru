@@ -2,12 +2,26 @@ import type { MangaChapter } from '../../source/leercapitulo';
 
 const CHAPTER_RANGE_SIZE = 50;
 
+export type ChapterSort = 'asc' | 'desc';
+
 export type ChapterRange = {
   label: string;
   chapters: MangaChapter[];
 };
 
 export type ChapterState = 'current' | 'read';
+
+/** The source lists chapters newest first; ranges are built oldest first. */
+export function ascendingChapters(chapters: MangaChapter[]): MangaChapter[] {
+  return [...chapters].reverse();
+}
+
+export function displayChapters(
+  chapters: MangaChapter[],
+  sort: ChapterSort,
+): MangaChapter[] {
+  return sort === 'asc' ? chapters : [...chapters].reverse();
+}
 
 export function getChapterState(
   chapterPath: string,
