@@ -71,13 +71,6 @@ let preferredMode: ReaderMode = DEFAULT_READER_MODE;
 let preferredScale: ReaderScale = DEFAULT_READER_SCALE;
 let preferredQuality: ReaderQuality = DEFAULT_READER_QUALITY;
 
-function modeLabel(mode: ReaderMode) {
-  return (
-    READER_MODE_OPTIONS.find((option) => option.value === mode)?.label ??
-    READER_MODE_OPTIONS[0].label
-  );
-}
-
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
 export default function ReaderScreen({ navigation, route }: Props) {
@@ -307,13 +300,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               onOpenPrev={openChapter}
               onOpenPicker={() => setPickerOpen(true)}
             />
-            {chromeVisible ? (
-              <PageCounter
-                page={safePage}
-                total={data.pages.length}
-                bottomInset={insets.bottom}
-              />
-            ) : null}
             {hasError ? (
               <View
                 pointerEvents="box-none"
@@ -341,7 +327,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
 
         {chromeVisible ? (
           <View
-            className="absolute left-0 right-0 top-0 bg-zinc-50 dark:bg-zinc-950"
+            className="absolute left-0 right-0 top-0 bg-zinc-950"
             style={{ paddingTop: insets.top }}
           >
             <ScreenHeader
@@ -372,19 +358,46 @@ export default function ReaderScreen({ navigation, route }: Props) {
                   >
                     <Feather name="list" size={18} color={colors.text} />
                   </AppPressable>
+                  {data?.next ? (
+                    <AppPressable
+                      accessibilityLabel={`Capítulo siguiente: ${data.next.title}`}
+                      onPress={() => {
+                        const next = data.next;
+
+                        if (next) {
+                          openChapter(next);
+                        }
+                      }}
+                      className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
+                    >
+                      <Feather
+                        name="skip-forward"
+                        size={18}
+                        color={colors.text}
+                      />
+                    </AppPressable>
+                  ) : null}
                   <AppPressable
-                    accessibilityLabel={`Ajustes de lectura. Modo actual: ${modeLabel(mode)}`}
+                    accessibilityLabel="Ajustes de lectura"
                     onPress={() => setSettingsOpen(true)}
-                    className={`min-h-12 justify-center rounded-lg px-3 ${OUTLINE_CONTROL}`}
+                    className={`min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
                   >
-                    <Text className="text-xs text-zinc-700 dark:text-zinc-300">
-                      {modeLabel(mode)}
-                    </Text>
+                    <Feather name="settings" size={18} color={colors.text} />
                   </AppPressable>
                 </View>
               }
             />
           </View>
+        ) : null}
+
+        {chromeVisible && data ? (
+          <ReaderToolbar
+            mode={mode}
+            page={safePage}
+            total={data.pages.length}
+            bottomInset={insets.bottom}
+            onSelectMode={selectMode}
+          />
         ) : null}
 
         <ChapterPicker
@@ -951,27 +964,42 @@ function PagedPages({
   );
 }
 
-function PageCounter({
+function ReaderToolbar({
+  mode,
   page,
   total,
   bottomInset,
+  onSelectMode,
 }: {
+  mode: ReaderMode;
   page: number;
   total: number;
   bottomInset: number;
+  onSelectMode: (mode: ReaderMode) => void;
 }) {
   return (
     <View
-      pointerEvents="none"
-      accessible
-      accessibilityRole="text"
-      accessibilityLabel={`Página ${page + 1} de ${total}`}
+      className="absolute left-4 right-4 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2"
       style={{ bottom: bottomInset + 12 }}
-      className="absolute right-4 rounded-md bg-zinc-900 px-3 py-1 dark:bg-zinc-100"
     >
-      <Text className="text-xs text-white dark:text-zinc-900">
+      <Text
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={`Página ${page + 1} de ${total}`}
+        className="mb-2 text-center text-xs text-zinc-400"
+      >
         {page + 1} / {total}
       </Text>
+      <View className="flex-row gap-2">
+        {READER_MODE_OPTIONS.map((option) => (
+          <OptionChip
+            key={option.value}
+            label={option.label}
+            selected={mode === option.value}
+            onPress={() => onSelectMode(option.value)}
+          />
+        ))}
+      </View>
     </View>
   );
 }
