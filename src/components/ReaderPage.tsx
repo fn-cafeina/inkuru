@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { AccessibilityActionInfo } from 'react-native';
-import { PixelRatio, Text, View } from 'react-native';
+import { ActivityIndicator, PixelRatio, Text, View } from 'react-native';
 import {
   GestureDetector,
   useExclusiveGestures,
@@ -20,6 +20,7 @@ import { Image } from 'expo-image';
 import type { ReaderQuality, ReaderScale } from '../storage/readerSettings';
 import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
 import { AppPressable } from './AppPressable';
+import { Skeleton } from './Skeleton';
 import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
 const MAX_ZOOM = 4;
@@ -119,6 +120,7 @@ export function ReaderPage({
   const [source, setSource] = useState<SourceSize | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [zoomed, setZoomed] = useState(false);
   const zoomedRef = useRef(false);
 
@@ -374,6 +376,7 @@ export function ReaderPage({
             accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
             onPress={() => {
               setFailed(false);
+              setLoaded(false);
               setAttempt((current) => current + 1);
             }}
             style={
@@ -388,43 +391,60 @@ export function ReaderPage({
             </Text>
           </AppPressable>
         ) : (
-          <Animated.View
-            style={[{ width: baseWidth, height: baseHeight }, animatedStyle]}
-          >
-            <Image
-              key={attempt}
-              source={{ uri }}
-              style={{ width: baseWidth, height: baseHeight }}
-              contentFit="fill"
-              cachePolicy="memory-disk"
-              recyclingKey={uri}
-              // `original` and the sharper quality tiers decode the full
-              // bitmap; `balanced` downsamples to the view size.
-              allowDownscaling={
-                quality === 'balanced' && scaleMode !== 'original'
-              }
-              transition={150}
-              onLoad={(event) => {
-                const { width: sourceWidth, height: sourceHeight } =
-                  event.source;
+          <View style={{ width: baseWidth, height: baseHeight }}>
+            {loaded ? null : (
+              <View
+                accessible={false}
+                importantForAccessibility="no-hide-descendants"
+                pointerEvents="none"
+                className="absolute inset-0 items-center justify-center"
+              >
+                <Skeleton className="absolute inset-0" />
+                <ActivityIndicator color="#a1a1aa" />
+              </View>
+            )}
+            <Animated.View
+              style={[{ width: baseWidth, height: baseHeight }, animatedStyle]}
+            >
+              <Image
+                key={attempt}
+                source={{ uri }}
+                style={{ width: baseWidth, height: baseHeight }}
+                contentFit="fill"
+                cachePolicy="memory-disk"
+                recyclingKey={uri}
+                // `original` and the sharper quality tiers decode the full
+                // bitmap; `balanced` downsamples to the view size.
+                allowDownscaling={
+                  quality === 'balanced' && scaleMode !== 'original'
+                }
+                onLoad={(event) => {
+                  const { width: sourceWidth, height: sourceHeight } =
+                    event.source;
 
-                if (sourceWidth > 0 && sourceHeight > 0) {
-                  setSource({ width: sourceWidth, height: sourceHeight });
-                }
-              }}
-              onError={() => setFailed(true)}
-              accessible
-              accessibilityLabel={label}
-              accessibilityActions={actions}
-              onAccessibilityAction={(event) => {
-                if (event.nativeEvent.actionName === 'increment') {
-                  onNextPage?.();
-                } else if (event.nativeEvent.actionName === 'decrement') {
-                  onPreviousPage?.();
-                }
-              }}
-            />
-          </Animated.View>
+                  if (sourceWidth > 0 && sourceHeight > 0) {
+                    setSource({ width: sourceWidth, height: sourceHeight });
+                  }
+
+                  setLoaded(true);
+                }}
+                onError={() => {
+                  setFailed(true);
+                  setLoaded(false);
+                }}
+                accessible
+                accessibilityLabel={label}
+                accessibilityActions={actions}
+                onAccessibilityAction={(event) => {
+                  if (event.nativeEvent.actionName === 'increment') {
+                    onNextPage?.();
+                  } else if (event.nativeEvent.actionName === 'decrement') {
+                    onPreviousPage?.();
+                  }
+                }}
+              />
+            </Animated.View>
+          </View>
         )}
       </View>
     </GestureDetector>
