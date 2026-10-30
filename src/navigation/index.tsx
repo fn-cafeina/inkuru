@@ -34,10 +34,24 @@ export function RootNavigator() {
         },
       }}
     >
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Tabs" component={MainTabs} />
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen
+          name="Tabs"
+          component={MainTabs}
+          options={{ animation: 'none' }}
+        />
         <Stack.Screen name="Manga" component={MangaScreen} />
-        <Stack.Screen name="Reader" component={ReaderScreen} />
+        <Stack.Screen
+          name="Reader"
+          component={ReaderScreen}
+          options={{ animation: 'fade', statusBarHidden: true }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
