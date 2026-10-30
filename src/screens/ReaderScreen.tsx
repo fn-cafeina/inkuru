@@ -122,7 +122,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
     void saveReaderQuality(next);
   };
   const colors = useColors();
-  const hideChrome = useCallback(() => setChromeVisible(false), []);
+  const hideChrome = useCallback(() => {
+    setChromeVisible(false);
+    NavigationBar.setHidden(true);
+  }, []);
   const toggleChrome = useCallback(
     () => setChromeVisible((visible) => !visible),
     [],
@@ -760,6 +763,7 @@ function VerticalPages({
       data={pages}
       keyExtractor={(item) => item}
       onScrollBeginDrag={onReadActivity}
+      onMomentumScrollBegin={onReadActivity}
       renderItem={({ item, index }) => (
         <ReaderPage
           uri={item}
@@ -936,6 +940,8 @@ function PagedPages({
       scrollEnabled={!zoomed}
       removeClippedSubviews={false}
       showsHorizontalScrollIndicator={false}
+      onScrollBeginDrag={onReadActivity}
+      onMomentumScrollBegin={onReadActivity}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       initialNumToRender={1}
