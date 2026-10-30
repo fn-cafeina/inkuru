@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import type { ReactNode } from 'react';
 import { ScrollView, Switch, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { AppPressable } from '../components/AppPressable';
+import { ChoiceRow } from '../components/ChoiceRow';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
+import { SettingSection } from '../components/SettingSection';
 import { Skeleton } from '../components/Skeleton';
 import { useColors } from '../theme/colors';
 import {
@@ -92,9 +92,9 @@ export default function SettingsScreen() {
       >
         {loaded ? (
           <>
-            <SettingsSection title="Modo de lectura" groupRole="radiogroup">
+            <SettingSection title="Modo de lectura" groupRole="radiogroup">
               {READER_MODE_OPTIONS.map((option, index) => (
-                <SelectRow
+                <ChoiceRow
                   key={option.value}
                   label={option.label}
                   selected={mode === option.value}
@@ -102,11 +102,11 @@ export default function SettingsScreen() {
                   onPress={() => selectMode(option.value)}
                 />
               ))}
-            </SettingsSection>
+            </SettingSection>
 
-            <SettingsSection title="Ajuste de página" groupRole="radiogroup">
+            <SettingSection title="Escala de página" groupRole="radiogroup">
               {READER_SCALE_OPTIONS.map((option, index) => (
-                <SelectRow
+                <ChoiceRow
                   key={option.value}
                   label={option.label}
                   selected={scale === option.value}
@@ -114,11 +114,11 @@ export default function SettingsScreen() {
                   onPress={() => selectScale(option.value)}
                 />
               ))}
-            </SettingsSection>
+            </SettingSection>
 
-            <SettingsSection title="Calidad de imagen" groupRole="radiogroup">
+            <SettingSection title="Calidad de imagen" groupRole="radiogroup">
               {READER_QUALITY_OPTIONS.map((option, index) => (
-                <SelectRow
+                <ChoiceRow
                   key={option.value}
                   label={option.label}
                   selected={quality === option.value}
@@ -126,15 +126,15 @@ export default function SettingsScreen() {
                   onPress={() => selectQuality(option.value)}
                 />
               ))}
-            </SettingsSection>
+            </SettingSection>
 
-            <SettingsSection title="Pantalla despierta">
+            <SettingSection title="Pantalla">
               <SwitchRow
-                label="Mantener la pantalla encendida"
+                label="Mantener encendida"
                 value={keepAwake}
                 onValueChange={selectKeepAwake}
               />
-            </SettingsSection>
+            </SettingSection>
           </>
         ) : (
           <SettingsSkeleton />
@@ -153,78 +153,6 @@ function SettingsSkeleton() {
           <Skeleton className="mt-3 h-24 rounded-2xl" />
         </View>
       ))}
-    </View>
-  );
-}
-
-function SettingsSection({
-  title,
-  groupRole,
-  children,
-}: {
-  title: string;
-  groupRole?: 'radiogroup';
-  children: ReactNode;
-}) {
-  return (
-    <View className="mt-6">
-      <Text
-        accessibilityRole="header"
-        className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
-      >
-        {title}
-      </Text>
-      <View
-        accessibilityRole={groupRole}
-        className="overflow-hidden rounded-2xl bg-white dark:bg-zinc-900"
-      >
-        {children}
-      </View>
-    </View>
-  );
-}
-
-function SelectRow({
-  label,
-  selected,
-  divider,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  divider: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <AppPressable
-      accessibilityRole="radio"
-      accessibilityLabel={label}
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      className={`min-h-14 flex-row items-center px-4 ${
-        divider ? 'border-t border-zinc-200 dark:border-zinc-800' : ''
-      }`}
-    >
-      <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
-        {label}
-      </Text>
-      <RadioMark selected={selected} />
-    </AppPressable>
-  );
-}
-
-function RadioMark({ selected }: { selected: boolean }) {
-  return (
-    <View
-      className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
-        selected
-          ? 'border-accent-500'
-          : 'border-zinc-400 dark:border-zinc-600'
-      }`}
-    >
-      {selected ? (
-        <View className="h-2.5 w-2.5 rounded-full bg-accent-500" />
-      ) : null}
     </View>
   );
 }
@@ -249,7 +177,7 @@ function SwitchRow({
         accessibilityLabel={label}
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: colors.border, true: colors.accent }}
+        trackColor={{ false: colors.iconInactive, true: colors.accent }}
         thumbColor="#ffffff"
       />
     </View>

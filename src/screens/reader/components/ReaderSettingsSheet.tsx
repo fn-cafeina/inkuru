@@ -1,10 +1,10 @@
 import { Feather } from '@expo/vector-icons';
-import { Modal, ScrollView, View } from 'react-native';
+import { Modal, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
-import { OptionChip } from '../../../components/OptionChip';
-import { SectionTitle } from '../../../components/SectionTitle';
+import { ChoiceRow } from '../../../components/ChoiceRow';
+import { SettingSection } from '../../../components/SettingSection';
 import {
   READER_MODE_OPTIONS,
   READER_QUALITY_OPTIONS,
@@ -16,35 +16,6 @@ import type {
   ReaderScale,
 } from '../../../storage/readerSettings';
 import { useColors } from '../../../theme/colors';
-import { CARD } from '../../../theme/styles';
-
-function ChipGroup<T extends string>({
-  title,
-  options,
-  value,
-  onSelect,
-}: {
-  title: string;
-  options: readonly { value: T; label: string }[];
-  value: T;
-  onSelect: (value: T) => void;
-}) {
-  return (
-    <View>
-      <SectionTitle>{title}</SectionTitle>
-      <View className={`mt-2 flex-row flex-wrap gap-2 rounded-xl p-3 ${CARD}`}>
-        {options.map((option) => (
-          <OptionChip
-            key={option.value}
-            label={option.label}
-            selected={value === option.value}
-            onPress={() => onSelect(option.value)}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
 
 export function ReaderSettingsSheet({
   visible,
@@ -86,44 +57,62 @@ export function ReaderSettingsSheet({
           className="absolute inset-0"
         />
         <View
-          className="rounded-t-xl border-t border-zinc-800 bg-zinc-900"
-          style={{ maxHeight: '85%' }}
+          className="rounded-t-2xl"
+          style={{ backgroundColor: colors.surface, maxHeight: '85%' }}
         >
-          <View className="flex-row items-center justify-between pr-4">
-            <SectionTitle className="px-4 text-zinc-100">
-              Ajustes de lectura
-            </SectionTitle>
+          <View className="flex-row items-center justify-between px-4">
+            <Text
+              className="text-base font-semibold"
+              style={{ color: colors.text }}
+            >
+              Lectura
+            </Text>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
-              className="min-h-12 min-w-12 items-center justify-center rounded-lg"
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
-              <Feather name="x" size={20} color={colors.text} />
+              <Feather name="x" size={20} color={colors.textMuted} />
             </AppPressable>
           </View>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
-            contentContainerClassName="px-4 gap-4"
+            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+            contentContainerClassName="px-4 pb-2"
           >
-            <ChipGroup
-              title="Modo de lectura"
-              options={READER_MODE_OPTIONS}
-              value={mode}
-              onSelect={onSelectMode}
-            />
-            <ChipGroup
-              title="Ajuste de página"
-              options={READER_SCALE_OPTIONS}
-              value={scale}
-              onSelect={onSelectScale}
-            />
-            <ChipGroup
-              title="Calidad de imagen"
-              options={READER_QUALITY_OPTIONS}
-              value={quality}
-              onSelect={onSelectQuality}
-            />
+            <SettingSection title="Modo de lectura" groupRole="radiogroup">
+              {READER_MODE_OPTIONS.map((option, index) => (
+                <ChoiceRow
+                  key={option.value}
+                  label={option.label}
+                  selected={mode === option.value}
+                  divider={index > 0}
+                  onPress={() => onSelectMode(option.value)}
+                />
+              ))}
+            </SettingSection>
+            <SettingSection title="Escala de página" groupRole="radiogroup">
+              {READER_SCALE_OPTIONS.map((option, index) => (
+                <ChoiceRow
+                  key={option.value}
+                  label={option.label}
+                  selected={scale === option.value}
+                  divider={index > 0}
+                  onPress={() => onSelectScale(option.value)}
+                />
+              ))}
+            </SettingSection>
+            <SettingSection title="Calidad de imagen" groupRole="radiogroup">
+              {READER_QUALITY_OPTIONS.map((option, index) => (
+                <ChoiceRow
+                  key={option.value}
+                  label={option.label}
+                  selected={quality === option.value}
+                  divider={index > 0}
+                  onPress={() => onSelectQuality(option.value)}
+                />
+              ))}
+            </SettingSection>
           </ScrollView>
         </View>
       </View>

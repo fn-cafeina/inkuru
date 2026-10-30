@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { FlatList, Modal, View } from 'react-native';
+import { FlatList, Modal, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
@@ -9,7 +9,6 @@ import {
   ChapterRow,
 } from '../../../components/ChapterRow';
 import { ListDivider } from '../../../components/ListDivider';
-import { SectionTitle } from '../../../components/SectionTitle';
 import type { MangaChapter } from '../../../source/leercapitulo';
 import { useColors } from '../../../theme/colors';
 
@@ -47,17 +46,22 @@ export function ChapterPicker({
           className="absolute inset-0"
         />
         <View
-          className="rounded-t-xl border-t border-zinc-800 bg-zinc-900"
-          style={{ maxHeight: '70%' }}
+          className="rounded-t-2xl"
+          style={{ backgroundColor: colors.surface, maxHeight: '70%' }}
         >
-          <View className="flex-row items-center justify-between pr-4">
-            <SectionTitle className="px-4 text-zinc-100">Capítulos</SectionTitle>
+          <View className="flex-row items-center justify-between px-4">
+            <Text
+              className="text-base font-semibold"
+              style={{ color: colors.text }}
+            >
+              Capítulos
+            </Text>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
-              className="min-h-12 min-w-12 items-center justify-center rounded-lg"
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
-              <Feather name="x" size={20} color={colors.text} />
+              <Feather name="x" size={20} color={colors.textMuted} />
             </AppPressable>
           </View>
           <FlatList
@@ -82,7 +86,7 @@ export function ChapterPicker({
                 onPress={() => onSelect(item)}
               />
             )}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
           />
         </View>
       </View>
