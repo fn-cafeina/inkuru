@@ -7,4 +7,10 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      'max-lines': ['error', 500],
+    },
+  },
 ]);
