@@ -84,8 +84,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const [scale, setScale] = useState<ReaderScale>(preferredScale);
   const [quality, setQuality] = useState<ReaderQuality>(preferredQuality);
   const [page, setPage] = useState(0);
-  // Reading starts immersive; only an explicit center tap reveals the chrome.
-  const [chromeVisible, setChromeVisible] = useState(false);
+  // Reading opens with the chrome visible; a center tap toggles it.
+  const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [keepAwake, setKeepAwake] = useState(true);
@@ -115,7 +115,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
     void saveReaderQuality(next);
   };
   const colors = useColors();
-  const hideChrome = useCallback(() => setChromeVisible(false), []);
   const toggleChrome = useCallback(
     () => setChromeVisible((visible) => !visible),
     [],
@@ -237,18 +236,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
     };
   }, [keepAwake]);
 
-  // Both system bars stay hidden for the whole chapter, so opening the chrome
-  // never resizes the page. Only the overlay fades in and out.
-  useEffect(() => {
-    if (!chromeVisible) {
-      return undefined;
-    }
-
-    const timer = setTimeout(hideChrome, 3000);
-
-    return () => clearTimeout(timer);
-  }, [chromeVisible, hideChrome]);
-
   // Warm the adjacent pages so swipes do not wait on the network.
   useEffect(() => {
     if (!data) {
@@ -298,7 +285,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               title={title}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
-              onReadActivity={hideChrome}
               onOpenNext={openChapter}
               onOpenPrev={openChapter}
               onOpenPicker={() => setPickerOpen(true)}
@@ -591,7 +577,6 @@ function ReaderPages({
   title,
   onPageChange,
   onToggleChrome,
-  onReadActivity,
   onOpenNext,
   onOpenPrev,
   onOpenPicker,
@@ -607,7 +592,6 @@ function ReaderPages({
   title: string;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
-  onReadActivity: () => void;
   onOpenNext: (chapter: MangaChapter) => void;
   onOpenPrev: (chapter: MangaChapter) => void;
   onOpenPicker: () => void;
@@ -636,7 +620,6 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
-      onReadActivity={onReadActivity}
       footer={footer}
     />
   ) : (
@@ -650,7 +633,6 @@ function ReaderPages({
       initialPage={page}
       onPageChange={onPageChange}
       onToggleChrome={onToggleChrome}
-      onReadActivity={onReadActivity}
       footer={footer}
     />
   );
@@ -665,7 +647,6 @@ function VerticalPages({
   initialPage,
   onPageChange,
   onToggleChrome,
-  onReadActivity,
   footer,
 }: {
   pages: string[];
@@ -676,7 +657,6 @@ function VerticalPages({
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
-  onReadActivity: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
@@ -736,8 +716,6 @@ function VerticalPages({
       ref={listRef}
       data={pages}
       keyExtractor={(item) => item}
-      onScrollBeginDrag={onReadActivity}
-      onMomentumScrollBegin={onReadActivity}
       renderItem={({ item, index }) => (
         <ReaderPage
           uri={item}
@@ -783,7 +761,6 @@ function PagedPages({
   initialPage,
   onPageChange,
   onToggleChrome,
-  onReadActivity,
   footer,
 }: {
   pages: string[];
@@ -795,7 +772,6 @@ function PagedPages({
   initialPage: number;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
-  onReadActivity: () => void;
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
@@ -831,7 +807,6 @@ function PagedPages({
     if (index < 0 || index >= pages.length) {
       return;
     }
-    onReadActivity();
     listRef.current?.scrollToIndex({ index, animated: true });
   };
 
@@ -914,8 +889,6 @@ function PagedPages({
       scrollEnabled={!zoomed}
       removeClippedSubviews={false}
       showsHorizontalScrollIndicator={false}
-      onScrollBeginDrag={onReadActivity}
-      onMomentumScrollBegin={onReadActivity}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       initialNumToRender={1}
