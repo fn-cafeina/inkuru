@@ -92,12 +92,14 @@ export function useRemoteData<T>(
       try {
         const result = await fetcher(controller.signal);
 
-        if (requestId !== requestRef.current) {
-          return;
-        }
-
+        // Cache valid results even if the consumer unmounted while the
+        // request was in flight; the next mount should not pay for it again.
         if (key !== undefined) {
           writeCache(key, result);
+        }
+
+        if (requestId !== requestRef.current) {
+          return;
         }
 
         setState((prev) =>
