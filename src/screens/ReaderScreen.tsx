@@ -115,10 +115,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     void saveReaderQuality(next);
   };
   const colors = useColors();
-  const hideChrome = useCallback(() => {
-    setChromeVisible(false);
-    NavigationBar.setHidden(true);
-  }, []);
+  const hideChrome = useCallback(() => setChromeVisible(false), []);
   const toggleChrome = useCallback(
     () => setChromeVisible((visible) => !visible),
     [],
@@ -240,19 +237,16 @@ export default function ReaderScreen({ navigation, route }: Props) {
     };
   }, [keepAwake]);
 
-  // True immersive: hiding both bars resizes the window. Sync the visibility
-  // with the chrome (with a grace period so taps don't fight the timer) and
-  // hide the chrome again when the user goes back to reading.
+  // Both system bars stay hidden for the whole chapter, so opening the chrome
+  // never resizes the page. Only the overlay fades in and out.
   useEffect(() => {
-    NavigationBar.setHidden(!chromeVisible);
-
-    if (chromeVisible) {
-      const timer = setTimeout(hideChrome, 3000);
-
-      return () => clearTimeout(timer);
+    if (!chromeVisible) {
+      return undefined;
     }
 
-    return undefined;
+    const timer = setTimeout(hideChrome, 3000);
+
+    return () => clearTimeout(timer);
   }, [chromeVisible, hideChrome]);
 
   // Warm the adjacent pages so swipes do not wait on the network.
@@ -271,7 +265,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
   return (
     // The reader fills the whole window behind both system bars.
     <View className="flex-1 bg-zinc-950">
-      <StatusBar hidden={!chromeVisible} hideTransitionAnimation="fade" />
+      <StatusBar hidden />
+      <NavigationBar hidden />
       <View
         className="flex-1"
         onLayout={(event) => {
