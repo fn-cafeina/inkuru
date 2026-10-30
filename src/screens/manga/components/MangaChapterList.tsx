@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 
 import { ChapterRow } from '../../../components/ChapterRow';
@@ -47,9 +47,15 @@ export function MangaChapterList({
   onScrollPast,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
+  const listRef = useRef<FlatList<MangaChapter>>(null);
+
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [rangeIndex, sortOrder]);
 
   return (
     <FlatList
+      ref={listRef}
       data={chapters}
       keyExtractor={(item) => item.path}
       ItemSeparatorComponent={ListDivider}
