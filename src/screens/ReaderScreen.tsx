@@ -83,7 +83,10 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 export default function ReaderScreen({ navigation, route }: Props) {
   const { path, title, mangaPath } = route.params;
   const insets = useSafeAreaInsets();
-  const { height: windowHeight } = useWindowDimensions();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const viewHeight = viewport.height > 0 ? viewport.height : windowHeight;
+  const viewWidth = viewport.width > 0 ? viewport.width : windowWidth;
   const [mode, setMode] = useState<ReaderMode>(preferredMode);
   const [scale, setScale] = useState<ReaderScale>(preferredScale);
   const [quality, setQuality] = useState<ReaderQuality>(preferredQuality);
@@ -262,16 +265,26 @@ export default function ReaderScreen({ navigation, route }: Props) {
   }, [data, safePage]);
 
   return (
-    // The reader owns the top inset so pages reach the status bar when the chrome is hidden.
-    <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
+    // The reader fills the whole window behind both system bars.
+    <View className="flex-1 bg-zinc-950">
       <StatusBar hidden={!chromeVisible} hideTransitionAnimation="fade" />
-      <View className="flex-1">
+      <View
+        className="flex-1"
+        onLayout={(event) => {
+          const { width, height } = event.nativeEvent.layout;
+          setViewport((prev) =>
+            prev.width === width && prev.height === height
+              ? prev
+              : { width, height },
+          );
+        }}
+      >
         {loading && !data ? (
-          <ReaderSkeleton height={windowHeight} />
+          <ReaderSkeleton height={viewHeight} />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
         ) : !data ? (
-          <ReaderSkeleton height={windowHeight} />
+          <ReaderSkeleton height={viewHeight} />
         ) : (
           <>
             <ReaderPages
@@ -280,7 +293,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
               scale={scale}
               quality={quality}
               page={safePage}
-              windowHeight={windowHeight}
+              width={viewWidth}
+              height={viewHeight}
               bottomInset={insets.bottom}
               title={title}
               onPageChange={setPage}
@@ -594,7 +608,8 @@ function ReaderPages({
   scale,
   quality,
   page,
-  windowHeight,
+  width,
+  height,
   bottomInset,
   title,
   onPageChange,
@@ -609,7 +624,8 @@ function ReaderPages({
   scale: ReaderScale;
   quality: ReaderQuality;
   page: number;
-  windowHeight: number;
+  width: number;
+  height: number;
   bottomInset: number;
   title: string;
   onPageChange: (page: number) => void;
@@ -619,14 +635,13 @@ function ReaderPages({
   onOpenPrev: (chapter: MangaChapter) => void;
   onOpenPicker: () => void;
 }) {
-  const { width } = useWindowDimensions();
   const footer = (
     <ReaderTransition
       currentTitle={data.title || title}
       next={data.next}
       prev={data.prev}
       width={width}
-      height={windowHeight}
+      height={height}
       bottomInset={bottomInset}
       onOpenNext={onOpenNext}
       onOpenPrev={onOpenPrev}
@@ -638,7 +653,7 @@ function ReaderPages({
     <VerticalPages
       pages={data.pages}
       width={width}
-      windowHeight={windowHeight}
+      windowHeight={height}
       scale={scale}
       quality={quality}
       initialPage={page}
@@ -651,7 +666,7 @@ function ReaderPages({
     <PagedPages
       pages={data.pages}
       width={width}
-      windowHeight={windowHeight}
+      windowHeight={height}
       scale={scale}
       quality={quality}
       direction={mode === 'paged-ltr' ? 'ltr' : 'rtl'}
