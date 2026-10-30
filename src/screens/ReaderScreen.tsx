@@ -60,7 +60,6 @@ import { fetchReader } from '../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../source/leercapitulo';
 import type { RootStackParamList } from '../navigation/types';
 import { useColors } from '../theme/colors';
-import { READER_PAGE_ASPECT_RATIO } from '../theme/layout';
 import { CARD, OUTLINE_CONTROL } from '../theme/styles';
 
 const pageKey = (path: string) => `reader:page:${path}`;
@@ -248,11 +247,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
       <StatusBar hidden={!chromeVisible} />
       <View className="flex-1">
         {loading && !data ? (
-          <ReaderSkeleton />
+          <ReaderSkeleton height={windowHeight} />
         ) : hasError && !data ? (
           <ErrorState message="No se pudo cargar el capítulo" onRetry={reload} />
         ) : !data ? (
-          <ReaderSkeleton />
+          <ReaderSkeleton height={windowHeight} />
         ) : (
           <>
             <ReaderPages
@@ -372,18 +371,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
   );
 }
 
-function ReaderSkeleton() {
-  const { width } = useWindowDimensions();
-
+function ReaderSkeleton({ height }: { height: number }) {
   return (
-    <View>
-      {[0, 1, 2].map((index) => (
-        <Skeleton
-          key={index}
-          className="mb-2 rounded"
-          style={{ width, aspectRatio: READER_PAGE_ASPECT_RATIO }}
-        />
-      ))}
+    <View className="flex-1" style={{ height }}>
+      <Skeleton className="h-full w-full" />
     </View>
   );
 }
