@@ -21,22 +21,22 @@ import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../components/AppPressable';
+import { AppPressable } from '../../components/AppPressable';
 import {
   CHAPTER_ROW_HEIGHT,
   CHAPTER_ROW_STEP,
   ChapterRow,
-} from '../components/ChapterRow';
-import { ErrorState } from '../components/ErrorState';
-import { ListDivider } from '../components/ListDivider';
-import { OptionChip } from '../components/OptionChip';
-import { ReaderPage } from '../components/ReaderPage';
-import { ReaderTransition } from '../components/ReaderTransition';
-import { ScreenHeader } from '../components/ScreenHeader';
-import { SectionTitle } from '../components/SectionTitle';
-import { Skeleton } from '../components/Skeleton';
-import { useRemoteData } from '../hooks/useRemoteData';
-import { markChapterRead, saveProgress } from '../storage/readerProgress';
+} from '../../components/ChapterRow';
+import { ErrorState } from '../../components/ErrorState';
+import { ListDivider } from '../../components/ListDivider';
+import { OptionChip } from '../../components/OptionChip';
+import { ReaderPage } from '../../components/ReaderPage';
+import { ReaderTransition } from '../../components/ReaderTransition';
+import { ScreenHeader } from '../../components/ScreenHeader';
+import { SectionTitle } from '../../components/SectionTitle';
+import { Skeleton } from '../../components/Skeleton';
+import { useRemoteData } from '../../hooks/useRemoteData';
+import { markChapterRead, saveProgress } from '../../storage/readerProgress';
 import {
   DEFAULT_READER_MODE,
   DEFAULT_READER_QUALITY,
@@ -51,17 +51,17 @@ import {
   saveReaderMode,
   saveReaderQuality,
   saveReaderScale,
-} from '../storage/readerSettings';
+} from '../../storage/readerSettings';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
-} from '../storage/readerSettings';
-import { fetchReader } from '../source/leercapitulo';
-import type { MangaChapter, ReaderData } from '../source/leercapitulo';
-import type { RootStackParamList } from '../navigation/types';
-import { useColors } from '../theme/colors';
-import { CARD, OUTLINE_CONTROL } from '../theme/styles';
+} from '../../storage/readerSettings';
+import { fetchReader } from '../../source/leercapitulo';
+import type { MangaChapter, ReaderData } from '../../source/leercapitulo';
+import type { RootStackParamList } from '../../navigation/types';
+import { useColors } from '../../theme/colors';
+import { CARD, OUTLINE_CONTROL } from '../../theme/styles';
 
 const pageKey = (path: string) => `reader:page:${path}`;
 

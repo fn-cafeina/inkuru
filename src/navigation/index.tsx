@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useColorScheme } from 'react-native';
 
 import MangaScreen from '../screens/MangaScreen';
-import ReaderScreen from '../screens/ReaderScreen';
+import ReaderScreen from '../screens/reader/ReaderScreen';
 import { useColors } from '../theme/colors';
 import { MainTabs } from './Tabs';
 import type { RootStackParamList } from './types';
