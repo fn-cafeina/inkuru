@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { FlatList } from 'react-native';
 import type { ListViewToken } from 'react-native';
@@ -31,7 +31,6 @@ export function VerticalPages({
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
-  const didRestore = useRef(false);
   const didRetry = useRef(false);
   const [zoomed, setZoomed] = useState(false);
   const [onViewableItemsChanged] = useState(
@@ -46,16 +45,6 @@ export function VerticalPages({
   const [viewabilityConfig] = useState(() => ({
     itemVisiblePercentThreshold: 50,
   }));
-
-  useEffect(() => {
-    if (didRestore.current) {
-      return;
-    }
-    didRestore.current = true;
-    if (initialPage > 0 && initialPage < pages.length) {
-      listRef.current?.scrollToIndex({ index: initialPage, animated: false });
-    }
-  }, [initialPage, pages.length]);
 
   const onScrollToIndexFailed = (info: {
     index: number;

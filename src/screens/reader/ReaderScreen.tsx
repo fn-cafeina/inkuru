@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, useWindowDimensions, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
@@ -44,28 +44,37 @@ function readerSubtitle(
 }
 
 export default function ReaderScreen({ navigation, route }: Props) {
-  const { path, title, mangaPath } = route.params;
+  const { path: initialPath, title: initialTitle, mangaPath } = route.params;
+  const [chapterPath, setChapterPath] = useState(initialPath);
+  const [chapterTitle, setChapterTitle] = useState(initialTitle);
   const insets = useSafeAreaInsets();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
   const viewHeight = viewport.height > 0 ? viewport.height : windowHeight;
   const viewWidth = viewport.width > 0 ? viewport.width : windowWidth;
-  const { mode, scale, quality, selectMode, selectScale, selectQuality } =
-    useReaderPreferences();
+  const {
+    mode,
+    scale,
+    quality,
+    loaded: preferencesLoaded,
+    selectMode,
+    selectScale,
+    selectQuality,
+  } = useReaderPreferences();
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const fetcher = useCallback(
-    (signal: AbortSignal) => fetchReader(path, signal),
-    [path],
+    (signal: AbortSignal) => fetchReader(chapterPath, signal),
+    [chapterPath],
   );
   const { data, hasError, loading, reload } = useRemoteData(
     fetcher,
-    `reader:${path}`,
+    `reader:${chapterPath}`,
   );
-  const { page, setPage, total } = useReaderProgress({
-    path,
-    title,
+  const { page, setPage, total, restored } = useReaderProgress({
+    path: chapterPath,
+    title: chapterTitle,
     mangaPath,
     data,
   });
@@ -76,17 +85,47 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const openChapter = (chapter: MangaChapter) => {
     setPickerOpen(false);
 
-    if (chapter.path === path) {
+    if (chapter.path === chapterPath) {
       return;
     }
 
-    navigation.replace('Reader', {
+    setChapterPath(chapter.path);
+    setChapterTitle(chapter.title);
+    setChromeVisible(true);
+    navigation.setParams({
       path: chapter.path,
       title: chapter.title,
       mangaPath,
     });
   };
   const showError = hasError && data !== null;
+  const ready = preferencesLoaded && restored;
+
+  useEffect(() => {
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (settingsOpen) {
+          setSettingsOpen(false);
+          return true;
+        }
+
+        if (pickerOpen) {
+          setPickerOpen(false);
+          return true;
+        }
+
+        if (chromeVisible) {
+          setChromeVisible(false);
+          return true;
+        }
+
+        return false;
+      },
+    );
+
+    return () => subscription.remove();
+  }, [chromeVisible, pickerOpen, settingsOpen]);
 
   return (
     // The reader fills the whole window behind both system bars.
@@ -104,7 +143,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           );
         }}
       >
-        {loading && !data ? (
+        {!ready || (loading && !data) ? (
           <ReaderSkeleton width={viewWidth} height={viewHeight} />
         ) : hasError && !data ? (
           <ErrorState
@@ -112,10 +151,9 @@ export default function ReaderScreen({ navigation, route }: Props) {
             tone="dark"
             onRetry={reload}
           />
-        ) : !data ? (
-          <ReaderSkeleton width={viewWidth} height={viewHeight} />
-        ) : (
+        ) : data ? (
           <ReaderPages
+            key={chapterPath}
             data={data}
             mode={mode}
             scale={scale}
@@ -124,18 +162,20 @@ export default function ReaderScreen({ navigation, route }: Props) {
             width={viewWidth}
             height={viewHeight}
             bottomInset={insets.bottom}
-            title={title}
+            title={chapterTitle}
             onPageChange={setPage}
             onToggleChrome={toggleChrome}
             onOpenNext={openChapter}
             onOpenPrev={openChapter}
             onOpenPicker={() => setPickerOpen(true)}
           />
+        ) : (
+          <ReaderSkeleton width={viewWidth} height={viewHeight} />
         )}
 
         <ReaderChrome
-          title={readerTitle(data, title)}
-          subtitle={readerSubtitle(data, title, page, total)}
+          title={readerTitle(data, chapterTitle)}
+          subtitle={readerSubtitle(data, chapterTitle, page, total)}
           visible={chromeVisible}
           showError={showError}
           topInset={insets.top}
@@ -147,7 +187,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
         <ChapterPicker
           visible={pickerOpen}
           chapters={data ? ascendingChapters(data.chapters) : []}
-          currentPath={path}
+          currentPath={chapterPath}
           onClose={() => setPickerOpen(false)}
           onSelect={openChapter}
         />

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { FlatList, View } from 'react-native';
 import type { ListViewToken } from 'react-native';
@@ -33,7 +33,6 @@ export function PagedPages({
   footer: ReactElement;
 }) {
   const listRef = useRef<FlatList<string>>(null);
-  const didRestore = useRef(false);
   const [zoomed, setZoomed] = useState(false);
   const [onViewableItemsChanged] = useState(
     () =>
@@ -47,19 +46,6 @@ export function PagedPages({
   const [viewabilityConfig] = useState(() => ({
     itemVisiblePercentThreshold: 50,
   }));
-
-  // The stored page can land after mount; jump once it does.
-  useEffect(() => {
-    if (didRestore.current) {
-      return;
-    }
-
-    didRestore.current = true;
-
-    if (initialPage > 0 && initialPage < pages.length) {
-      listRef.current?.scrollToIndex({ index: initialPage, animated: false });
-    }
-  }, [initialPage, pages.length]);
 
   const goToPage = (index: number) => {
     if (index < 0 || index >= pages.length) {

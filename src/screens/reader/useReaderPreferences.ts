@@ -33,6 +33,7 @@ export function useReaderPreferences() {
   const [scale, setScale] = useState<ReaderScale>(preferredScale);
   const [quality, setQuality] = useState<ReaderQuality>(preferredQuality);
   const [keepAwake, setKeepAwake] = useState(true);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -67,8 +68,12 @@ export function useReaderPreferences() {
         }
 
         setKeepAwake(storedKeepAwake);
+        setLoaded(true);
       } catch {
         // A storage failure must not block reading.
+        if (active) {
+          setLoaded(true);
+        }
       }
     };
 
@@ -80,7 +85,7 @@ export function useReaderPreferences() {
   }, []);
 
   useEffect(() => {
-    if (!keepAwake) {
+    if (!keepAwake || !loaded) {
       return;
     }
 
@@ -89,7 +94,7 @@ export function useReaderPreferences() {
     return () => {
       void deactivateKeepAwake('reader');
     };
-  }, [keepAwake]);
+  }, [keepAwake, loaded]);
 
   const selectMode = (next: ReaderMode) => {
     preferredMode = next;
@@ -111,6 +116,7 @@ export function useReaderPreferences() {
     mode,
     scale,
     quality,
+    loaded,
     selectMode,
     selectScale,
     selectQuality,

@@ -16,7 +16,7 @@ type Params = {
 
 export function useReaderProgress({ path, title, mangaPath, data }: Params) {
   const [page, setPage] = useState(0);
-  const [restored, setRestored] = useState(false);
+  const [restoredPath, setRestoredPath] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -33,7 +33,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
         // A storage failure must not block reading.
       } finally {
         if (active) {
-          setRestored(true);
+          setRestoredPath(path);
         }
       }
     };
@@ -47,6 +47,9 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
   const total = data?.pages.length ?? 0;
   const safePage = total > 0 ? Math.min(page, total - 1) : page;
+  // A path change must not expose the previous chapter's page while storage
+  // resolves, so restoration is tied to the path that was actually read.
+  const restored = restoredPath === path;
 
   useEffect(() => {
     if (!restored) {
@@ -84,5 +87,5 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     }
   }, [data, safePage]);
 
-  return { page: safePage, setPage, total };
+  return { page: safePage, setPage, total, restored };
 }
