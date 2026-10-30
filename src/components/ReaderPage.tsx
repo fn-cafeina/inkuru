@@ -205,6 +205,7 @@ export function ReaderPage({
 
   const pinch = usePinchGesture({
     onActivate: (event) => {
+      runOnJS(onZoomChange)(true);
       startScale.value = savedScale.value;
       startX.value = savedX.value;
       startY.value = savedY.value;
@@ -359,11 +360,11 @@ export function ReaderPage({
   return (
     <GestureDetector gesture={gesture}>
       <View
-        className="bg-zinc-200 dark:bg-zinc-800"
+        className="bg-zinc-950"
         style={{
           width: viewportWidth,
           height: viewportHeight,
-          overflow: paged ? 'hidden' : 'visible',
+          overflow: 'hidden',
           alignItems: 'center',
           justifyContent: 'center',
         }}
@@ -394,8 +395,9 @@ export function ReaderPage({
               key={attempt}
               source={{ uri }}
               style={{ width: baseWidth, height: baseHeight }}
-              contentFit={source ? 'fill' : 'contain'}
+              contentFit="fill"
               cachePolicy="memory-disk"
+              recyclingKey={uri}
               // `original` and the sharper quality tiers decode the full
               // bitmap; `balanced` downsamples to the view size.
               allowDownscaling={
