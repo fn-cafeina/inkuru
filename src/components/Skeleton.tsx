@@ -7,6 +7,7 @@ import { COVER_ASPECT_RATIO } from '../theme/layout';
 type Props = {
   className?: string;
   style?: StyleProp<ViewStyle>;
+  tone?: 'auto' | 'dark';
 };
 
 // One pulse for every placeholder on screen: starting a loop per skeleton made
@@ -47,14 +48,16 @@ function subscribePulse() {
   };
 }
 
-export function Skeleton({ className, style }: Props) {
+export function Skeleton({ className, style, tone = 'auto' }: Props) {
   useEffect(subscribePulse, []);
 
   return (
     <Animated.View
       accessible={false}
       importantForAccessibility="no-hide-descendants"
-      className={`bg-zinc-200 dark:bg-zinc-800 ${className ?? ''}`}
+      className={`${
+        tone === 'dark' ? 'bg-zinc-800' : 'bg-zinc-200 dark:bg-zinc-800'
+      } ${className ?? ''}`}
       style={[{ opacity }, style]}
     />
   );

@@ -109,7 +109,7 @@ export function ReaderPage({
             }
             className="items-center justify-center px-6"
           >
-            <Text className="text-center text-xs text-zinc-600 dark:text-zinc-400">
+            <Text className="text-center text-xs text-zinc-300">
               No se pudo cargar. Toca para reintentar.
             </Text>
           </AppPressable>
@@ -122,7 +122,7 @@ export function ReaderPage({
                 pointerEvents="none"
                 className="absolute inset-0 items-center justify-center"
               >
-                <Skeleton className="absolute inset-0" />
+                <Skeleton tone="dark" className="absolute inset-0" />
                 <ActivityIndicator color="#a1a1aa" />
               </View>
             )}

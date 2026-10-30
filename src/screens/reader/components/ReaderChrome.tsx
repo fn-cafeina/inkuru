@@ -4,7 +4,6 @@ import { Feather } from '@expo/vector-icons';
 import { AppPressable } from '../../../components/AppPressable';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { useColors } from '../../../theme/colors';
-import { OUTLINE_CONTROL } from '../../../theme/styles';
 
 type Props = {
   title: string;
@@ -42,7 +41,7 @@ export function ReaderChrome({
           <AppPressable
             accessibilityLabel="No se pudo actualizar. Reintentar"
             onPress={onRetry}
-            className="min-h-10 flex-row items-center rounded-lg bg-zinc-900 px-3 dark:bg-zinc-100"
+            className="min-h-10 flex-row items-center rounded-full bg-zinc-900 px-3 dark:bg-zinc-100"
           >
             <Feather name="refresh-cw" size={14} color={colors.background} />
             <Text className="ml-2 text-xs text-white dark:text-zinc-900">
@@ -60,22 +59,23 @@ export function ReaderChrome({
           <ScreenHeader
             title={title}
             subtitle={subtitle}
+            tone="dark"
             onBack={onBack}
             action={
               <View className="flex-row items-center">
                 <AppPressable
                   accessibilityLabel="Lista de capítulos"
                   onPress={onOpenPicker}
-                  className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
+                  className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
                 >
-                  <Feather name="list" size={18} color={colors.text} />
+                  <Feather name="list" size={18} color="#f4f4f5" />
                 </AppPressable>
                 <AppPressable
                   accessibilityLabel="Ajustes de lectura"
                   onPress={onOpenSettings}
-                  className={`min-h-12 min-w-12 items-center justify-center rounded-lg ${OUTLINE_CONTROL}`}
+                  className="min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
                 >
-                  <Feather name="settings" size={18} color={colors.text} />
+                  <Feather name="settings" size={18} color="#f4f4f5" />
                 </AppPressable>
               </View>
             }

@@ -17,6 +17,7 @@ export function ScreenHeader({
   onBack,
   action,
   titleVisible = true,
+  tone = 'auto',
 }: {
   title: string;
   subtitle?: string;
@@ -24,8 +25,11 @@ export function ScreenHeader({
   action?: ReactNode;
   /** Keep false until the content scrolls past its hero title. */
   titleVisible?: boolean;
+  tone?: 'auto' | 'dark';
 }) {
   const colors = useColors();
+  const textColor = tone === 'dark' ? '#f4f4f5' : colors.text;
+  const mutedColor = tone === 'dark' ? '#a1a1aa' : colors.textMuted;
   const titleOpacity = useSharedValue(titleVisible ? 1 : 0);
 
   useEffect(() => {
@@ -37,14 +41,14 @@ export function ScreenHeader({
   }));
 
   return (
-    <View className="flex-row items-center px-2 py-2">
+    <View className="flex-row items-center px-2 py-1">
       <AppPressable
         onPress={onBack}
         accessibilityLabel="Volver"
         hitSlop={8}
-        className="min-h-12 min-w-12 items-center justify-center rounded-lg"
+        className="min-h-12 min-w-12 items-center justify-center rounded-full"
       >
-        <Feather name="chevron-left" size={24} color={colors.text} />
+        <Feather name="chevron-left" size={24} color={textColor} />
       </AppPressable>
       <Animated.View
         style={titleStyle}
@@ -53,14 +57,16 @@ export function ScreenHeader({
       >
         <Text
           numberOfLines={1}
-          className="text-base font-semibold text-zinc-900 dark:text-zinc-50"
+          className="text-base font-semibold"
+          style={{ color: textColor }}
         >
           {title}
         </Text>
         {subtitle ? (
           <Text
             numberOfLines={1}
-            className="text-xs text-zinc-500 dark:text-zinc-400"
+            className="text-xs"
+            style={{ color: mutedColor }}
           >
             {subtitle}
           </Text>
