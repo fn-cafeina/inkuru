@@ -1,5 +1,12 @@
+import { useMemo, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { FlatList, Modal, Text, View } from 'react-native';
+import {
+  FlatList,
+  Modal,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
@@ -16,18 +23,34 @@ import { APP_BAR_GAP, SHEET_MAX_HEIGHT } from '../../../theme/spacing';
 export function ChapterPicker({
   visible,
   chapters,
-  current,
+  currentPath,
   onClose,
   onSelect,
 }: {
   visible: boolean;
   chapters: MangaChapter[];
-  current: number;
+  currentPath: string;
   onClose: () => void;
   onSelect: (chapter: MangaChapter) => void;
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const [query, setQuery] = useState('');
+  const showFilter = chapters.length > 50;
+  const currentIndex = chapters.findIndex(
+    (chapter) => chapter.path === currentPath,
+  );
+  const filtered = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+
+    if (!normalized) {
+      return chapters;
+    }
+
+    return chapters.filter((chapter) =>
+      chapter.title.toLowerCase().includes(normalized),
+    );
+  }, [chapters, query]);
 
   return (
     <Modal
@@ -65,8 +88,39 @@ export function ChapterPicker({
               <Feather name="x" size={20} color={colors.textMuted} />
             </AppPressable>
           </View>
+          {showFilter ? (
+            <View className="mx-4 mb-2 min-h-12 flex-row items-center rounded-full bg-zinc-100 px-3 dark:bg-zinc-800">
+              <Feather
+                name="search"
+                size={16}
+                color={colors.iconInactive}
+              />
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                accessibilityLabel="Buscar capítulo"
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholder="Buscar capítulo"
+                placeholderTextColor={colors.iconInactive}
+                className="min-h-12 flex-1 px-2 text-sm"
+                style={{ color: colors.text }}
+              />
+              {query ? (
+                <AppPressable
+                  accessibilityLabel="Limpiar búsqueda"
+                  onPress={() => setQuery('')}
+                  hitSlop={8}
+                  className="min-h-12 min-w-12 items-center justify-center rounded-full"
+                >
+                  <Feather name="x" size={16} color={colors.iconInactive} />
+                </AppPressable>
+              ) : null}
+            </View>
+          ) : null}
           <FlatList
-            data={chapters}
+            key={query}
+            data={filtered}
             keyExtractor={(item) => item.path}
             ItemSeparatorComponent={ListDivider}
             // Rows are CHAPTER_ROW_HEIGHT plus a 1px divider (CHAPTER_ROW_STEP).
@@ -76,17 +130,22 @@ export function ChapterPicker({
               index,
             })}
             initialScrollIndex={
-              chapters.length > 0
-                ? Math.min(Math.max(current, 0), chapters.length - 1)
-                : undefined
+              !query && currentIndex >= 0 ? currentIndex : undefined
             }
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
               <ChapterRow
                 title={item.title}
-                state={index === current ? 'selected' : undefined}
+                state={item.path === currentPath ? 'selected' : undefined}
                 onPress={() => onSelect(item)}
               />
             )}
+            ListEmptyComponent={
+              <View className="items-center py-8">
+                <Text className="text-sm" style={{ color: colors.textMuted }}>
+                  Sin capítulos
+                </Text>
+              </View>
+            }
             contentContainerStyle={{
               paddingTop: APP_BAR_GAP,
               paddingBottom: insets.bottom + 16,

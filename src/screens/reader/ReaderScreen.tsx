@@ -14,6 +14,7 @@ import { ReaderPages } from './pages/ReaderPages';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
+import { ascendingChapters } from '../manga/chapters';
 import { fetchReader } from '../../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../../source/leercapitulo';
 import type { RootStackParamList } from '../../navigation/types';
@@ -145,8 +146,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
         />
         <ChapterPicker
           visible={pickerOpen}
-          chapters={data?.chapters ?? []}
-          current={data?.chapterIndex ?? -1}
+          chapters={data ? ascendingChapters(data.chapters) : []}
+          currentPath={path}
           onClose={() => setPickerOpen(false)}
           onSelect={openChapter}
         />
