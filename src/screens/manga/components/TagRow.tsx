@@ -31,14 +31,13 @@ export function TagRow({ tags }: { tags: string[] }) {
       current[index] === width ? current : { ...current, [index]: width },
     );
 
-  const measured =
+  const overflowWidth = widths[tags.length];
+  const rows =
     available > 0 &&
-    tags.every((_, index) => widths[index] !== undefined) &&
-    widths[tags.length] !== undefined;
-
-  const rows = measured
-    ? layoutTagRows(tags.length, widths, available, widths[tags.length])
-    : null;
+    overflowWidth !== undefined &&
+    tags.every((_, index) => widths[index] !== undefined)
+      ? layoutTagRows(tags.length, widths, available, overflowWidth)
+      : null;
 
   return (
     <View
@@ -49,16 +48,24 @@ export function TagRow({ tags }: { tags: string[] }) {
         <>
           {rows.first.length > 0 ? (
             <View className="flex-row gap-1.5 overflow-hidden">
-              {rows.first.map((index) => (
-                <TagChip key={`${tags[index]}-${index}`} label={tags[index]} />
-              ))}
+              {rows.first.map((index) => {
+                const tag = tags[index];
+
+                return tag === undefined ? null : (
+                  <TagChip key={`${tag}-${index}`} label={tag} />
+                );
+              })}
             </View>
           ) : null}
           {rows.second.length > 0 || rows.hidden > 0 ? (
             <View className="flex-row gap-1.5 overflow-hidden">
-              {rows.second.map((index) => (
-                <TagChip key={`${tags[index]}-${index}`} label={tags[index]} />
-              ))}
+              {rows.second.map((index) => {
+                const tag = tags[index];
+
+                return tag === undefined ? null : (
+                  <TagChip key={`${tag}-${index}`} label={tag} />
+                );
+              })}
               {rows.hidden > 0 ? <TagChip label={`+${rows.hidden}`} /> : null}
             </View>
           ) : null}
@@ -95,12 +102,13 @@ function layoutTagRows(
 ) {
   const indices = (from: number, length: number) =>
     Array.from({ length }, (_, offset) => from + offset);
+  const widthAt = (index: number) => widths[index] ?? 0;
 
   let firstCount = 0;
   let used = 0;
 
   while (firstCount < count) {
-    const next = used + (firstCount > 0 ? TAG_ROW_GAP : 0) + widths[firstCount];
+    const next = used + (firstCount > 0 ? TAG_ROW_GAP : 0) + widthAt(firstCount);
 
     if (next > available) {
       break;
@@ -120,7 +128,7 @@ function layoutTagRows(
   while (firstCount + secondCount < count) {
     const index = firstCount + secondCount;
     const next =
-      used + (secondCount > 0 ? TAG_ROW_GAP : 0) + widths[index];
+      used + (secondCount > 0 ? TAG_ROW_GAP : 0) + widthAt(index);
 
     if (next > available) {
       break;
@@ -147,7 +155,7 @@ function layoutTagRows(
     const next =
       used +
       (secondCount > 0 ? TAG_ROW_GAP : 0) +
-      widths[index] +
+      widthAt(index) +
       TAG_ROW_GAP +
       overflowWidth;
 
@@ -155,7 +163,7 @@ function layoutTagRows(
       break;
     }
 
-    used += (secondCount > 0 ? TAG_ROW_GAP : 0) + widths[index];
+    used += (secondCount > 0 ? TAG_ROW_GAP : 0) + widthAt(index);
     secondCount += 1;
   }
 
