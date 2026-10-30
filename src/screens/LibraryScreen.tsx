@@ -1,5 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
-import { FlatList, useWindowDimensions } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import {
   useFocusEffect,
   useNavigation,
@@ -11,21 +16,29 @@ import { EmptyState } from '../components/EmptyState';
 import { MangaGridCard } from '../components/MangaGridCard';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
-import { MangaGridSkeleton } from '../components/Skeleton';
 import type { TabNavigation } from '../navigation/types';
 import { loadLibrary } from '../storage/library';
 import type { LibraryEntry } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
+import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
+
+let cachedEntries: LibraryEntry[] | null = null;
+let cachedProgress: Record<string, ReaderProgress> = {};
 
 export default function LibraryScreen() {
   const navigation = useNavigation<TabNavigation<'Library'>>();
+  const colors = useColors();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<LibraryEntry>>(null);
   useScrollToTop(listRef);
-  const [entries, setEntries] = useState<LibraryEntry[] | null>(null);
-  const [progress, setProgress] = useState<Record<string, ReaderProgress>>({});
+  const [entries, setEntries] = useState<LibraryEntry[]>(
+    () => cachedEntries ?? [],
+  );
+  const [progress, setProgress] =
+    useState<Record<string, ReaderProgress>>(cachedProgress);
+  const [loaded, setLoaded] = useState(cachedEntries !== null);
   const cardWidth = mangaCardWidth(width);
 
   useFocusEffect(
@@ -34,14 +47,14 @@ export default function LibraryScreen() {
 
       void (async () => {
         const items = await loadLibrary();
-        const loaded: Record<string, ReaderProgress> = {};
+        const loadedProgress: Record<string, ReaderProgress> = {};
 
         await Promise.all(
           items.map(async (entry) => {
             const value = await loadProgress(entry.path);
 
             if (value) {
-              loaded[entry.path] = value;
+              loadedProgress[entry.path] = value;
             }
           }),
         );
@@ -50,8 +63,13 @@ export default function LibraryScreen() {
           return;
         }
 
-        setEntries([...items].sort((a, b) => b.addedAt - a.addedAt));
-        setProgress(loaded);
+        const sorted = [...items].sort((a, b) => b.addedAt - a.addedAt);
+
+        cachedEntries = sorted;
+        cachedProgress = loadedProgress;
+        setEntries(sorted);
+        setProgress(loadedProgress);
+        setLoaded(true);
       })();
 
       return () => {
@@ -64,8 +82,10 @@ export default function LibraryScreen() {
     <Screen>
       <PageTitle>Biblioteca</PageTitle>
 
-      {!entries ? (
-        <MangaGridSkeleton cardWidth={cardWidth} />
+      {!loaded ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color={colors.iconInactive} />
+        </View>
       ) : entries.length === 0 ? (
         <EmptyState
           title="Biblioteca vacía"
@@ -86,7 +106,7 @@ export default function LibraryScreen() {
           keyExtractor={(item) => item.path}
           numColumns={3}
           columnWrapperStyle={{ gap: CARD_GAP }}
-          contentContainerClassName="px-4 pb-4"
+          contentContainerClassName="px-4 pb-6"
           renderItem={({ item }) => (
             <MangaGridCard
               title={item.title}

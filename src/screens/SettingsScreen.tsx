@@ -6,7 +6,6 @@ import { ChoiceRow } from '../components/ChoiceRow';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { SettingSection } from '../components/SettingSection';
-import { Skeleton } from '../components/Skeleton';
 import { useColors } from '../theme/colors';
 import {
   DEFAULT_READER_MODE,
@@ -35,7 +34,6 @@ export default function SettingsScreen() {
   const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
   const [quality, setQuality] = useState<ReaderQuality>(DEFAULT_READER_QUALITY);
   const [keepAwake, setKeepAwake] = useState(true);
-  const [loaded, setLoaded] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -52,7 +50,6 @@ export default function SettingsScreen() {
           setScale(storedScale ?? DEFAULT_READER_SCALE);
           setQuality(storedQuality ?? DEFAULT_READER_QUALITY);
           setKeepAwake(storedKeepAwake);
-          setLoaded(true);
         }
       });
 
@@ -90,70 +87,51 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-4 pb-6"
       >
-        {loaded ? (
-          <>
-            <SettingSection title="Modo de lectura" groupRole="radiogroup">
-              {READER_MODE_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={mode === option.value}
-                  divider={index > 0}
-                  onPress={() => selectMode(option.value)}
-                />
-              ))}
-            </SettingSection>
+        <SettingSection title="Modo de lectura" groupRole="radiogroup">
+          {READER_MODE_OPTIONS.map((option, index) => (
+            <ChoiceRow
+              key={option.value}
+              label={option.label}
+              selected={mode === option.value}
+              divider={index > 0}
+              onPress={() => selectMode(option.value)}
+            />
+          ))}
+        </SettingSection>
 
-            <SettingSection title="Escala de página" groupRole="radiogroup">
-              {READER_SCALE_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={scale === option.value}
-                  divider={index > 0}
-                  onPress={() => selectScale(option.value)}
-                />
-              ))}
-            </SettingSection>
+        <SettingSection title="Escala de página" groupRole="radiogroup">
+          {READER_SCALE_OPTIONS.map((option, index) => (
+            <ChoiceRow
+              key={option.value}
+              label={option.label}
+              selected={scale === option.value}
+              divider={index > 0}
+              onPress={() => selectScale(option.value)}
+            />
+          ))}
+        </SettingSection>
 
-            <SettingSection title="Calidad de imagen" groupRole="radiogroup">
-              {READER_QUALITY_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={quality === option.value}
-                  divider={index > 0}
-                  onPress={() => selectQuality(option.value)}
-                />
-              ))}
-            </SettingSection>
+        <SettingSection title="Calidad de imagen" groupRole="radiogroup">
+          {READER_QUALITY_OPTIONS.map((option, index) => (
+            <ChoiceRow
+              key={option.value}
+              label={option.label}
+              selected={quality === option.value}
+              divider={index > 0}
+              onPress={() => selectQuality(option.value)}
+            />
+          ))}
+        </SettingSection>
 
-            <SettingSection title="Pantalla">
-              <SwitchRow
-                label="Mantener encendida"
-                value={keepAwake}
-                onValueChange={selectKeepAwake}
-              />
-            </SettingSection>
-          </>
-        ) : (
-          <SettingsSkeleton />
-        )}
+        <SettingSection title="Pantalla">
+          <SwitchRow
+            label="Mantener encendida"
+            value={keepAwake}
+            onValueChange={selectKeepAwake}
+          />
+        </SettingSection>
       </ScrollView>
     </Screen>
-  );
-}
-
-function SettingsSkeleton() {
-  return (
-    <View>
-      {[0, 1, 2, 3].map((index) => (
-        <View key={index} className="mt-6">
-          <Skeleton className="h-3 w-32 rounded" />
-          <Skeleton className="mt-3 h-24 rounded-2xl" />
-        </View>
-      ))}
-    </View>
   );
 }
 

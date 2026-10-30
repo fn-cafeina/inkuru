@@ -104,7 +104,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
         }}
       >
         {loading && !data ? (
-          <ReaderSkeleton height={viewHeight} />
+          <ReaderSkeleton width={viewWidth} height={viewHeight} />
         ) : hasError && !data ? (
           <ErrorState
             message="No se pudo cargar el capítulo"
@@ -112,7 +112,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
             onRetry={reload}
           />
         ) : !data ? (
-          <ReaderSkeleton height={viewHeight} />
+          <ReaderSkeleton width={viewWidth} height={viewHeight} />
         ) : (
           <ReaderPages
             data={data}

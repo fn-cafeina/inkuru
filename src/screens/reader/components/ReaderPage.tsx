@@ -8,7 +8,6 @@ import { Image } from 'expo-image';
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { AppPressable } from '../../../components/AppPressable';
-import { Skeleton } from '../../../components/Skeleton';
 import { pageBox } from '../readerPageLayout';
 import type { SourceSize } from '../readerPageLayout';
 import { usePageGestures } from '../usePageGestures';
@@ -120,9 +119,8 @@ export function ReaderPage({
                 accessible={false}
                 importantForAccessibility="no-hide-descendants"
                 pointerEvents="none"
-                className="absolute inset-0 items-center justify-center"
+                className="absolute inset-0 items-center justify-center bg-zinc-900"
               >
-                <Skeleton tone="dark" className="absolute inset-0" />
                 <ActivityIndicator color="#a1a1aa" />
               </View>
             )}
@@ -136,6 +134,7 @@ export function ReaderPage({
                 contentFit="fill"
                 cachePolicy="memory-disk"
                 recyclingKey={uri}
+                transition={100}
                 // `original` and the sharper quality tiers decode the full
                 // bitmap; `balanced` downsamples to the view size.
                 allowDownscaling={
