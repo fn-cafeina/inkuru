@@ -34,3 +34,8 @@ Android manga reader app.
 ## Structure
 
 - No router. Entry `index.ts` renders `App.tsx`.
+- Screens live in `src/screens/<screen>/`, with screen-private components in
+  `components/` and pure helpers next to the screen.
+- Shared UI lives in `src/components/`. Move a component there only when more
+  than one screen uses it.
+- Keep files under 500 lines; ESLint enforces this with `max-lines`.
