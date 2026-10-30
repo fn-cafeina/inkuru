@@ -15,9 +15,9 @@ export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
 export const DEFAULT_READER_QUALITY: ReaderQuality = 'balanced';
 
 export const READER_MODE_OPTIONS = [
-  { value: 'webtoon', label: 'Cascada' },
-  { value: 'paged-ltr', label: 'Tradicional' },
-  { value: 'paged-rtl', label: 'Manga' },
+  { value: 'webtoon', label: 'Cascada · Vertical' },
+  { value: 'paged-ltr', label: 'Tradicional · Izq→Der' },
+  { value: 'paged-rtl', label: 'Manga · Der→Izq' },
 ] as const;
 
 export const READER_SCALE_OPTIONS = [

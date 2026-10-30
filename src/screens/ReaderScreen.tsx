@@ -464,11 +464,11 @@ function ChapterPicker({
           className="absolute inset-0"
         />
         <View
-          className="rounded-t-xl bg-zinc-50 dark:bg-zinc-950"
+          className="rounded-t-xl border-t border-zinc-800 bg-zinc-900"
           style={{ maxHeight: '70%' }}
         >
           <View className="flex-row items-center justify-between pr-4">
-            <SectionTitle className="px-4">Capítulos</SectionTitle>
+            <SectionTitle className="px-4 text-zinc-100">Capítulos</SectionTitle>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
@@ -575,11 +575,13 @@ function ReaderSettingsSheet({
           className="absolute inset-0"
         />
         <View
-          className="rounded-t-xl bg-zinc-50 dark:bg-zinc-950"
+          className="rounded-t-xl border-t border-zinc-800 bg-zinc-900"
           style={{ maxHeight: '85%' }}
         >
           <View className="flex-row items-center justify-between pr-4">
-            <SectionTitle className="px-4">Ajustes de lectura</SectionTitle>
+            <SectionTitle className="px-4 text-zinc-100">
+              Ajustes de lectura
+            </SectionTitle>
             <AppPressable
               accessibilityLabel="Cerrar"
               onPress={onClose}
