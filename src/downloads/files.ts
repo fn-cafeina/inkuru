@@ -127,7 +127,7 @@ export function deleteChapterFiles(chapterPath: string) {
   try {
     directory.delete();
   } catch {
-    // The manager will mark the chapter as failed and retry later.
+    // A leftover directory is swept on the next launch.
   }
 }
 
