@@ -38,7 +38,21 @@ type MangaLocalState = {
 
 // Keep the last local state per manga so reopening a title does not flash the
 // wrong CTA while AsyncStorage resolves.
+const LOCAL_CACHE_LIMIT = 20;
 const localCache = new Map<string, MangaLocalState>();
+
+function rememberLocal(path: string, state: MangaLocalState) {
+  localCache.delete(path);
+  localCache.set(path, state);
+
+  if (localCache.size > LOCAL_CACHE_LIMIT) {
+    const oldest = localCache.keys().next().value;
+
+    if (oldest !== undefined) {
+      localCache.delete(oldest);
+    }
+  }
+}
 
 function mangaTitle(data: MangaDetail | null, fallback?: string): string {
   return data?.title ?? fallback ?? '';
@@ -84,7 +98,7 @@ export default function MangaScreen({ navigation, route }: Props) {
         isInLibrary(path),
       ]).then(([value, reads, saved]) => {
         if (active) {
-          localCache.set(path, {
+          rememberLocal(path, {
             progress: value,
             readChapters: reads,
             inLibrary: saved,
@@ -127,7 +141,7 @@ export default function MangaScreen({ navigation, route }: Props) {
     }
 
     setInLibrary(!inLibrary);
-    localCache.set(path, {
+    rememberLocal(path, {
       progress,
       readChapters,
       inLibrary: !inLibrary,
