@@ -4,13 +4,7 @@ import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
-import { ChoiceRow } from '../../../components/ChoiceRow';
-import { SettingSection } from '../../../components/SettingSection';
-import {
-  READER_MODE_OPTIONS,
-  READER_QUALITY_OPTIONS,
-  READER_SCALE_OPTIONS,
-} from '../../../storage/readerSettings';
+import { ReaderPreferenceSections } from '../../../components/ReaderPreferenceSections';
 import type {
   ReaderMode,
   ReaderQuality,
@@ -66,65 +60,36 @@ export function ReaderSettingsSheet({
           height: SHEET_HEIGHT,
         }}
       >
-          <View className="min-h-14 flex-row items-center justify-between px-4">
-            <Text
-              className="text-base font-semibold"
-              style={{ color: colors.text }}
-            >
-              Lectura
-            </Text>
-            <AppPressable
-              accessibilityLabel="Cerrar"
-              onPress={onClose}
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
-            >
-              <Feather name="x" size={20} color={colors.textMuted} />
-            </AppPressable>
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
-            contentContainerClassName="px-4"
+        <View className="min-h-14 flex-row items-center justify-between px-4">
+          <Text
+            className="text-base font-semibold"
+            style={{ color: colors.text }}
           >
-            <SettingSection
-              title="Modo de lectura"
-              groupRole="radiogroup"
-              className="mt-2"
-            >
-              {READER_MODE_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={mode === option.value}
-                  divider={index > 0}
-                  onPress={() => onSelectMode(option.value)}
-                />
-              ))}
-            </SettingSection>
-            <SettingSection title="Escala de página" groupRole="radiogroup">
-              {READER_SCALE_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={scale === option.value}
-                  divider={index > 0}
-                  disabled={mode === 'webtoon'}
-                  onPress={() => onSelectScale(option.value)}
-                />
-              ))}
-            </SettingSection>
-            <SettingSection title="Calidad de imagen" groupRole="radiogroup">
-              {READER_QUALITY_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={quality === option.value}
-                  divider={index > 0}
-                  onPress={() => onSelectQuality(option.value)}
-                />
-              ))}
-            </SettingSection>
-          </ScrollView>
+            Lectura
+          </Text>
+          <AppPressable
+            accessibilityLabel="Cerrar"
+            onPress={onClose}
+            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+          >
+            <Feather name="x" size={20} color={colors.textMuted} />
+          </AppPressable>
+        </View>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+          contentContainerClassName="px-4"
+        >
+          <ReaderPreferenceSections
+            mode={mode}
+            scale={scale}
+            quality={quality}
+            onSelectMode={onSelectMode}
+            onSelectScale={onSelectScale}
+            onSelectQuality={onSelectQuality}
+            firstSectionClassName="mt-2"
+          />
+        </ScrollView>
       </Animated.View>
     </Animated.View>
   );

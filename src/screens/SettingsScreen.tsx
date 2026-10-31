@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 import { ScrollView, Switch, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
-import { ChoiceRow } from '../components/ChoiceRow';
 import { AppPressable } from '../components/AppPressable';
 import { PageTitle } from '../components/PageTitle';
+import { ReaderPreferenceSections } from '../components/ReaderPreferenceSections';
 import { Screen } from '../components/Screen';
 import { SettingSection } from '../components/SettingSection';
 import { useColors } from '../theme/colors';
@@ -12,9 +12,6 @@ import {
   DEFAULT_READER_MODE,
   DEFAULT_READER_QUALITY,
   DEFAULT_READER_SCALE,
-  READER_MODE_OPTIONS,
-  READER_QUALITY_OPTIONS,
-  READER_SCALE_OPTIONS,
   loadKeepAwake,
   loadReaderMode,
   loadReaderQuality,
@@ -88,45 +85,15 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-4 pb-6"
       >
-        <SettingSection
-          title="Modo de lectura"
-          groupRole="radiogroup"
-          className="mt-0"
-        >
-          {READER_MODE_OPTIONS.map((option, index) => (
-            <ChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={mode === option.value}
-              divider={index > 0}
-              onPress={() => selectMode(option.value)}
-            />
-          ))}
-        </SettingSection>
-        <SettingSection title="Escala de página" groupRole="radiogroup">
-          {READER_SCALE_OPTIONS.map((option, index) => (
-            <ChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={scale === option.value}
-              divider={index > 0}
-              disabled={mode === 'webtoon'}
-              onPress={() => selectScale(option.value)}
-            />
-          ))}
-        </SettingSection>
-
-        <SettingSection title="Calidad de imagen" groupRole="radiogroup">
-          {READER_QUALITY_OPTIONS.map((option, index) => (
-            <ChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={quality === option.value}
-              divider={index > 0}
-              onPress={() => selectQuality(option.value)}
-            />
-          ))}
-        </SettingSection>
+        <ReaderPreferenceSections
+          mode={mode}
+          scale={scale}
+          quality={quality}
+          onSelectMode={selectMode}
+          onSelectScale={selectScale}
+          onSelectQuality={selectQuality}
+          firstSectionClassName="mt-0"
+        />
 
         <SettingSection title="Pantalla">
           <SwitchRow
