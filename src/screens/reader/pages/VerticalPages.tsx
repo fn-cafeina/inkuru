@@ -119,7 +119,7 @@ export function VerticalPages({
     <FlatList
       ref={listRef}
       data={pages}
-      keyExtractor={(item) => item}
+      keyExtractor={(_, index) => String(index)}
       renderItem={({ item, index }) => (
         <ReaderPage
           uri={item}

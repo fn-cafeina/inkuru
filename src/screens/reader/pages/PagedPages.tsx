@@ -95,7 +95,7 @@ export function PagedPages({
       inverted={direction === 'rtl'}
       pagingEnabled
       data={pages}
-      keyExtractor={(item) => item}
+      keyExtractor={(_, index) => String(index)}
       getItemLayout={(_, index) => ({
         length: width,
         offset: width * index,
