@@ -1,4 +1,5 @@
-import { Image, Text } from 'react-native';
+import { Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import { AppPressable } from './AppPressable';
@@ -32,13 +33,20 @@ export function MangaGridCard({
       style={{ width }}
       className="mb-3 rounded-2xl p-1"
     >
-      <Image
-        source={{ uri: cover }}
+      <View
+        className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
         style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
-        className="rounded-xl bg-zinc-200 dark:bg-zinc-800"
-        resizeMode="cover"
-        accessible={false}
-      />
+      >
+        <Image
+          source={{ uri: cover }}
+          style={{ width: '100%', height: '100%' }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          recyclingKey={cover}
+          transition={100}
+          accessible={false}
+        />
+      </View>
       <Text
         numberOfLines={2}
         className="mt-2 text-sm font-medium text-zinc-900 dark:text-zinc-100"

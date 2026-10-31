@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
@@ -175,8 +176,11 @@ function MangaCoverInfo({
       >
         <Image
           source={{ uri: manga.cover }}
-          className="h-full w-full"
-          resizeMode="cover"
+          style={{ width: '100%', height: '100%' }}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+          recyclingKey={manga.cover}
+          transition={100}
           accessible={false}
         />
       </View>
