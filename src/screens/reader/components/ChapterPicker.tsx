@@ -1,12 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
@@ -23,12 +23,6 @@ import type { MangaChapter } from '../../../source/leercapitulo';
 import { useColors } from '../../../theme/colors';
 import { APP_BAR_GAP } from '../../../theme/spacing';
 
-function chapterNumber(title: string): number | undefined {
-  const match = title.match(/\d+(?:[.,]\d+)?/);
-
-  return match ? Number(match[0].replace(',', '.')) : undefined;
-}
-
 export function ChapterPicker({
   visible,
   chapters,
@@ -44,7 +38,9 @@ export function ChapterPicker({
 }) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const [query, setQuery] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const showFilter = chapters.length > 50;
   const currentIndex = chapters.findIndex(
     (chapter) => chapter.path === currentPath,
@@ -56,21 +52,40 @@ export function ChapterPicker({
       return chapters;
     }
 
-    const numeric = /^\d+(?:[.,]\d+)?$/.test(normalized)
-      ? Number(normalized.replace(',', '.'))
-      : undefined;
-
     return chapters.filter((chapter) =>
-      numeric !== undefined
-        ? chapterNumber(chapter.title) === numeric
-        : chapter.title.toLowerCase().includes(normalized),
+      chapter.title.toLowerCase().includes(normalized),
     );
   }, [chapters, query]);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hide = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   if (!visible) {
     return null;
   }
 
+  const panelHeight = Math.max(
+    240,
+    Math.min(
+      windowHeight * 0.7,
+      windowHeight - keyboardHeight - insets.top - 16,
+    ),
+  );
   const close = () => {
     Keyboard.dismiss();
     onClose();
@@ -93,14 +108,17 @@ export function ChapterPicker({
         className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
       />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1, justifyContent: 'flex-end' }}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'flex-end',
+          paddingBottom: keyboardHeight,
+        }}
       >
         <Animated.View
           entering={SlideInDown.duration(200)}
           className="rounded-t-2xl"
-          style={{ backgroundColor: colors.surface, height: '70%' }}
+          style={{ backgroundColor: colors.surface, height: panelHeight }}
         >
           <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
@@ -180,7 +198,7 @@ export function ChapterPicker({
             }}
           />
         </Animated.View>
-      </KeyboardAvoidingView>
+      </View>
     </Animated.View>
   );
 }
