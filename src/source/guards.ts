@@ -24,11 +24,7 @@ function isMangaChapter(value: unknown): value is MangaChapter {
     return false;
   }
 
-  return (
-    isString(value.title) &&
-    isString(value.path) &&
-    isOptionalString(value.date)
-  );
+  return isString(value.title) && isString(value.path);
 }
 
 function isMangaListItem(value: unknown): value is MangaListItem {

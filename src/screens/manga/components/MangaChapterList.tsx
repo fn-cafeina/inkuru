@@ -14,7 +14,6 @@ import {
 import { useDownloadVersion } from '../../../hooks/useDownloads';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
-import { formatSourceDate } from '../../../utils/formatDate';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
 import { ChapterDownloadButton } from './ChapterDownloadButton';
@@ -116,7 +115,6 @@ export function MangaChapterList({
       renderItem={({ item }) => (
         <ChapterRow
           title={item.title}
-          date={item.date ? formatSourceDate(item.date) : undefined}
           state={getChapterState(item.path, currentChapterPath, readSet)}
           trailing={
             <ChapterDownloadButton

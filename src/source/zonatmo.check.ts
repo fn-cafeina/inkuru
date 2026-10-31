@@ -71,7 +71,6 @@ assertEqual(
   'primer capítulo',
 );
 assertEqual(item(manga.chapters, 0).title, 'Capítulo 248', 'título del primer capítulo');
-assertEqual(item(manga.chapters, 0).date, '2026-10-22', 'fecha del primer capítulo');
 
 const reader = parseReader(READER_FIXTURE);
 

@@ -20,13 +20,11 @@ const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
 
 export function ChapterRow({
   title,
-  date,
   state,
   trailing,
   onPress,
 }: {
   title: string;
-  date?: string;
   state?: ChapterRowState;
   trailing?: ReactNode;
   onPress: () => void;
@@ -52,11 +50,6 @@ export function ChapterRow({
       >
         {title}
       </Text>
-      {date ? (
-        <Text className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
-          {date}
-        </Text>
-      ) : null}
       {trailing ? <View className="ml-2">{trailing}</View> : null}
       {state === 'selected' ? (
         <View className="ml-2">

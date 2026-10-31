@@ -23,7 +23,6 @@ const STATUS_VALUES: Record<string, string> = {
 export type MangaChapter = {
   title: string;
   path: string;
-  date?: string;
 };
 
 export type MangaFact = {
@@ -281,7 +280,6 @@ function parseMangaChapter(block: string): MangaChapter | undefined {
   return {
     title,
     path: toPath(rawPath),
-    date: parseChapterDate(textWithClass(block, 'span', 'text-muted')),
   };
 }
 
@@ -323,15 +321,6 @@ function parseMangaSynopsis(html: string): string {
   )?.[1];
 
   return paragraph !== undefined ? cleanText(paragraph) : '';
-}
-
-function parseChapterDate(value: string | undefined): string | undefined {
-  const match = value ? /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value) : null;
-  const day = match?.[1];
-  const month = match?.[2];
-  const year = match?.[3];
-
-  return day && month && year ? `${year}-${month}-${day}` : value;
 }
 
 function extractCover(block: string): string | undefined {
