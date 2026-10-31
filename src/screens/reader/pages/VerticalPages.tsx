@@ -73,7 +73,9 @@ export function VerticalPages({
     [pageHeight],
   );
   const [viewabilityConfig] = useState(() => ({
-    itemVisiblePercentThreshold: 50,
+    // Webtoon pages can be taller than the viewport, so half of a page is not
+    // always reachable; a low threshold keeps the reported page moving.
+    itemVisiblePercentThreshold: 10,
   }));
 
   const onScrollToIndexFailed = (info: {
