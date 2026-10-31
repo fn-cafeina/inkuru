@@ -30,7 +30,6 @@ export function MainTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarHideOnKeyboard: true,
         sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.iconInactive,

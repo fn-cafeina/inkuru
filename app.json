@@ -15,6 +15,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "backgroundColor": "#fafafa",
+      "softwareKeyboardLayoutMode": "pan",
       "predictiveBackGestureEnabled": true
     },
     "plugins": [
