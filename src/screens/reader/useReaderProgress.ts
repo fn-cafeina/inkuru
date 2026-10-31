@@ -141,7 +141,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
         pageUrl !== undefined &&
         !pageUrl.startsWith('file://')
       ) {
-        void Image.prefetch(pageUrl);
+        void Image.prefetch(pageUrl).catch(() => undefined);
       }
     }
   }, [data, safePage]);

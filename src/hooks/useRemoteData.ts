@@ -122,7 +122,13 @@ export function useRemoteData<T>(
             ? { ...prev, data: result, savedAt, hasError: false }
             : prev,
         );
-      } catch {
+      } catch (error) {
+        // Expected when superseded or timed out; real failures (network,
+        // markup changes) are logged so they are not invisible.
+        if (!controller.signal.aborted) {
+          console.warn(`[useRemoteData] ${key ?? 'reader'}:`, error);
+        }
+
         if (requestId === requestRef.current) {
           setState((prev) =>
             prev.key === key ? { ...prev, hasError: true } : prev,

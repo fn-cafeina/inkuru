@@ -339,7 +339,7 @@ async function runDownload(input: DownloadInput) {
     states.delete(chapterPath);
     forgetRemoteCache(`reader:${chapterPath}`);
     notify();
-  } catch {
+  } catch (error) {
     const wasCancelled = runs.consumeCancel(chapterPath);
 
     if (!runs.isCurrent(chapterPath, generation)) {
@@ -349,6 +349,9 @@ async function runDownload(input: DownloadInput) {
 
       return;
     }
+
+    // Log real failures (fetch, write, JSON) so "failed" is diagnosable.
+    console.warn(`[downloads] ${chapterPath}:`, error);
 
     deleteChapterFiles(chapterPath);
 
