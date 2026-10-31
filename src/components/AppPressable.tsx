@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { useColors } from '../theme/colors';
 
@@ -17,10 +17,7 @@ export function AppPressable({
   ...rest
 }: Props) {
   const colors = useColors();
-  const ripple =
-    pressFeedback && Platform.OS === 'android'
-      ? { color: colors.ripple }
-      : undefined;
+  const ripple = pressFeedback ? { color: colors.ripple } : undefined;
 
   return (
     <Pressable
@@ -29,18 +26,9 @@ export function AppPressable({
       className={`overflow-hidden ${className ?? ''}`}
       {...rest}
     >
-      {({ pressed }) => (
-        <>
-          {typeof children === 'function' ? children({ pressed }) : children}
-          {pressFeedback && Platform.OS !== 'android' && pressed ? (
-            <View
-              pointerEvents="none"
-              className="absolute inset-0"
-              style={{ backgroundColor: colors.ripple }}
-            />
-          ) : null}
-        </>
-      )}
+      {({ pressed }) =>
+        typeof children === 'function' ? children({ pressed }) : children
+      }
     </Pressable>
   );
 }
