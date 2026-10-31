@@ -38,8 +38,11 @@ export function VerticalPages({
   const didRetry = useRef(false);
   const initialIndex =
     pages.length > 0 ? Math.min(initialPage, pages.length - 1) : 0;
-  // The initial scroll can report page 0 before it lands; do not persist that.
-  const pendingRestore = useRef(initialIndex > 0);
+  // getItemLayout estimates a uniform height, but webtoon pages differ, so the
+  // initial scroll lands near the target rather than on it. Reporting that
+  // landing page would overwrite the saved position with the wrong one, so
+  // nothing is reported until the target page is actually seen.
+  const restoreRef = useRef({ pending: initialIndex > 0, retried: false });
   const [zoomed, setZoomed] = useState(false);
   const [footerReady, setFooterReady] = useState(pages.length === 0);
   const markFooterReady = useCallback(() => setFooterReady(true), []);
@@ -52,12 +55,21 @@ export function VerticalPages({
           return;
         }
 
-        if (pendingRestore.current) {
-          if (index === 0) {
+        if (restoreRef.current.pending) {
+          if (index === initialIndex) {
+            restoreRef.current.pending = false;
+          } else if (!restoreRef.current.retried) {
+            // Landing short of the target: re-anchor once, then wait for the
+            // target to scroll into view.
+            restoreRef.current.retried = true;
+            listRef.current?.scrollToIndex({
+              index: initialIndex,
+              animated: false,
+            });
+            return;
+          } else {
             return;
           }
-
-          pendingRestore.current = false;
         }
 
         onPageChange(index);
