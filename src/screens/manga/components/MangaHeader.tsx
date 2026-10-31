@@ -11,6 +11,7 @@ import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
 import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 import { useColors } from '../../../theme/colors';
+import { formatSourceDate } from '../../../utils/formatDate';
 import type { ChapterRange } from '../chapters';
 import { TagRow } from './TagRow';
 
@@ -212,7 +213,7 @@ function MangaCoverInfo({
         ) : null}
         {updated ? (
           <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            {`Actualizado ${updated}`}
+            {`Actualizado ${formatSourceDate(updated)}`}
           </Text>
         ) : null}
       </View>

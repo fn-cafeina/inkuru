@@ -37,7 +37,7 @@ function readerSubtitle(
 
   return [
     data.mangaTitle ? data.title || title : undefined,
-    total > 0 ? `${page + 1}/${total}` : undefined,
+    total > 0 ? `Página ${page + 1} de ${total}` : undefined,
   ]
     .filter(Boolean)
     .join(' · ');

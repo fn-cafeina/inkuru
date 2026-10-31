@@ -7,6 +7,7 @@ import { ListDivider } from '../../../components/ListDivider';
 import { RefreshNotice } from '../../../components/RefreshNotice';
 import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
 import { useColors } from '../../../theme/colors';
+import { formatSourceDate } from '../../../utils/formatDate';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
 import { MangaHeader } from './MangaHeader';
@@ -69,7 +70,7 @@ export function MangaChapterList({
       renderItem={({ item }) => (
         <ChapterRow
           title={item.title}
-          date={item.date}
+          date={item.date ? formatSourceDate(item.date) : undefined}
           state={getChapterState(item.path, currentChapterPath, readSet)}
           onPress={() => onOpen(item)}
         />

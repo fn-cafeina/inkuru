@@ -12,6 +12,7 @@ type Props = {
   width: number;
   height: number;
   bottomInset: number;
+  chapterIndex: number;
   onOpenNext: (chapter: MangaChapter) => void;
   onOpenPrev: (chapter: MangaChapter) => void;
   onOpenPicker: () => void;
@@ -26,6 +27,7 @@ export function ReaderTransition({
   width,
   height,
   bottomInset,
+  chapterIndex,
   onOpenNext,
   onOpenPrev,
   onOpenPicker,
@@ -62,7 +64,9 @@ export function ReaderTransition({
           </>
         ) : (
           <Text className="mt-3 text-center text-sm text-zinc-400">
-            Último capítulo.
+            {chapterIndex < 0
+              ? 'No hay capítulo siguiente.'
+              : 'Último capítulo.'}
           </Text>
         )}
 

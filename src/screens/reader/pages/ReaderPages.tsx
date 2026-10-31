@@ -47,6 +47,7 @@ export function ReaderPages({
       width={width}
       height={height}
       bottomInset={bottomInset}
+      chapterIndex={data.chapterIndex}
       onOpenNext={onOpenNext}
       onOpenPrev={onOpenPrev}
       onOpenPicker={onOpenPicker}
