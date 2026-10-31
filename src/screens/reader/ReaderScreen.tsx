@@ -12,8 +12,10 @@ import { ReaderSettingsSheet } from './components/ReaderSettingsSheet';
 import { ReaderSkeleton } from './components/ReaderSkeleton';
 import { ReaderPages } from './pages/ReaderPages';
 import { useRemoteData } from '../../hooks/useRemoteData';
+import { useFocusEffect } from '@react-navigation/native';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
+import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
 import { fetchReader } from '../../source/leercapitulo';
 import type { MangaChapter, ReaderData } from '../../source/leercapitulo';
@@ -63,6 +65,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   } = useReaderPreferences();
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [readChapters, setReadChapters] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchReader(chapterPath, signal),
@@ -100,6 +103,26 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const showError = hasError && data !== null;
   const ready = preferencesLoaded && restored;
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+
+      if (mangaPath) {
+        void loadReadChapters(mangaPath).then((reads) => {
+          if (active) {
+            setReadChapters(reads);
+          }
+        });
+      } else {
+        setReadChapters([]);
+      }
+
+      return () => {
+        active = false;
+      };
+    }, [mangaPath, pickerOpen]),
+  );
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
@@ -188,6 +211,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           visible={pickerOpen}
           chapters={data ? ascendingChapters(data.chapters) : []}
           currentPath={chapterPath}
+          readChapters={readChapters}
           onClose={() => setPickerOpen(false)}
           onSelect={openChapter}
         />

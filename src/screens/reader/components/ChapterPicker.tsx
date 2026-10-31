@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Feather } from '@expo/vector-icons';
 import { FlatList, Text, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
@@ -18,12 +19,14 @@ export function ChapterPicker({
   visible,
   chapters,
   currentPath,
+  readChapters,
   onClose,
   onSelect,
 }: {
   visible: boolean;
   chapters: MangaChapter[];
   currentPath: string;
+  readChapters: string[];
   onClose: () => void;
   onSelect: (chapter: MangaChapter) => void;
 }) {
@@ -32,6 +35,7 @@ export function ChapterPicker({
   const currentIndex = chapters.findIndex(
     (chapter) => chapter.path === currentPath,
   );
+  const readSet = useMemo(() => new Set(readChapters), [readChapters]);
 
   if (!visible) {
     return null;
@@ -84,7 +88,13 @@ export function ChapterPicker({
           renderItem={({ item }) => (
             <ChapterRow
               title={item.title}
-              state={item.path === currentPath ? 'selected' : undefined}
+              state={
+                item.path === currentPath
+                  ? 'selected'
+                  : readSet.has(item.path)
+                    ? 'read'
+                    : undefined
+              }
               onPress={() => onSelect(item)}
             />
           )}
