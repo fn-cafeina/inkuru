@@ -9,6 +9,7 @@ type Props = {
   subtitle?: string;
   width: number;
   onPress: () => void;
+  onLongPress?: () => void;
 };
 
 export function MangaGridCard({
@@ -17,11 +18,14 @@ export function MangaGridCard({
   subtitle,
   width,
   onPress,
+  onLongPress,
 }: Props) {
   return (
     <AppPressable
       accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
       onPress={onPress}
+      onLongPress={onLongPress}
+      delayLongPress={350}
       style={{ width }}
       className="mb-3 rounded-2xl p-1"
     >

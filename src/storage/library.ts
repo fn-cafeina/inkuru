@@ -10,10 +10,19 @@ export type LibraryEntry = {
 const LIBRARY_KEY = 'library:entries';
 
 export async function loadLibrary(): Promise<LibraryEntry[]> {
+  const result = await loadLibraryResult();
+
+  return result.entries;
+}
+
+export async function loadLibraryResult(): Promise<{
+  entries: LibraryEntry[];
+  failed: boolean;
+}> {
   try {
-    return await readLibrary();
+    return { entries: await readLibrary(), failed: false };
   } catch {
-    return [];
+    return { entries: [], failed: true };
   }
 }
 

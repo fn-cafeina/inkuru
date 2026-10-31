@@ -1,6 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   useWindowDimensions,
   View,
@@ -13,11 +14,12 @@ import {
 
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import { MangaGridCard } from '../components/MangaGridCard';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import type { TabNavigation } from '../navigation/types';
-import { loadLibrary } from '../storage/library';
+import { loadLibraryResult, removeFromLibrary } from '../storage/library';
 import type { LibraryEntry } from '../storage/library';
 import { loadProgress } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
@@ -39,50 +41,112 @@ export default function LibraryScreen() {
   const [progress, setProgress] =
     useState<Record<string, ReaderProgress>>(cachedProgress);
   const [loaded, setLoaded] = useState(cachedEntries !== null);
+  const [failed, setFailed] = useState(false);
+  const mounted = useRef(true);
   const cardWidth = mangaCardWidth(width);
+
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    [],
+  );
+
+  const load = useCallback(async (showSpinner = false) => {
+    if (showSpinner) {
+      setFailed(false);
+      setLoaded(false);
+    }
+
+    const result = await loadLibraryResult();
+
+    if (!mounted.current) {
+      return;
+    }
+
+    if (result.failed) {
+      setFailed(true);
+      setLoaded(true);
+      return;
+    }
+
+    const loadedProgress: Record<string, ReaderProgress> = {};
+
+    await Promise.all(
+      result.entries.map(async (entry) => {
+        const value = await loadProgress(entry.path);
+
+        if (value) {
+          loadedProgress[entry.path] = value;
+        }
+      }),
+    );
+
+    if (!mounted.current) {
+      return;
+    }
+
+    const sorted = [...result.entries].sort((a, b) => b.addedAt - a.addedAt);
+
+    cachedEntries = sorted;
+    cachedProgress = loadedProgress;
+    setFailed(false);
+    setEntries(sorted);
+    setProgress(loadedProgress);
+    setLoaded(true);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
-      let active = true;
-
-      void (async () => {
-        const items = await loadLibrary();
-        const loadedProgress: Record<string, ReaderProgress> = {};
-
-        await Promise.all(
-          items.map(async (entry) => {
-            const value = await loadProgress(entry.path);
-
-            if (value) {
-              loadedProgress[entry.path] = value;
-            }
-          }),
-        );
-
-        if (!active) {
-          return;
-        }
-
-        const sorted = [...items].sort((a, b) => b.addedAt - a.addedAt);
-
-        cachedEntries = sorted;
-        cachedProgress = loadedProgress;
-        setEntries(sorted);
-        setProgress(loadedProgress);
-        setLoaded(true);
-      })();
-
-      return () => {
-        active = false;
-      };
-    }, []),
+      void load();
+    }, [load]),
   );
+
+  const retry = () => {
+    void load(true);
+  };
+
+  const confirmRemove = (entry: LibraryEntry) => {
+    Alert.alert('Quitar de la biblioteca', entry.title, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Quitar',
+        style: 'destructive',
+        onPress: () => {
+          void removeFromLibrary(entry.path).then((ok) => {
+            if (!ok) {
+              Alert.alert('No se pudo quitar', 'Inténtalo de nuevo.');
+              return;
+            }
+
+            const next = entries.filter((item) => item.path !== entry.path);
+
+            cachedEntries = next;
+            setEntries(next);
+            setProgress((current) => {
+              const nextProgress = { ...current };
+
+              delete nextProgress[entry.path];
+              cachedProgress = nextProgress;
+
+              return nextProgress;
+            });
+          });
+        },
+      },
+    ]);
+  };
 
   return (
     <Screen>
       <PageTitle>Biblioteca</PageTitle>
 
-      {!loaded ? (
+      {failed ? (
+        <ErrorState
+          message="No se pudo leer la biblioteca"
+          onRetry={retry}
+        />
+      ) : !loaded ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.iconInactive} />
         </View>
@@ -111,7 +175,7 @@ export default function LibraryScreen() {
             <MangaGridCard
               title={item.title}
               cover={item.cover}
-              subtitle={progress[item.path]?.chapterTitle ?? 'Sin empezar'}
+              subtitle={progress[item.path]?.chapterTitle ?? 'Sin leer'}
               width={cardWidth}
               onPress={() =>
                 navigation.navigate('Manga', {
@@ -119,6 +183,7 @@ export default function LibraryScreen() {
                   title: item.title,
                 })
               }
+              onLongPress={() => confirmRemove(item)}
             />
           )}
           showsVerticalScrollIndicator={false}
