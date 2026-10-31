@@ -22,17 +22,20 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     let active = true;
 
     const restore = async () => {
+      let nextPage = 0;
+
       try {
         const storedPage = await AsyncStorage.getItem(pageKey(path));
         const parsedPage = Number.parseInt(storedPage ?? '', 10);
 
-        if (active && Number.isFinite(parsedPage) && parsedPage > 0) {
-          setPage(parsedPage);
+        if (Number.isFinite(parsedPage) && parsedPage > 0) {
+          nextPage = parsedPage;
         }
       } catch {
         // A storage failure must not block reading.
       } finally {
         if (active) {
+          setPage(nextPage);
           setRestoredPath(path);
         }
       }
