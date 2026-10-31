@@ -97,27 +97,19 @@ export default function SettingsScreen() {
             <ChoiceRow
               key={option.value}
               label={option.label}
-              description={option.description}
               selected={mode === option.value}
               divider={index > 0}
               onPress={() => selectMode(option.value)}
             />
           ))}
         </SettingSection>
-        {mode === 'webtoon' ? (
-          <Text className="mt-1 px-1 text-xs text-zinc-500 dark:text-zinc-400">
-            La escala solo se aplica en modo paginado.
-          </Text>
-        ) : null}
-
         {mode !== 'webtoon' ? (
           <SettingSection title="Escala de página" groupRole="radiogroup">
             {READER_SCALE_OPTIONS.map((option, index) => (
               <ChoiceRow
                 key={option.value}
                 label={option.label}
-                description={option.description}
-                selected={scale === option.value}
+                  selected={scale === option.value}
                 divider={index > 0}
                 onPress={() => selectScale(option.value)}
               />
@@ -130,7 +122,6 @@ export default function SettingsScreen() {
             <ChoiceRow
               key={option.value}
               label={option.label}
-              description={option.description}
               selected={quality === option.value}
               divider={index > 0}
               onPress={() => selectQuality(option.value)}

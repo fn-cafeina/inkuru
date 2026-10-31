@@ -9,47 +9,19 @@ export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
 export const DEFAULT_READER_QUALITY: ReaderQuality = 'balanced';
 
 export const READER_MODE_OPTIONS = [
-  {
-    value: 'webtoon',
-    label: 'Vertical',
-    description: 'Páginas continuas, ideal para webtoon.',
-  },
-  {
-    value: 'paged-ltr',
-    label: 'Izquierda a derecha',
-    description: 'Una página a la vez, de izquierda a derecha.',
-  },
-  {
-    value: 'paged-rtl',
-    label: 'Derecha a izquierda',
-    description: 'Una página a la vez, estilo manga.',
-  },
+  { value: 'webtoon', label: 'Vertical' },
+  { value: 'paged-ltr', label: 'Izquierda a derecha' },
+  { value: 'paged-rtl', label: 'Derecha a izquierda' },
 ] as const;
 
 export const READER_SCALE_OPTIONS = [
-  {
-    value: 'fit-screen',
-    label: 'Ajustar pantalla',
-    description: 'La página completa dentro de la pantalla.',
-  },
-  {
-    value: 'fit-width',
-    label: 'Ajustar ancho',
-    description: 'Usa todo el ancho; las páginas altas se pueden desplazar.',
-  },
+  { value: 'fit-screen', label: 'Ajustar pantalla' },
+  { value: 'fit-width', label: 'Ajustar ancho' },
 ] as const;
 
 export const READER_QUALITY_OPTIONS = [
-  {
-    value: 'balanced',
-    label: 'Equilibrada',
-    description: 'Menos datos y carga más rápida.',
-  },
-  {
-    value: 'original',
-    label: 'Original',
-    description: 'Máximo detalle; usa más datos.',
-  },
+  { value: 'balanced', label: 'Normal' },
+  { value: 'original', label: 'Original' },
 ] as const;
 
 const MODE_KEY = 'reader:mode';
