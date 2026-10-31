@@ -111,11 +111,6 @@ export function forgetRemoteData(key: string) {
   void removeCache(key);
 }
 
-/** Drop the in-memory layer only; used after clearing persisted data. */
-export function clearRemoteDataMemory() {
-  cache.clear();
-}
-
 export function useRemoteData<T>(
   fetcher: (signal: AbortSignal) => Promise<T>,
   cacheKey?: string,

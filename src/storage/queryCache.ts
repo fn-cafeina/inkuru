@@ -242,20 +242,3 @@ export function removeCache(key: string): Promise<void> {
     }
   });
 }
-
-export function clearQueryCache(): Promise<void> {
-  return enqueue(async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const ours = keys.filter((key) => key.startsWith(PREFIX));
-
-      if (ours.length > 0) {
-        await AsyncStorage.multiRemove(ours);
-      }
-    } catch {
-      // Even if listing fails, reset the index below.
-    }
-
-    await persistIndex([]);
-  });
-}

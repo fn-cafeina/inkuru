@@ -1,18 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Switch, Text, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { ScrollView, Switch, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { Image } from 'expo-image';
 
 import { ChoiceRow } from '../components/ChoiceRow';
 import { AppPressable } from '../components/AppPressable';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { SettingSection } from '../components/SettingSection';
-import {
-  clearRemoteDataMemory,
-} from '../hooks/useRemoteData';
-import { clearQueryCache } from '../storage/queryCache';
 import { useColors } from '../theme/colors';
 import {
   DEFAULT_READER_MODE,
@@ -37,7 +31,6 @@ import type {
 } from '../storage/readerSettings';
 
 export default function SettingsScreen() {
-  const colors = useColors();
   const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
   const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
   const [quality, setQuality] = useState<ReaderQuality>(DEFAULT_READER_QUALITY);
@@ -85,30 +78,6 @@ export default function SettingsScreen() {
   const selectKeepAwake = (next: boolean) => {
     setKeepAwake(next);
     void saveKeepAwake(next);
-  };
-
-  const confirmClearCache = () => {
-    Alert.alert(
-      'Borrar caché',
-      'Se eliminarán los datos e imágenes temporales. Las descargas se conservan.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Borrar',
-          style: 'destructive',
-          onPress: () => {
-            clearRemoteDataMemory();
-            void Promise.all([
-              clearQueryCache(),
-              Image.clearMemoryCache(),
-              Image.clearDiskCache(),
-            ]).then(() => {
-              Alert.alert('Caché borrada');
-            });
-          },
-        },
-      ],
-    );
   };
 
   return (
@@ -165,26 +134,6 @@ export default function SettingsScreen() {
             value={keepAwake}
             onValueChange={selectKeepAwake}
           />
-        </SettingSection>
-
-        <SettingSection title="Almacenamiento">
-          <AppPressable
-            accessibilityRole="button"
-            accessibilityLabel="Borrar caché"
-            accessibilityHint="Borra datos e imágenes temporales. Las descargas se conservan."
-            onPress={confirmClearCache}
-            className="min-h-14 flex-row items-center px-4"
-          >
-            <Feather name="trash-2" size={18} color={colors.iconInactive} />
-            <View className="ml-3 flex-1">
-              <Text className="text-base text-zinc-900 dark:text-zinc-100">
-                Borrar caché
-              </Text>
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
-                Las descargas se conservan.
-              </Text>
-            </View>
-          </AppPressable>
         </SettingSection>
       </ScrollView>
     </Screen>
