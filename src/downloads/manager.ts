@@ -256,6 +256,8 @@ async function runDownload(input: DownloadInput) {
   states.set(chapterPath, { status: 'downloading', page: 0, total: 0 });
   notify();
 
+  let failed = false;
+
   try {
     const data = await fetchReader(chapterPath, controller.signal);
 
@@ -274,7 +276,7 @@ async function runDownload(input: DownloadInput) {
 
     const worker = async () => {
       while (cursor < total) {
-        if (controller.signal.aborted || !isCurrent(chapterPath, generation)) {
+        if (failed || controller.signal.aborted || !isCurrent(chapterPath, generation)) {
           throw new Error('aborted');
         }
 
@@ -289,7 +291,7 @@ async function runDownload(input: DownloadInput) {
         const file = pageFile(directory, index, url);
         await downloadPage(url, file, controller.signal);
 
-        if (!isCurrent(chapterPath, generation)) {
+        if (failed || !isCurrent(chapterPath, generation)) {
           throw new Error('stale');
         }
 
@@ -304,11 +306,14 @@ async function runDownload(input: DownloadInput) {
       }
     };
 
-    await Promise.all(
-      Array.from({ length: Math.min(MAX_PARALLEL_PAGES, total) }, () =>
-        worker(),
-      ),
-    );
+    const workers = Array.from({ length: Math.min(MAX_PARALLEL_PAGES, total) }, () => worker());
+
+    await Promise.all(workers).catch(async (error) => {
+      failed = true;
+      controller.abort();
+      await Promise.allSettled(workers);
+      throw error;
+    });
 
     if (controller.signal.aborted || !isCurrent(chapterPath, generation)) {
       throw new Error('aborted');
@@ -350,8 +355,7 @@ async function runDownload(input: DownloadInput) {
     forgetRemoteCache(`reader:${chapterPath}`);
     notify();
   } catch {
-    const wasCancelled =
-      cancelled.delete(chapterPath) || controller.signal.aborted;
+    const wasCancelled = cancelled.delete(chapterPath);
 
     if (!isCurrent(chapterPath, generation)) {
       if (wasCancelled) {
