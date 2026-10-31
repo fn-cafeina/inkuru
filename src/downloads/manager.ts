@@ -24,6 +24,7 @@ const MAX_PARALLEL_PAGES = 3;
 const states = new Map<string, DownloadState>();
 const records = new Map<string, DownloadRecord>();
 const controllers = new Map<string, AbortController>();
+const generations = new Map<string, number>();
 const cancelled = new Set<string>();
 const queue: DownloadInput[] = [];
 const listeners = new Set<() => void>();
@@ -39,6 +40,20 @@ function notify() {
   for (const listener of listeners) {
     listener();
   }
+}
+
+// A late write from a cancelled or deleted download must not resurrect its
+// record. Each run owns a generation; cancelling or deleting invalidates it.
+function bumpGeneration(chapterPath: string): number {
+  const next = (generations.get(chapterPath) ?? 0) + 1;
+
+  generations.set(chapterPath, next);
+
+  return next;
+}
+
+function isCurrent(chapterPath: string, generation: number): boolean {
+  return (generations.get(chapterPath) ?? 0) === generation;
 }
 
 export function subscribe(listener: () => void) {
@@ -77,10 +92,11 @@ export async function loadDownloadedReader(
   return file?.data ?? null;
 }
 
-export function enqueueDownload(input: DownloadInput) {
-  const current = states.get(input.chapterPath);
+export async function enqueueDownload(input: DownloadInput) {
+  const chapterPath = input.chapterPath;
+  const current = states.get(chapterPath);
 
-  if (records.has(input.chapterPath)) {
+  if (records.has(chapterPath)) {
     return;
   }
 
@@ -88,9 +104,24 @@ export function enqueueDownload(input: DownloadInput) {
     return;
   }
 
-  states.set(input.chapterPath, { status: 'queued', page: 0, total: 0 });
-  queue.push(input);
+  states.set(chapterPath, { status: 'queued', page: 0, total: 0 });
   notify();
+
+  // The index may still be loading, so wait before deciding the chapter is new.
+  await initializeDownloads();
+
+  // Cancelling or deleting while the index loaded must win.
+  if (states.get(chapterPath)?.status !== 'queued') {
+    return;
+  }
+
+  if (records.has(chapterPath)) {
+    states.delete(chapterPath);
+    notify();
+    return;
+  }
+
+  queue.push(input);
   void pump();
 }
 
@@ -115,7 +146,10 @@ export function cancelDownload(chapterPath: string) {
 
   if (state.status === 'downloading') {
     cancelled.add(chapterPath);
+    bumpGeneration(chapterPath);
     controllers.get(chapterPath)?.abort();
+    states.delete(chapterPath);
+    notify();
   }
 }
 
@@ -124,6 +158,7 @@ export async function deleteDownload(chapterPath: string) {
 
   if (controller) {
     cancelled.add(chapterPath);
+    bumpGeneration(chapterPath);
     controller.abort();
   }
 
@@ -137,6 +172,13 @@ export async function deleteDownload(chapterPath: string) {
   records.delete(chapterPath);
   deleteChapterFiles(chapterPath);
   forgetRemoteCache(`reader:${chapterPath}`);
+  notify();
+
+  await initializeDownloads();
+
+  // Initialization may have recovered the index entry before the files were
+  // gone, so remove it again after the scan.
+  records.delete(chapterPath);
   await removeRecord(chapterPath);
   notify();
 }
@@ -208,6 +250,7 @@ async function pump() {
 
 async function runDownload(input: DownloadInput) {
   const chapterPath = input.chapterPath;
+  const generation = bumpGeneration(chapterPath);
   const controller = new AbortController();
   controllers.set(chapterPath, controller);
   states.set(chapterPath, { status: 'downloading', page: 0, total: 0 });
@@ -215,6 +258,11 @@ async function runDownload(input: DownloadInput) {
 
   try {
     const data = await fetchReader(chapterPath, controller.signal);
+
+    if (!isCurrent(chapterPath, generation)) {
+      throw new Error('stale');
+    }
+
     const total = data.pages.length;
     const directory = prepareChapterDirectory(chapterPath);
     const localPages: string[] = [];
@@ -226,7 +274,7 @@ async function runDownload(input: DownloadInput) {
 
     const worker = async () => {
       while (cursor < total) {
-        if (controller.signal.aborted) {
+        if (controller.signal.aborted || !isCurrent(chapterPath, generation)) {
           throw new Error('aborted');
         }
 
@@ -240,6 +288,11 @@ async function runDownload(input: DownloadInput) {
 
         const file = pageFile(directory, index, url);
         await downloadPage(url, file, controller.signal);
+
+        if (!isCurrent(chapterPath, generation)) {
+          throw new Error('stale');
+        }
+
         localPages[index] = file.uri;
         completed += 1;
         states.set(chapterPath, {
@@ -257,7 +310,7 @@ async function runDownload(input: DownloadInput) {
       ),
     );
 
-    if (controller.signal.aborted) {
+    if (controller.signal.aborted || !isCurrent(chapterPath, generation)) {
       throw new Error('aborted');
     }
 
@@ -276,14 +329,37 @@ async function runDownload(input: DownloadInput) {
       record,
       data: { ...data, pages: localPages },
     });
-    records.set(chapterPath, record);
+
+    if (!isCurrent(chapterPath, generation)) {
+      cancelled.delete(chapterPath);
+      deleteChapterFiles(chapterPath);
+      return;
+    }
+
     await upsertRecord(record);
+
+    if (!isCurrent(chapterPath, generation)) {
+      cancelled.delete(chapterPath);
+      await removeRecord(chapterPath);
+      deleteChapterFiles(chapterPath);
+      return;
+    }
+
+    records.set(chapterPath, record);
     states.delete(chapterPath);
     forgetRemoteCache(`reader:${chapterPath}`);
     notify();
   } catch {
     const wasCancelled =
       cancelled.delete(chapterPath) || controller.signal.aborted;
+
+    if (!isCurrent(chapterPath, generation)) {
+      if (wasCancelled) {
+        deleteChapterFiles(chapterPath);
+      }
+
+      return;
+    }
 
     deleteChapterFiles(chapterPath);
 
@@ -295,6 +371,12 @@ async function runDownload(input: DownloadInput) {
 
     notify();
   } finally {
-    controllers.delete(chapterPath);
+    if (controllers.get(chapterPath) === controller) {
+      controllers.delete(chapterPath);
+    }
+
+    if (isCurrent(chapterPath, generation)) {
+      generations.delete(chapterPath);
+    }
   }
 }

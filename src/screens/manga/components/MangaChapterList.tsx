@@ -98,7 +98,7 @@ export function MangaChapterList({
       return;
     }
 
-    enqueueDownload({
+    void enqueueDownload({
       chapterPath: chapter.path,
       chapterTitle: chapter.title,
       mangaPath,
