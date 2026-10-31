@@ -13,6 +13,7 @@ import {
 } from './files';
 import { loadDownloadIndex, removeRecord, upsertRecord } from './metadata';
 import { hashKey } from './paths';
+import { withTimeout } from './timeout';
 import type {
   DownloadInput,
   DownloadRecord,
@@ -259,7 +260,7 @@ async function runDownload(input: DownloadInput) {
   let failed = false;
 
   try {
-    const data = await fetchReader(chapterPath, controller.signal);
+    const data = await withTimeout(controller, 15_000, () => fetchReader(chapterPath, controller.signal));
 
     if (!isCurrent(chapterPath, generation)) {
       throw new Error('stale');
@@ -289,7 +290,7 @@ async function runDownload(input: DownloadInput) {
         }
 
         const file = pageFile(directory, index, url);
-        await downloadPage(url, file, controller.signal);
+        await withTimeout(controller, 30_000, () => downloadPage(url, file, controller.signal));
 
         if (failed || !isCurrent(chapterPath, generation)) {
           throw new Error('stale');
@@ -323,11 +324,7 @@ async function runDownload(input: DownloadInput) {
       throw new Error('incomplete');
     }
 
-    const record: DownloadRecord = {
-      ...input,
-      pageCount: total,
-      completedAt: Date.now(),
-    };
+    const record: DownloadRecord = { ...input, pageCount: total, completedAt: Date.now() };
 
     await writeDownloadFile(directory, {
       version: 1,
