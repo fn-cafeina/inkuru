@@ -155,9 +155,15 @@ export async function deleteDownload(chapterPath: string) {
 
   states.delete(chapterPath);
   records.delete(chapterPath);
-  deleteChapterFiles(chapterPath);
+  const deleted = deleteChapterFiles(chapterPath);
   forgetRemoteCache(`reader:${chapterPath}`);
   notify();
+
+  if (!deleted && hasDownloadFiles(chapterPath)) {
+    // The files survived (collision or unreadable marker); keeping the index
+    // entry prevents reconcileDirectories from resurrecting them as unknown.
+    return;
+  }
 
   await initializeDownloads();
 

@@ -35,7 +35,13 @@ async function readWrapper(target: File): Promise<DownloadFile | null> {
   }
 }
 
-function directoryOwner(directory: Directory): string | undefined {
+/**
+ * `undefined` when there is no marker (reusable), `null` when the marker
+ * exists but cannot be parsed (ownership unknown, refuse), otherwise the path.
+ */
+function directoryOwner(
+  directory: Directory,
+): string | undefined | null {
   const file = new File(directory, READER_FILE);
 
   if (!file.exists) {
@@ -45,9 +51,9 @@ function directoryOwner(directory: Directory): string | undefined {
   try {
     const parsed: unknown = JSON.parse(file.textSync());
 
-    return isDownloadFile(parsed) ? parsed.record.chapterPath : undefined;
+    return isDownloadFile(parsed) ? parsed.record.chapterPath : null;
   } catch {
-    return undefined;
+    return null;
   }
 }
 
@@ -152,11 +158,12 @@ export function hasDownloadFiles(chapterPath: string): boolean {
   );
 }
 
-export function deleteChapterFiles(chapterPath: string) {
+/** Returns whether the directory was actually removed. */
+export function deleteChapterFiles(chapterPath: string): boolean {
   const directory = chapterDirectory(chapterPath);
 
   if (!directory.exists || !ownsDirectory(chapterPath, directory)) {
-    return;
+    return false;
   }
 
   try {
@@ -171,8 +178,10 @@ export function deleteChapterFiles(chapterPath: string) {
 
   try {
     directory.delete();
+    return true;
   } catch {
     // A directory without the marker is swept on the next launch.
+    return false;
   }
 }
 

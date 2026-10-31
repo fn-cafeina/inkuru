@@ -21,5 +21,10 @@ assertEqual(
   false,
   'una carpeta ajena se rechaza',
 );
+assertEqual(
+  ownsChapterPath('/chapter/1', null),
+  false,
+  'un marcador ilegible se rechaza',
+);
 
 console.log('download ownership ok');
