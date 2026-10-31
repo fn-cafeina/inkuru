@@ -113,9 +113,12 @@ export async function writeDownloadFile(
   file: DownloadFile,
 ): Promise<void> {
   const target = new File(directory, READER_FILE);
+  const temp = new File(directory, `${READER_FILE}.tmp`);
 
-  target.create({ overwrite: true });
-  await target.write(JSON.stringify(file));
+  temp.create({ overwrite: true });
+  await temp.write(JSON.stringify(file));
+  // Move only after a full write, so a crash never leaves a 0-byte marker.
+  await temp.move(target, { overwrite: true });
 }
 
 export async function readDownloadFile(
