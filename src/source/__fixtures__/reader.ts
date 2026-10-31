@@ -1,31 +1,34 @@
-// Fixture from https://www.leercapitulo.co/leer/psvkfbmjgo/one-piece/1195/ (2026-10-26). Trimmed markup.
+// Fixture from https://zonatmo.org/view_uploads/1090001 (2026-10-31). Trimmed markup.
 export const READER_FIXTURE = `
-<header class="lc-reader-top" id="lcReaderTop">
-  <a class="lc-rbtn lc-rbtn--title" href="/manga/psvkfbmjgo/one-piece/">&lsaquo; One Piece</a>
-  <select class="lc-rbtn" id="chapterSelect">
-    <option value="/leer/psvkfbmjgo/one-piece/1196/">Capitulo 1196</option>
-    <option value="/leer/psvkfbmjgo/one-piece/1195/" selected>Capitulo 1195</option>
-    <option value="/leer/psvkfbmjgo/one-piece/1194/">Capitulo 1194</option>
-  </select>
-</header>
+<div id="reader-header">
+  <div class="reader-header-inner">
+    <a href="https://zonatmo.org/library/manga/8232/one-punch-man" class="btn-rh" title="Volver al manga">
+      <i class="fas fa-arrow-left"></i>
+      <span class="d-none d-sm-inline">ONE PUNCH-MAN</span>
+    </a>
+    <select id="chapterSelect">
+      <option value="https://zonatmo.org/view_uploads/1069384">Cap. 246 — Anterior</option>
+      <option value="https://zonatmo.org/view_uploads/1081669"
+          selected>Cap. 247 — Actual</option>
+      <option value="https://zonatmo.org/view_uploads/1090001">Cap. 248 — Siguiente</option>
+    </select>
+    <div>
+      <a href="https://zonatmo.org/view_uploads/1069384" class="btn-rh" title="Cap. anterior">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+      <a href="https://zonatmo.org/view_uploads/1090001" class="btn-rh" title="Cap. siguiente">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
 
-<section class="lc-settings" id="lcSettings">
-  <select class="lc-rbtn" id="modeSelect">
-    <option value="vertical">Cascada</option>
-    <option value="single">Pagina a pagina</option>
-  </select>
-</section>
-
-<div class="ad"><img src="/ads/banner.jpg" alt="Anuncio"></div>
-
-<main class="lc-pages" id="lcPages" data-mode="vertical">
-  <img data-src="https://es2s12-2127.t34798ndc.com/B0C3Xdh/J6Y/Uy/Gb/xZ/PE/Pj/GG/sG/b2/mj/Zx/mN/29/qy/s2/29/ZN/eIZgRe5/EE9s/UE.dIk.jpg"
-       alt="Capitulo 1195 pagina 1"
-       data-index="0"
-       class="is-pending is-current">
-  <img data-src="https://es2s12-2127.t34798ndc.com/JEvzCAZVOKP/wC4/Qx/BF/dU/al/au/BB/EB/Fn/Tu/Ud/TS/n0/Zx/En/n0/US/McUz1M5/ll0E/Qd.mck.jpg"
-       alt="Capitulo 1195 pagina 2"
-       data-index="1"
-       class="is-pending">
-</main>
+<div id="reader-wrap">
+  <div class="reader-img-wrap" id="rpage-1" data-page="1">
+    <img src="https://storage2.zonatmo.org/chapters/1090001/1.webp" alt="Página 1" class="reader-image" loading="eager" fetchpriority="high" decoding="async">
+  </div>
+  <div class="reader-img-wrap" id="rpage-2" data-page="2">
+    <img src="https://storage.zonatmo.org/chapters/1090001/2.webp" alt="Página 2" class="reader-image" loading="lazy" decoding="async">
+  </div>
+</div>
 `;

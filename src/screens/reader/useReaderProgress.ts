@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 
 import { markChapterRead, saveProgress } from '../../storage/readerProgress';
-import type { ReaderData } from '../../source/leercapitulo';
+import type { ReaderData } from '../../source/zonatmo';
 
 const pageKey = (path: string) => `reader:page:${path}`;
 

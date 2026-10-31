@@ -2,7 +2,7 @@ import { CATALOG_EMPTY_FIXTURE, CATALOG_FIXTURE } from './__fixtures__/catalog';
 import { MANGA_FIXTURE } from './__fixtures__/manga';
 import { READER_FIXTURE } from './__fixtures__/reader';
 import { SEARCH_FIXTURE } from './__fixtures__/search';
-import { parseCatalog, parseManga, parseReader, parseSearch } from './leercapitulo';
+import { parseCatalog, parseManga, parseReader, parseSearch } from './zonatmo';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -40,93 +40,94 @@ function expectThrow(fn: () => void, label: string): void {
 
 const manga = parseManga(MANGA_FIXTURE);
 
-assertEqual(manga.title, 'One Piece', 'título del manga');
+assertEqual(manga.title, 'ONE PUNCH-MAN', 'título del manga');
 assertEqual(
   manga.cover,
-  'https://www.leercapitulo.co/covers/4f/1067e3fadaf8ec9edd6b71368445a7.jpg?v1792459668816',
+  'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
   'portada del manga',
 );
-assertEqual(manga.tags.join('|'), 'Action|Adventure|Martial Arts', 'tags del manga');
-assertEqual(manga.facts.length, 6, 'facts del manga');
+assertEqual(manga.tags.join('|'), 'Acción|Aventura', 'tags del manga');
+assertEqual(manga.facts.length, 4, 'facts del manga');
 assertEqual(
   manga.facts.find((fact) => fact.label === 'Estado')?.value,
   'Ongoing',
   'estado',
 );
 assertEqual(
+  manga.facts.find((fact) => fact.label === 'Tipo')?.value,
+  'MANGA',
+  'tipo',
+);
+assertEqual(
   manga.facts.find((fact) => fact.label === 'Demografia')?.value,
-  'Shōnen',
+  'Seinen',
   'demografía',
 );
 assertEqual(
-  manga.facts.find((fact) => fact.label === 'Capitulos')?.value,
-  '1272',
-  'capítulos del manga',
-);
-assertEqual(
   manga.facts.find((fact) => fact.label === 'Autor')?.value,
-  'Oda Eiichirou (尾田栄一郎)',
+  'one',
   'autor',
 );
-assert(manga.synopsis.includes('"One Piece"'), 'sinopsis decodificada');
+assert(manga.synopsis.includes('Ciudad-Z'), 'sinopsis decodificada');
 assertEqual(manga.chapters.length, 2, 'capítulos del manga');
 assertEqual(
   item(manga.chapters, 0).path,
-  '/leer/psvkfbmjgo/one-piece/1196/',
+  '/view_uploads/1090001',
   'primer capítulo',
 );
-assertEqual(item(manga.chapters, 0).title, 'Capitulo 1196', 'título del primer capítulo');
-assertEqual(item(manga.chapters, 0).date, '2026-10-17', 'fecha del primer capítulo');
+assertEqual(item(manga.chapters, 0).title, 'Capítulo 248', 'título del primer capítulo');
+assertEqual(item(manga.chapters, 0).date, '2026-10-22', 'fecha del primer capítulo');
 
 const reader = parseReader(READER_FIXTURE);
 
-assertEqual(reader.title, 'Capitulo 1195', 'título del lector');
-assertEqual(reader.mangaTitle, 'One Piece', 'manga del lector');
+assertEqual(reader.title, 'Cap. 247 — Actual', 'título del lector');
+assertEqual(reader.mangaTitle, 'ONE PUNCH-MAN', 'manga del lector');
 assertEqual(reader.chapters.length, 3, 'capítulos del lector');
 assertEqual(reader.chapterIndex, 1, 'índice del capítulo actual');
 assertEqual(
   item(reader.chapters, reader.chapterIndex).title,
-  'Capitulo 1195',
+  'Cap. 247 — Actual',
   'capítulo actual del lector',
+);
+assertEqual(
+  item(reader.chapters, 0).path,
+  '/view_uploads/1090001',
+  'capítulos ordenados del más nuevo al más antiguo',
 );
 assertEqual(reader.pages.length, 2, 'páginas del lector');
 assertEqual(
   item(reader.pages, 0),
-  'https://es2s12-2127.t34798ndc.com/B0C3Xdh/J6Y/Uy/Gb/xZ/PE/Pj/GG/sG/b2/mj/Zx/mN/29/qy/s2/29/ZN/eIZgRe5/EE9s/UE.dIk.jpg',
+  'https://storage2.zonatmo.org/chapters/1090001/1.webp',
   'primera página',
 );
 assertEqual(
   reader.prev?.path,
-  '/leer/psvkfbmjgo/one-piece/1194/',
+  '/view_uploads/1069384',
   'capítulo anterior',
 );
-assertEqual(reader.prev?.title, 'Capitulo 1194', 'título anterior');
+assertEqual(reader.prev?.title, 'Cap. 246 — Anterior', 'título anterior');
 assertEqual(
   reader.next?.path,
-  '/leer/psvkfbmjgo/one-piece/1196/',
+  '/view_uploads/1090001',
   'capítulo siguiente',
 );
-assertEqual(reader.next?.title, 'Capitulo 1196', 'título siguiente');
+assertEqual(reader.next?.title, 'Cap. 248 — Siguiente', 'título siguiente');
 
 const search = parseSearch(SEARCH_FIXTURE);
 
-assertEqual(search.length, 2, 'resultados de búsqueda');
-assertEqual(item(search, 0).title, 'One Piece Full Color', 'título de búsqueda');
+assertEqual(search.length, 1, 'resultados de búsqueda');
+assertEqual(item(search, 0).title, 'ONE PUNCH-MAN', 'título de búsqueda');
 assertEqual(
   item(search, 0).cover,
-  'https://www.leercapitulo.co/covers/50/1ab355791858e5d163d1b9d69cf70c.jpg?v1793004892973',
+  'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
   'portada de búsqueda',
 );
 assertEqual(
   item(search, 0).path,
-  '/manga/7c12f0hx4w/one-piece-full-color/',
+  '/library/manga/8232/one-punch-man',
   'ruta de búsqueda',
 );
-assertEqual(
-  item(search, 0).lastChapter,
-  'Capitulo 1055',
-  'último capítulo de búsqueda',
-);
+assertEqual(item(search, 0).lastChapter, undefined, 'búsqueda sin último capítulo');
 assertEqual(parseSearch('[]').length, 0, 'búsqueda vacía');
 expectThrow(
   () => parseSearch('nope'),
@@ -140,28 +141,28 @@ expectThrow(
 const catalog = parseCatalog(CATALOG_FIXTURE);
 
 assertEqual(catalog.items.length, 2, 'mangas del catálogo');
-assertEqual(item(catalog.items, 0).title, 'One Piece', 'título del catálogo');
+assertEqual(item(catalog.items, 0).title, 'ONE PUNCH-MAN', 'título del catálogo');
 assertEqual(
   item(catalog.items, 0).cover,
-  'https://www.leercapitulo.co/covers/4f/1067e3fadaf8ec9edd6b71368445a7.jpg?v1793004892973',
+  'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
   'portada del catálogo',
 );
 assertEqual(
   item(catalog.items, 0).path,
-  '/manga/psvkfbmjgo/one-piece/',
+  '/library/manga/8232/one-punch-man',
   'ruta del catálogo',
 );
 assertEqual(
   item(catalog.items, 0).lastChapter,
-  'Capitulo 1196',
-  'último capítulo del catálogo',
+  '279 caps',
+  'capítulos del catálogo',
 );
 assertEqual(
   item(catalog.items, 1).title,
-  "To Hell with Being Heir, I'm going to Heal",
+  'Smyrna & Capri',
   'entidades HTML del catálogo',
 );
-assertEqual(catalog.hasMore, true, 'siguiente página del catálogo');
+assertEqual(catalog.hasMore, true, 'catálogo con siguiente página');
 
 const emptyCatalog = parseCatalog(CATALOG_EMPTY_FIXTURE);
 
@@ -177,7 +178,7 @@ expectThrow(
   'HTML inválido del detalle debe lanzar error',
 );
 expectThrow(
-  () => parseReader('<main class="lc-pages"></main>'),
+  () => parseReader('<div id="reader-wrap"></div>'),
   'HTML inválido del lector debe lanzar error',
 );
 

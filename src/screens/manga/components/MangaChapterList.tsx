@@ -5,7 +5,7 @@ import { ChapterRow } from '../../../components/ChapterRow';
 import { EmptyState } from '../../../components/EmptyState';
 import { ListDivider } from '../../../components/ListDivider';
 import { RefreshNotice } from '../../../components/RefreshNotice';
-import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
+import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import { formatSourceDate } from '../../../utils/formatDate';
 import type { ChapterRange } from '../chapters';

@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import type { MangaChapter } from '../../../source/leercapitulo';
+import type { MangaChapter } from '../../../source/zonatmo';
 import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
 

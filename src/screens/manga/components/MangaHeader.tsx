@@ -7,7 +7,7 @@ import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
 import { OptionChip } from '../../../components/OptionChip';
 import { SectionTitle } from '../../../components/SectionTitle';
-import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
+import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
 import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 import { useColors } from '../../../theme/colors';

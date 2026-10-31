@@ -15,8 +15,8 @@ import { useRemoteData } from '../../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
-import { fetchManga } from '../../source/leercapitulo';
-import type { MangaDetail } from '../../source/leercapitulo';
+import { fetchManga } from '../../source/zonatmo';
+import type { MangaDetail } from '../../source/zonatmo';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
 import {

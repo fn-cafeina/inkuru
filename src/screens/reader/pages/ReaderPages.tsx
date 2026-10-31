@@ -1,4 +1,4 @@
-import type { MangaChapter, ReaderData } from '../../../source/leercapitulo';
+import type { MangaChapter, ReaderData } from '../../../source/zonatmo';
 import type {
   ReaderMode,
   ReaderQuality,

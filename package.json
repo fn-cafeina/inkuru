@@ -35,7 +35,7 @@
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "check:parser": "bun src/source/leercapitulo.check.ts"
+    "check:parser": "bun src/source/zonatmo.check.ts"
   },
   "private": true,
   "trustedDependencies": [

@@ -21,8 +21,8 @@ import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import type { TabNavigation } from '../navigation/types';
-import { fetchCatalog, fetchSearch } from '../source/leercapitulo';
-import type { CatalogPage, MangaListItem } from '../source/leercapitulo';
+import { fetchCatalog, fetchSearch } from '../source/zonatmo';
+import type { CatalogPage, MangaListItem } from '../source/zonatmo';
 import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
 

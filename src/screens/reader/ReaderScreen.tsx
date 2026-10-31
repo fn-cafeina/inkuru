@@ -17,8 +17,8 @@ import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
 import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
-import { fetchReader } from '../../source/leercapitulo';
-import type { MangaChapter, ReaderData } from '../../source/leercapitulo';
+import { fetchReader } from '../../source/zonatmo';
+import type { MangaChapter, ReaderData } from '../../source/zonatmo';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
@@ -121,6 +121,8 @@ export default function ReaderScreen({ navigation, route }: Props) {
       return () => {
         active = false;
       };
+      // pickerOpen is a refresh trigger: read marks must reload when it opens.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mangaPath, pickerOpen]),
   );
 

@@ -11,7 +11,7 @@ import {
   ChapterRow,
 } from '../../../components/ChapterRow';
 import { ListDivider } from '../../../components/ListDivider';
-import type { MangaChapter } from '../../../source/leercapitulo';
+import type { MangaChapter } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import { APP_BAR_GAP, SHEET_HEIGHT } from '../../../theme/spacing';
 
