@@ -4,7 +4,9 @@ import { FlatList, RefreshControl, View } from 'react-native';
 import { ChapterRow } from '../../../components/ChapterRow';
 import { EmptyState } from '../../../components/EmptyState';
 import { ListDivider } from '../../../components/ListDivider';
+import { RefreshNotice } from '../../../components/RefreshNotice';
 import type { MangaChapter, MangaDetail } from '../../../source/leercapitulo';
+import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
 import { MangaHeader } from './MangaHeader';
@@ -21,6 +23,8 @@ type Props = {
   bottomInset: number;
   titleVisible: boolean;
   refreshing: boolean;
+  refreshError: boolean;
+  ready: boolean;
   onRefresh: () => void;
   onSelectRange: (index: number) => void;
   onToggleSort: () => void;
@@ -40,6 +44,8 @@ export function MangaChapterList({
   bottomInset,
   titleVisible,
   refreshing,
+  refreshError,
+  ready,
   onRefresh,
   onSelectRange,
   onToggleSort,
@@ -47,6 +53,7 @@ export function MangaChapterList({
   onScrollPast,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
+  const colors = useColors();
   const listRef = useRef<FlatList<MangaChapter>>(null);
 
   useEffect(() => {
@@ -68,17 +75,26 @@ export function MangaChapterList({
         />
       )}
       ListHeaderComponent={
-        <MangaHeader
-          manga={manga}
-          readCount={readSet.size}
-          resumeChapter={resumeChapter}
-          sortOrder={sortOrder}
-          ranges={ranges}
-          activeRange={rangeIndex}
-          onSelectRange={onSelectRange}
-          onToggleSort={onToggleSort}
-          onRead={onOpen}
-        />
+        <View>
+          <MangaHeader
+            manga={manga}
+            readCount={readSet.size}
+            resumeChapter={resumeChapter}
+            sortOrder={sortOrder}
+            ranges={ranges}
+            activeRange={rangeIndex}
+            onSelectRange={onSelectRange}
+            onToggleSort={onToggleSort}
+            onRead={onOpen}
+            ready={ready}
+          />
+          {refreshError ? (
+            <RefreshNotice
+              message="No se pudo actualizar"
+              onRetry={onRefresh}
+            />
+          ) : null}
+        </View>
       }
       ListFooterComponent={
         <View style={{ height: bottomInset + 24 }} />
@@ -93,7 +109,12 @@ export function MangaChapterList({
       }}
       scrollEventThrottle={16}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[colors.accent]}
+          progressBackgroundColor={colors.surface}
+        />
       }
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}

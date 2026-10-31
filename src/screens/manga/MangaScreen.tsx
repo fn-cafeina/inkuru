@@ -28,6 +28,16 @@ import type { ChapterSort } from './chapters';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
+type MangaLocalState = {
+  progress: ReaderProgress | null;
+  readChapters: string[];
+  inLibrary: boolean;
+};
+
+// Keep the last local state per manga so reopening a title does not flash the
+// wrong CTA while AsyncStorage resolves.
+const localCache = new Map<string, MangaLocalState>();
+
 function mangaTitle(data: MangaDetail | null, fallback?: string): string {
   return data?.title ?? fallback ?? '';
 }
@@ -42,9 +52,18 @@ export default function MangaScreen({ navigation, route }: Props) {
   );
   const { data, hasError, loading, reload, refreshing, refresh } =
     useRemoteData(fetcher, `manga:${path}`);
-  const [progress, setProgress] = useState<ReaderProgress | null>(null);
-  const [readChapters, setReadChapters] = useState<string[]>([]);
-  const [inLibrary, setInLibrary] = useState(false);
+  const [progress, setProgress] = useState<ReaderProgress | null>(
+    () => localCache.get(path)?.progress ?? null,
+  );
+  const [readChapters, setReadChapters] = useState<string[]>(
+    () => localCache.get(path)?.readChapters ?? [],
+  );
+  const [inLibrary, setInLibrary] = useState(
+    () => localCache.get(path)?.inLibrary ?? false,
+  );
+  const [localLoaded, setLocalLoaded] = useState(
+    () => localCache.has(path),
+  );
   const [sortOrder, setSortOrder] = useState<ChapterSort>('asc');
   const [activeRange, setActiveRange] = useState(0);
   const [barTitleVisible, setBarTitleVisible] = useState(false);
@@ -59,9 +78,15 @@ export default function MangaScreen({ navigation, route }: Props) {
         isInLibrary(path),
       ]).then(([value, reads, saved]) => {
         if (active) {
+          localCache.set(path, {
+            progress: value,
+            readChapters: reads,
+            inLibrary: saved,
+          });
           setProgress(value);
           setReadChapters(reads);
           setInLibrary(saved);
+          setLocalLoaded(true);
         }
       });
 
@@ -72,25 +97,35 @@ export default function MangaScreen({ navigation, route }: Props) {
   );
 
   const toggleLibrary = async () => {
-    if (!data) {
+    if (!data && !inLibrary) {
       return;
     }
 
     const ok = inLibrary
       ? await removeFromLibrary(path)
-      : await addToLibrary({
-          path,
-          title: data.title,
-          cover: data.cover,
-          addedAt: Date.now(),
-        });
+      : data
+        ? await addToLibrary({
+            path,
+            title: data.title,
+            cover: data.cover,
+            addedAt: Date.now(),
+          })
+        : false;
 
     if (!ok) {
-      Alert.alert('No se pudo actualizar la biblioteca');
+      Alert.alert(
+        'No se pudo actualizar la biblioteca',
+        'Inténtalo de nuevo.',
+      );
       return;
     }
 
     setInLibrary(!inLibrary);
+    localCache.set(path, {
+      progress,
+      readChapters,
+      inLibrary: !inLibrary,
+    });
   };
 
   const resumeChapter = data
@@ -117,6 +152,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const selectRange = (index: number) => {
     setActiveRange(index);
   };
+  const showRefreshError = hasError && data !== null;
 
   return (
     <Screen>
@@ -132,7 +168,7 @@ export default function MangaScreen({ navigation, route }: Props) {
                 : 'Añadir a la biblioteca'
             }
             accessibilityState={{ selected: inLibrary }}
-            disabled={!data}
+            disabled={!data && !inLibrary}
             onPress={() => {
               void toggleLibrary();
             }}
@@ -164,6 +200,8 @@ export default function MangaScreen({ navigation, route }: Props) {
           bottomInset={insets.bottom}
           titleVisible={barTitleVisible}
           refreshing={refreshing}
+          refreshError={showRefreshError}
+          ready={localLoaded}
           onRefresh={refresh}
           onSelectRange={selectRange}
           onToggleSort={toggleSort}
@@ -176,7 +214,9 @@ export default function MangaScreen({ navigation, route }: Props) {
           }
           onScrollPast={setBarTitleVisible}
         />
-      ) : null}
+      ) : (
+        <ErrorState message="Manga no disponible" onRetry={reload} />
+      )}
     </Screen>
   );
 }

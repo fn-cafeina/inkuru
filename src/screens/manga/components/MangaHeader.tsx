@@ -32,6 +32,7 @@ type Props = {
   onSelectRange: (index: number) => void;
   onToggleSort: () => void;
   onRead: (chapter: MangaChapter) => void;
+  ready: boolean;
 };
 
 export function MangaHeader({
@@ -44,6 +45,7 @@ export function MangaHeader({
   onSelectRange,
   onToggleSort,
   onRead,
+  ready,
 }: Props) {
   const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
@@ -69,6 +71,7 @@ export function MangaHeader({
           <Button
             variant="primary"
             size="lg"
+            disabled={!ready}
             onPress={() => onRead(readChapter)}
           >
             {resumeChapter

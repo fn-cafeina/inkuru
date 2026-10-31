@@ -22,12 +22,14 @@ export function Button({
   variant = 'primary',
   size = 'sm',
   tone = 'auto',
+  disabled = false,
   onPress,
   children,
 }: {
   variant?: Variant;
   size?: Size;
   tone?: Tone;
+  disabled?: boolean;
   onPress: () => void;
   children: string;
 }) {
@@ -52,11 +54,13 @@ export function Button({
 
   return (
     <AppPressable
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={containerStyle}
       className={`items-center justify-center rounded-full ${
         variant === 'secondary' ? 'border' : ''
-      } ${SIZES[size]}`}
+      } ${SIZES[size]} ${disabled ? 'opacity-40' : ''}`}
     >
       <Text className={LABELS[variant]} style={{ color: textColor }}>
         {children}
