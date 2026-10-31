@@ -1,6 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { FlatList, Text, TextInput, View } from 'react-native';
+import {
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,7 +21,13 @@ import {
 import { ListDivider } from '../../../components/ListDivider';
 import type { MangaChapter } from '../../../source/leercapitulo';
 import { useColors } from '../../../theme/colors';
-import { APP_BAR_GAP, SHEET_MAX_HEIGHT } from '../../../theme/spacing';
+import { APP_BAR_GAP } from '../../../theme/spacing';
+
+function chapterNumber(title: string): number | undefined {
+  const match = title.match(/\d+(?:[.,]\d+)?/);
+
+  return match ? Number(match[0].replace(',', '.')) : undefined;
+}
 
 export function ChapterPicker({
   visible,
@@ -42,14 +56,29 @@ export function ChapterPicker({
       return chapters;
     }
 
+    const numeric = /^\d+(?:[.,]\d+)?$/.test(normalized)
+      ? Number(normalized.replace(',', '.'))
+      : undefined;
+
     return chapters.filter((chapter) =>
-      chapter.title.toLowerCase().includes(normalized),
+      numeric !== undefined
+        ? chapterNumber(chapter.title) === numeric
+        : chapter.title.toLowerCase().includes(normalized),
     );
   }, [chapters, query]);
 
   if (!visible) {
     return null;
   }
+
+  const close = () => {
+    Keyboard.dismiss();
+    onClose();
+  };
+  const select = (chapter: MangaChapter) => {
+    Keyboard.dismiss();
+    onSelect(chapter);
+  };
 
   return (
     <Animated.View
@@ -59,19 +88,20 @@ export function ChapterPicker({
     >
       <AppPressable
         accessible={false}
-        onPress={onClose}
+        onPress={close}
         pressFeedback={false}
         className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
       />
-      <Animated.View
-        entering={SlideInDown.duration(200)}
-        className="rounded-t-2xl"
-        style={{
-          backgroundColor: colors.surface,
-          maxHeight: SHEET_MAX_HEIGHT,
-        }}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1, justifyContent: 'flex-end' }}
       >
+        <Animated.View
+          entering={SlideInDown.duration(200)}
+          className="rounded-t-2xl"
+          style={{ backgroundColor: colors.surface, height: '70%' }}
+        >
           <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
               className="text-base font-semibold"
@@ -81,7 +111,7 @@ export function ChapterPicker({
             </Text>
             <AppPressable
               accessibilityLabel="Cerrar"
-              onPress={onClose}
+              onPress={close}
               className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
               <Feather name="x" size={20} color={colors.textMuted} />
@@ -89,17 +119,14 @@ export function ChapterPicker({
           </View>
           {showFilter ? (
             <View className="mx-4 mb-2 min-h-12 flex-row items-center rounded-full bg-zinc-100 px-3 dark:bg-zinc-800">
-              <Feather
-                name="search"
-                size={16}
-                color={colors.iconInactive}
-              />
+              <Feather name="search" size={16} color={colors.iconInactive} />
               <TextInput
                 value={query}
                 onChangeText={setQuery}
                 accessibilityLabel="Buscar capítulo"
                 autoCapitalize="none"
                 autoCorrect={false}
+                returnKeyType="search"
                 placeholder="Buscar capítulo"
                 placeholderTextColor={colors.iconInactive}
                 className="min-h-12 flex-1 px-2 text-sm"
@@ -131,17 +158,19 @@ export function ChapterPicker({
             initialScrollIndex={
               !query && currentIndex >= 0 ? currentIndex : undefined
             }
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             renderItem={({ item }) => (
               <ChapterRow
                 title={item.title}
                 state={item.path === currentPath ? 'selected' : undefined}
-                onPress={() => onSelect(item)}
+                onPress={() => select(item)}
               />
             )}
             ListEmptyComponent={
               <View className="items-center py-8">
                 <Text className="text-sm" style={{ color: colors.textMuted }}>
-                  Sin capítulos
+                  {query ? 'Sin coincidencias' : 'Sin capítulos'}
                 </Text>
               </View>
             }
@@ -150,7 +179,8 @@ export function ChapterPicker({
               paddingBottom: insets.bottom + 16,
             }}
           />
-      </Animated.View>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </Animated.View>
   );
 }
