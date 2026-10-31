@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ErrorState } from '../../components/ErrorState';
 import { ChapterPicker } from './components/ChapterPicker';
 import { ReaderChrome } from './components/ReaderChrome';
+import { ReaderProgressBar } from './components/ReaderProgressBar';
 import { ReaderSettingsSheet } from './components/ReaderSettingsSheet';
 import { ReaderSkeleton } from './components/ReaderSkeleton';
 import { ReaderPages } from './pages/ReaderPages';
@@ -34,19 +35,8 @@ function readerTitle(data: ReaderData | null, fallback: string): string {
 function readerSubtitle(
   data: ReaderData | null,
   title: string,
-  page: number,
-  total: number,
 ): string | undefined {
-  if (!data) {
-    return undefined;
-  }
-
-  return [
-    total > 0 ? `Página ${page + 1} de ${total}` : undefined,
-    data.mangaTitle ? data.title || title : undefined,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  return data?.mangaTitle ? data.title || title : undefined;
 }
 
 export default function ReaderScreen({ navigation, route }: Props) {
@@ -221,9 +211,14 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <ReaderSkeleton width={viewWidth} height={viewHeight} />
         )}
 
+        <ReaderProgressBar
+          page={page}
+          total={total}
+          bottomInset={insets.bottom}
+        />
         <ReaderChrome
           title={readerTitle(data, chapterTitle)}
-          subtitle={readerSubtitle(data, chapterTitle, page, total)}
+          subtitle={readerSubtitle(data, chapterTitle)}
           visible={chromeVisible}
           showError={showError}
           topInset={insets.top}
