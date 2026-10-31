@@ -228,6 +228,9 @@ export async function readCache<T>(
   key: string,
   validate: (value: unknown) => value is T,
 ): Promise<{ value: T; savedAt: number } | null> {
+  // Invalidation is queued; wait so a read cannot resurrect what a delete removed.
+  await tail;
+
   const raw = await AsyncStorage.getItem(storageKey(key)).catch(() => null);
 
   if (!raw) {
