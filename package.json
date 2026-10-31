@@ -37,7 +37,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "check:parser": "bun src/source/zonatmo.check.ts",
-    "check:discover": "bun src/screens/discoverFeed.check.ts"
+    "check:discover": "bun src/screens/discoverFeed.check.ts",
+    "check:downloads": "bun src/downloads/runState.check.ts"
   },
   "private": true,
   "trustedDependencies": [
