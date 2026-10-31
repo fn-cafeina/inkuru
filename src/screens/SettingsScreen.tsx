@@ -103,19 +103,18 @@ export default function SettingsScreen() {
             />
           ))}
         </SettingSection>
-        {mode !== 'webtoon' ? (
-          <SettingSection title="Escala de página" groupRole="radiogroup">
-            {READER_SCALE_OPTIONS.map((option, index) => (
-              <ChoiceRow
-                key={option.value}
-                label={option.label}
-                  selected={scale === option.value}
-                divider={index > 0}
-                onPress={() => selectScale(option.value)}
-              />
-            ))}
-          </SettingSection>
-        ) : null}
+        <SettingSection title="Escala de página" groupRole="radiogroup">
+          {READER_SCALE_OPTIONS.map((option, index) => (
+            <ChoiceRow
+              key={option.value}
+              label={option.label}
+              selected={scale === option.value}
+              divider={index > 0}
+              disabled={mode === 'webtoon'}
+              onPress={() => selectScale(option.value)}
+            />
+          ))}
+        </SettingSection>
 
         <SettingSection title="Calidad de imagen" groupRole="radiogroup">
           {READER_QUALITY_OPTIONS.map((option, index) => (
