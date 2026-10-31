@@ -17,5 +17,6 @@ jobs:
       - run: bun run typecheck
       - run: bun run check:parser
       - run: bun run check:discover
+      - run: bun run check:downloads
       - run: bun run lint
       - run: npx expo-doctor
