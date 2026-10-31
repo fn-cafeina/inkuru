@@ -59,7 +59,7 @@ export function MangaChapterList({
 
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [rangeIndex, sortOrder]);
+  }, [rangeIndex]);
 
   return (
     <FlatList
