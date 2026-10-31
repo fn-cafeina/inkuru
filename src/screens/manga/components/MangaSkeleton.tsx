@@ -1,5 +1,6 @@
 import { ScrollView, View } from 'react-native';
 
+import { ListDivider } from '../../../components/ListDivider';
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
 import {
@@ -47,9 +48,7 @@ export function MangaSkeleton() {
 
       {Array.from({ length: 4 }, (_, index) => (
         <View key={index}>
-          {index > 0 ? (
-            <View className="ml-4 h-px bg-zinc-200 dark:bg-zinc-800" />
-          ) : null}
+          {index > 0 ? <ListDivider /> : null}
           <View className="min-h-14 justify-center">
             <Skeleton
               className="h-4 rounded"

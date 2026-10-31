@@ -26,6 +26,7 @@ import { fetchReader } from '../../source/zonatmo';
 import type { MangaChapter, ReaderData } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import type { RootStackParamList } from '../../navigation/types';
+import { goBackOrTabs } from '../../navigation/back';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
@@ -163,14 +164,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     return () => subscription.remove();
   }, [chromeVisible, pickerOpen, settingsOpen]);
 
-  const goBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-
-    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
-  };
+  const goBack = () => goBackOrTabs(navigation);
 
   return (
     // The reader fills the whole window behind both system bars.

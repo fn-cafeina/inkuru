@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
-  Text,
   TextInput,
   useWindowDimensions,
   View,
@@ -17,6 +16,7 @@ import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { MangaGridCard } from '../components/MangaGridCard';
 import { PageTitle } from '../components/PageTitle';
+import { RefreshNotice } from '../components/RefreshNotice';
 import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import type { TabNavigation } from '../navigation/types';
@@ -207,16 +207,7 @@ function DiscoverResults({
       ListFooterComponent={
         <View className="py-4">
           {hasError ? (
-            <AppPressable
-              accessibilityLabel="No se pudo cargar más. Reintentar"
-              onPress={reload}
-              className="min-h-12 flex-row items-center justify-center rounded-full border border-zinc-200 px-4 dark:border-zinc-800"
-            >
-              <Feather name="refresh-cw" size={16} color={colors.textMuted} />
-              <Text className="ml-2 text-sm text-zinc-700 dark:text-zinc-300">
-                No se pudo cargar más. Reintentar
-              </Text>
-            </AppPressable>
+            <RefreshNotice message="No se pudo cargar más" onRetry={reload} className="" />
           ) : fetching && hasMore ? (
             <ActivityIndicator size="small" color={colors.iconInactive} />
           ) : null}

@@ -21,6 +21,7 @@ import type { MangaDetail } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
+import { goBackOrTabs } from '../../navigation/back';
 import {
   ascendingChapters,
   chunkChapters,
@@ -172,14 +173,7 @@ export default function MangaScreen({ navigation, route }: Props) {
   const selectRange = (index: number) => {
     setActiveRange(index);
   };
-  const goBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return;
-    }
-
-    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
-  };
+  const goBack = () => goBackOrTabs(navigation);
   const showRefreshError = hasError && data !== null;
 
   return (
