@@ -1,4 +1,5 @@
 import { fetchReader } from '../source/zonatmo';
+import { readerCacheKey } from '../storage/cacheKeys';
 import { forgetRemoteCache } from '../storage/remoteCache';
 import { forgetPageProgress } from '../storage/readerProgress';
 import type { ReaderData } from '../source/zonatmo';
@@ -157,7 +158,7 @@ export async function deleteDownload(chapterPath: string) {
   states.delete(chapterPath);
   records.delete(chapterPath);
   const deleted = deleteChapterFiles(chapterPath);
-  forgetRemoteCache(`reader:${chapterPath}`);
+  forgetRemoteCache(readerCacheKey(chapterPath));
   void forgetPageProgress(chapterPath);
   notify();
 
@@ -345,7 +346,7 @@ async function runDownload(input: DownloadInput) {
 
     records.set(chapterPath, record);
     states.delete(chapterPath);
-    forgetRemoteCache(`reader:${chapterPath}`);
+    forgetRemoteCache(readerCacheKey(chapterPath));
     notify();
   } catch (error) {
     const wasCancelled = runs.consumeCancel(chapterPath);

@@ -16,6 +16,7 @@ import { useRemoteData } from '../../hooks/useRemoteData';
 import { useFocusEffect } from '@react-navigation/native';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
+import { readerCacheKey } from '../../storage/cacheKeys';
 import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
 import { loadDownloadedReader } from '../../downloads/manager';
@@ -78,7 +79,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   );
   const { data, hasError, loading, reload } = useRemoteData(
     fetcher,
-    `reader:${chapterPath}`,
+    readerCacheKey(chapterPath),
     {
       freshMs: downloaded ? 0 : CACHE_FRESH_MS.chapter,
       persist: true,

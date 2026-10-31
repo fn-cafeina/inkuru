@@ -9,6 +9,7 @@ import { useRemoteData } from '../hooks/useRemoteData';
 import { isCatalogPage } from '../source/guards';
 import { fetchCatalog, fetchSearch } from '../source/zonatmo';
 import type { CatalogPage } from '../source/zonatmo';
+import { discoverCacheKey } from '../storage/cacheKeys';
 import { CACHE_FRESH_MS } from '../storage/queryCache';
 import { forgetRemoteCache } from '../storage/remoteCache';
 import { catalogFeedReducer, initialCatalogFeed } from './discoverFeed';
@@ -39,7 +40,7 @@ export function useDiscoverFeed(term: string) {
     refreshing,
     reload,
     refresh,
-  } = useRemoteData(fetcher, `discover:${term}:${page}`, {
+  } = useRemoteData(fetcher, discoverCacheKey(term, page), {
     freshMs: CACHE_FRESH_MS.catalog,
     persist: true,
     validate: isCatalogPage,
@@ -121,7 +122,7 @@ export function useDiscoverFeed(term: string) {
 
     // Refresh rebuilds from page 1, so cached pages after it must go too.
     for (let index = 1; index <= lastPage; index += 1) {
-      forgetRemoteCache(`discover:${term}:${index}`);
+      forgetRemoteCache(discoverCacheKey(term, index));
     }
 
     dispatch({ type: 'refresh' });
