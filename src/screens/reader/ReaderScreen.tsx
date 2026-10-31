@@ -39,6 +39,12 @@ function readerSubtitle(
   return data?.mangaTitle ? data.title || title : undefined;
 }
 
+function sheetAccessibility(pickerOpen: boolean, settingsOpen: boolean) {
+  const open = pickerOpen || settingsOpen;
+
+  return open ? 'no-hide-descendants' : 'auto';
+}
+
 export default function ReaderScreen({ navigation, route }: Props) {
   const { path: initialPath, title: initialTitle, mangaPath } = route.params;
   const [chapterPath, setChapterPath] = useState(initialPath);
@@ -181,54 +187,59 @@ export default function ReaderScreen({ navigation, route }: Props) {
           );
         }}
       >
-        {!ready || (loading && !data) ? (
-          <ReaderSkeleton width={viewWidth} height={viewHeight} />
-        ) : hasError && !data ? (
-          <ErrorState
-            message="No se pudo cargar el capítulo"
-            tone="dark"
+        <View
+          className="flex-1"
+          importantForAccessibility={sheetAccessibility(pickerOpen, settingsOpen)}
+        >
+          {!ready || (loading && !data) ? (
+            <ReaderSkeleton width={viewWidth} height={viewHeight} />
+          ) : hasError && !data ? (
+            <ErrorState
+              message="No se pudo cargar el capítulo"
+              tone="dark"
+              onRetry={reload}
+            />
+          ) : data ? (
+            <ReaderPages
+              key={chapterPath}
+              data={data}
+              mode={mode}
+              scale={scale}
+              quality={quality}
+              page={page}
+              width={viewWidth}
+              height={viewHeight}
+              bottomInset={insets.bottom}
+              title={chapterTitle}
+              onPageChange={setPage}
+              onToggleChrome={toggleChrome}
+              onOpenNext={openChapter}
+              onOpenPrev={openChapter}
+              onOpenPicker={() => setPickerOpen(true)}
+            />
+          ) : (
+            <ReaderSkeleton width={viewWidth} height={viewHeight} />
+          )}
+
+          {chromeVisible ? (
+            <ReaderProgressBar
+              page={page}
+              total={total}
+              bottomInset={insets.bottom}
+            />
+          ) : null}
+          <ReaderChrome
+            title={readerTitle(data, chapterTitle)}
+            subtitle={readerSubtitle(data, chapterTitle)}
+            visible={chromeVisible}
+            showError={showError}
+            topInset={insets.top}
+            onBack={goBack}
+            onOpenPicker={() => setPickerOpen(true)}
+            onOpenSettings={() => setSettingsOpen(true)}
             onRetry={reload}
           />
-        ) : data ? (
-          <ReaderPages
-            key={chapterPath}
-            data={data}
-            mode={mode}
-            scale={scale}
-            quality={quality}
-            page={page}
-            width={viewWidth}
-            height={viewHeight}
-            bottomInset={insets.bottom}
-            title={chapterTitle}
-            onPageChange={setPage}
-            onToggleChrome={toggleChrome}
-            onOpenNext={openChapter}
-            onOpenPrev={openChapter}
-            onOpenPicker={() => setPickerOpen(true)}
-          />
-        ) : (
-          <ReaderSkeleton width={viewWidth} height={viewHeight} />
-        )}
-
-        {chromeVisible ? (
-          <ReaderProgressBar
-            page={page}
-            total={total}
-            bottomInset={insets.bottom}
-          />
-        ) : null}
-        <ReaderChrome
-          title={readerTitle(data, chapterTitle)}
-          subtitle={readerSubtitle(data, chapterTitle)}
-          visible={chromeVisible}
-          showError={showError}
-          topInset={insets.top}
-          onBack={goBack}
-          onOpenPicker={() => setPickerOpen(true)}
-          onOpenSettings={() => setSettingsOpen(true)}
-          onRetry={reload}
-        />
+        </View>
         <ChapterPicker
           visible={pickerOpen}
           chapters={data ? ascendingChapters(data.chapters) : []}

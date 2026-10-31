@@ -42,6 +42,7 @@ export function ReaderSettingsSheet({
   return (
     <Animated.View
       entering={FadeIn.duration(120)}
+      accessibilityViewIsModal
       className="absolute inset-0 justify-end"
       style={{ zIndex: 50 }}
     >
