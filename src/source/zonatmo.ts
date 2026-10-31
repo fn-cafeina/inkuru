@@ -7,6 +7,8 @@ import {
 } from './html';
 
 const BASE_URL = 'https://zonatmo.org';
+const CATALOG_PATH =
+  '/biblioteca?order_item=likes_count&order_dir=desc&title=&_pg=1&filter_by=title&author_filter=&type=&demography=shounen&status=';
 
 const STATUS_VALUES: Record<string, string> = {
   publishing: 'Ongoing',
@@ -87,7 +89,7 @@ export async function fetchCatalog(
   page: number,
   signal?: AbortSignal,
 ): Promise<CatalogPage> {
-  const path = page > 1 ? `/biblioteca?page=${page}` : '/biblioteca';
+  const path = page > 1 ? `${CATALOG_PATH}&page=${page}` : CATALOG_PATH;
 
   return parseCatalog(await fetchText(path, signal));
 }
@@ -350,9 +352,7 @@ function extractCover(block: string): string | undefined {
 }
 
 function fact(label: string, value: string | undefined): MangaFact[] { return value ? [{ label, value }] : []; }
-function toPath(url: string): string {
-  return url.replace(/^https?:\/\/[^/]+/i, '');
-}
+function toPath(url: string): string { return url.replace(/^https?:\/\/[^/]+/i, ''); }
 function absoluteUrl(source: string): string {
   return /^https?:\/\//i.test(source)
     ? source
