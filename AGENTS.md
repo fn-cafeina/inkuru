@@ -14,7 +14,11 @@ Android manga reader app.
 
 - `bun run android` — dev server targeting Android
 - `bun run start` — dev server
-- `bunx tsc --noEmit` — typecheck
+- `bun run typecheck` — `tsc --noEmit`
+- `bun run lint` — ESLint
+- `bun run check:parser` — parser self-check
+- `bun run check:discover` — discover feed self-check
+- `bun run check:downloads` — download state self-check
 
 ## Platform
 
@@ -38,4 +42,14 @@ Android manga reader app.
   `components/` and pure helpers next to the screen.
 - Shared UI lives in `src/components/`. Move a component there only when more
   than one screen uses it.
-- Keep files under 500 lines; ESLint enforces this with `max-lines`.
+- Keep files under 300 lines (blank lines and comments excluded); ESLint
+  enforces this with `max-lines`.
+
+## Commits
+
+- One small, atomic, scoped commit per change. Do not mix unrelated fixes,
+  refactors or docs.
+- Use Conventional Commits: `fix(scope):`, `refactor(scope):`,
+  `perf(scope):`, `test(scope):`, `ci:`, `docs:`, `chore:`.
+- Run `bun run typecheck`, `bun run lint` and the relevant `check:*` scripts
+  before each commit. All must pass.
