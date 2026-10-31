@@ -157,9 +157,19 @@ export function deleteChapterFiles(chapterPath: string) {
   }
 
   try {
+    const reader = new File(directory, READER_FILE);
+
+    if (reader.exists) {
+      reader.delete();
+    }
+  } catch {
+    // If the marker survives, the directory removal below still has a chance.
+  }
+
+  try {
     directory.delete();
   } catch {
-    // A leftover directory is swept on the next launch.
+    // A directory without the marker is swept on the next launch.
   }
 }
 
