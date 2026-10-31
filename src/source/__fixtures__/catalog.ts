@@ -51,6 +51,7 @@ export const CATALOG_FIXTURE = `
         </div>
       </a>
     </div>
+    <a class="page-link" href="https://zonatmo.org/biblioteca?page=2" rel="next">Siguiente</a>
   </div>
 </div>
 `;

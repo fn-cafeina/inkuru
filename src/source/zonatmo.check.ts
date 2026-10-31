@@ -158,6 +158,11 @@ assertEqual(
 );
 assertEqual(catalog.hasMore, true, 'catálogo con siguiente página');
 
+const lastCatalog = parseCatalog(CATALOG_FIXTURE.replace(' rel="next"', ''));
+
+assertEqual(lastCatalog.items.length, 2, 'última página con mangas');
+assertEqual(lastCatalog.hasMore, false, 'última página sin siguiente');
+
 const emptyCatalog = parseCatalog(CATALOG_EMPTY_FIXTURE);
 
 assertEqual(emptyCatalog.items.length, 0, 'catálogo vacío');

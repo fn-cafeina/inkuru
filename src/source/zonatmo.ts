@@ -214,7 +214,7 @@ export function parseCatalog(html: string): CatalogPage {
     .map(parseCatalogItem)
     .filter(isDefined);
 
-  return { items, hasMore: items.length > 0 };
+  return { items, hasMore: /\brel\s*=\s*"next"/i.test(html) };
 }
 
 function parseCatalogItem(block: string): MangaListItem | undefined {
