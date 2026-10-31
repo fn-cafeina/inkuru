@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import type { MangaChapter } from '../../../source/zonatmo';
@@ -36,64 +36,71 @@ export function ReaderTransition({
   return (
     <Animated.View
       entering={FadeInDown.duration(250)}
-      style={{ width, height, paddingBottom: bottomInset + 24 }}
+      style={{ width, height }}
       className="bg-zinc-950"
     >
       <AppPressable
         accessible={false}
         onPress={onToggleChrome}
         pressFeedback={false}
-        className="flex-1 items-center justify-center px-4"
+        className="flex-1"
       >
-        <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Fin del capítulo
-        </Text>
-        <Text className="mt-3 text-center text-lg font-semibold text-zinc-100">
-          {currentTitle}
-        </Text>
-
-        <View className="my-6 h-px w-16 bg-zinc-800" />
-
-        {next ? (
-          <>
-            <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-              Siguiente
-            </Text>
-            <Text className="mt-3 text-center text-base text-zinc-300">
-              {next.title}
-            </Text>
-          </>
-        ) : (
-          <Text className="mt-3 text-center text-sm text-zinc-400">
-            {chapterIndex < 0
-              ? 'No hay capítulo siguiente.'
-              : 'Último capítulo.'}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          className="flex-1"
+          contentContainerClassName="flex-grow items-center justify-center px-4"
+          contentContainerStyle={{ paddingBottom: bottomInset + 24 }}
+        >
+          <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+            Fin del capítulo
           </Text>
-        )}
+          <Text className="mt-3 text-center text-lg font-semibold text-zinc-100">
+            {currentTitle}
+          </Text>
 
-        <View className="mt-6 self-stretch gap-3">
+          <View className="my-6 h-px w-16 bg-zinc-800" />
+
           {next ? (
-            <Button
-              variant="primary"
-              size="lg"
-              onPress={() => onOpenNext(next)}
-            >
-              Siguiente capítulo
+            <>
+              <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                Siguiente
+              </Text>
+              <Text className="mt-3 text-center text-base text-zinc-300">
+                {next.title}
+              </Text>
+            </>
+          ) : (
+            <Text className="mt-3 text-center text-sm text-zinc-400">
+              {chapterIndex < 0
+                ? 'No hay capítulo siguiente.'
+                : 'Último capítulo.'}
+            </Text>
+          )}
+
+          <View className="mt-6 self-stretch gap-3">
+            {next ? (
+              <Button
+                variant="primary"
+                size="lg"
+                onPress={() => onOpenNext(next)}
+              >
+                Siguiente capítulo
+              </Button>
+            ) : null}
+            <Button variant="secondary" tone="dark" onPress={onOpenPicker}>
+              Elegir capítulo
             </Button>
-          ) : null}
-          <Button variant="secondary" tone="dark" onPress={onOpenPicker}>
-            Elegir capítulo
-          </Button>
-          {prev ? (
-            <Button
-              variant="ghost"
-              tone="dark"
-              onPress={() => onOpenPrev(prev)}
-            >
-              Capítulo anterior
-            </Button>
-          ) : null}
-        </View>
+            {prev ? (
+              <Button
+                variant="ghost"
+                tone="dark"
+                onPress={() => onOpenPrev(prev)}
+              >
+                Capítulo anterior
+              </Button>
+            ) : null}
+          </View>
+        </ScrollView>
       </AppPressable>
     </Animated.View>
   );
