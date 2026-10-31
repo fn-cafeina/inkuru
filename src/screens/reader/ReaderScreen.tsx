@@ -18,6 +18,7 @@ import { useReaderProgress } from './useReaderProgress';
 import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
 import { loadDownloadedReader } from '../../downloads/manager';
+import { useIsChapterDownloaded } from '../../hooks/useDownloads';
 import { isReaderData } from '../../source/guards';
 import { fetchReader } from '../../source/zonatmo';
 import type { MangaChapter, ReaderData } from '../../source/zonatmo';
@@ -70,6 +71,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [readChapters, setReadChapters] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const downloaded = useIsChapterDownloaded(chapterPath);
   const fetcher = useCallback(
     async (signal: AbortSignal) => {
       const local = await loadDownloadedReader(chapterPath);
@@ -82,7 +84,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     fetcher,
     `reader:${chapterPath}`,
     {
-      freshMs: CACHE_FRESH_MS.chapter,
+      freshMs: downloaded ? 0 : CACHE_FRESH_MS.chapter,
       persist: true,
       validate: isReaderData,
     },
