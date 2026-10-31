@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
+import { palette } from '../../../theme/colors';
 import { AppPressable } from '../../../components/AppPressable';
 import { pageBox } from '../readerPageLayout';
 import type { SourceSize } from '../readerPageLayout';
@@ -137,7 +138,7 @@ export function ReaderPage({
                   pointerEvents="none"
                   className="absolute inset-0 items-center justify-center bg-zinc-900"
                 >
-                  <ActivityIndicator color="#a1a1aa" />
+                  <ActivityIndicator color={palette.dark.textMuted} />
                 </View>
               )}
               <Animated.View

@@ -4,7 +4,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { useColors } from '../../../theme/colors';
+import { palette, useColors } from '../../../theme/colors';
 
 type Props = {
   title: string;
@@ -72,14 +72,14 @@ export function ReaderChrome({
                   onPress={onOpenPicker}
                   className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
                 >
-                  <Feather name="list" size={18} color="#f4f4f5" />
+                  <Feather name="list" size={18} color={palette.dark.text} />
                 </AppPressable>
                 <AppPressable
                   accessibilityLabel="Ajustes de lectura"
                   onPress={onOpenSettings}
                   className="min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
                 >
-                  <Feather name="settings" size={18} color="#f4f4f5" />
+                  <Feather name="settings" size={18} color={palette.dark.text} />
                 </AppPressable>
               </View>
             }

@@ -1,7 +1,7 @@
 import { Text } from 'react-native';
 
 import { AppPressable } from './AppPressable';
-import { useColors } from '../theme/colors';
+import { palette, useColors } from '../theme/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'lg';
@@ -40,8 +40,8 @@ export function Button({
       ? colors.onAccent
       : onDark
         ? variant === 'secondary'
-          ? '#e4e4e7'
-          : '#a1a1aa'
+          ? palette.dark.text
+          : palette.dark.textMuted
         : variant === 'secondary'
           ? colors.text
           : colors.textMuted;

@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useColors } from '../theme/colors';
+import { palette, useColors } from '../theme/colors';
 import { APP_BAR_GAP } from '../theme/spacing';
 import { AppPressable } from './AppPressable';
 
@@ -29,8 +29,8 @@ export function ScreenHeader({
   tone?: 'auto' | 'dark';
 }) {
   const colors = useColors();
-  const textColor = tone === 'dark' ? '#f4f4f5' : colors.text;
-  const mutedColor = tone === 'dark' ? '#a1a1aa' : colors.textMuted;
+  const textColor = tone === 'dark' ? palette.dark.text : colors.text;
+  const mutedColor = tone === 'dark' ? palette.dark.textMuted : colors.textMuted;
   const titleOpacity = useSharedValue(titleVisible ? 1 : 0);
 
   useEffect(() => {

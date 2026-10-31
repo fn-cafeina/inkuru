@@ -7,6 +7,7 @@ import type {
   ReaderQuality,
   ReaderScale,
 } from '../../../storage/readerSettings';
+import { palette } from '../../../theme/colors';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { ReaderPage } from '../components/ReaderPage';
 
@@ -147,7 +148,7 @@ export function VerticalPages({
           footer
         ) : (
           <View className="items-center py-8">
-            <ActivityIndicator color="#a1a1aa" />
+            <ActivityIndicator color={palette.dark.textMuted} />
           </View>
         )
       }
