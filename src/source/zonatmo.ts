@@ -8,7 +8,7 @@ import {
 
 const BASE_URL = 'https://zonatmo.org';
 const CATALOG_PATH =
-  '/biblioteca?order_item=likes_count&order_dir=desc&title=&_pg=1&filter_by=title&author_filter=&type=&demography=shounen&status=';
+  '/biblioteca?order_item=likes_count&order_dir=desc&title=&filter_by=title&author_filter=&type=&demography=shounen&status=';
 
 const STATUS_VALUES: Record<string, string> = {
   publishing: 'Ongoing',
