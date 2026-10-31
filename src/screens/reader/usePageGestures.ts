@@ -110,7 +110,9 @@ export function usePageGestures({
 
   const pinch = usePinchGesture({
     onActivate: (event) => {
-      runOnJS(onZoomChange)(true);
+      // notifyZoom keeps zoomedRef in sync so the cleanup releases the
+      // parent scroll lock if this row is recycled mid-pinch.
+      runOnJS(notifyZoom)(true);
       startScale.value = savedScale.value;
       startX.value = savedX.value;
       startY.value = savedY.value;
