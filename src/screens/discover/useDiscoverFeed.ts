@@ -5,13 +5,13 @@ import {
   useReducer,
 } from 'react';
 
-import { useRemoteData } from '../hooks/useRemoteData';
-import { isCatalogPage } from '../source/guards';
-import { fetchCatalog, fetchSearch } from '../source/zonatmo';
-import type { CatalogPage } from '../source/zonatmo';
-import { discoverCacheKey } from '../storage/cacheKeys';
-import { CACHE_FRESH_MS } from '../storage/queryCache';
-import { forgetRemoteCache } from '../storage/remoteCache';
+import { useRemoteData } from '../../hooks/useRemoteData';
+import { isCatalogPage } from '../../source/guards';
+import { fetchCatalog, fetchSearch } from '../../source/zonatmo';
+import type { CatalogPage } from '../../source/zonatmo';
+import { discoverCacheKey } from '../../storage/cacheKeys';
+import { CACHE_FRESH_MS } from '../../storage/queryCache';
+import { forgetRemoteCache } from '../../storage/remoteCache';
 import { catalogFeedReducer, initialCatalogFeed } from './discoverFeed';
 
 export function useDiscoverFeed(term: string) {

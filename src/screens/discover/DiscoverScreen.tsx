@@ -10,19 +10,19 @@ import {
 } from 'react-native';
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 
-import { AppPressable } from '../components/AppPressable';
-import { Button } from '../components/Button';
-import { EmptyState } from '../components/EmptyState';
-import { ErrorState } from '../components/ErrorState';
-import { MangaGridCard } from '../components/MangaGridCard';
-import { PageTitle } from '../components/PageTitle';
-import { RefreshNotice } from '../components/RefreshNotice';
-import { Screen } from '../components/Screen';
-import { MangaGridSkeleton } from '../components/Skeleton';
-import type { TabNavigation } from '../navigation/types';
-import type { MangaListItem } from '../source/zonatmo';
-import { useColors } from '../theme/colors';
-import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
+import { AppPressable } from '../../components/AppPressable';
+import { Button } from '../../components/Button';
+import { EmptyState } from '../../components/EmptyState';
+import { ErrorState } from '../../components/ErrorState';
+import { MangaGridCard } from '../../components/MangaGridCard';
+import { PageTitle } from '../../components/PageTitle';
+import { RefreshNotice } from '../../components/RefreshNotice';
+import { Screen } from '../../components/Screen';
+import { MangaGridSkeleton } from '../../components/Skeleton';
+import type { TabNavigation } from '../../navigation/types';
+import type { MangaListItem } from '../../source/zonatmo';
+import { useColors } from '../../theme/colors';
+import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
 import { useDiscoverFeed } from './useDiscoverFeed';
 
 export default function DiscoverScreen() {

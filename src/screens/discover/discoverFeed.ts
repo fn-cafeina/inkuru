@@ -1,4 +1,4 @@
-import type { MangaListItem } from '../source/zonatmo';
+import type { MangaListItem } from '../../source/zonatmo';
 
 export type CatalogFeedState = {
   term: string;

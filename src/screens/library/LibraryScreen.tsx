@@ -12,19 +12,19 @@ import {
   useScrollToTop,
 } from '@react-navigation/native';
 
-import { Button } from '../components/Button';
-import { EmptyState } from '../components/EmptyState';
-import { ErrorState } from '../components/ErrorState';
-import { MangaGridCard } from '../components/MangaGridCard';
-import { PageTitle } from '../components/PageTitle';
-import { Screen } from '../components/Screen';
-import type { TabNavigation } from '../navigation/types';
-import { loadLibraryResult, removeFromLibrary } from '../storage/library';
-import type { LibraryEntry } from '../storage/library';
-import { loadProgressMany } from '../storage/readerProgress';
-import type { ReaderProgress } from '../storage/readerProgress';
-import { useColors } from '../theme/colors';
-import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
+import { Button } from '../../components/Button';
+import { EmptyState } from '../../components/EmptyState';
+import { ErrorState } from '../../components/ErrorState';
+import { MangaGridCard } from '../../components/MangaGridCard';
+import { PageTitle } from '../../components/PageTitle';
+import { Screen } from '../../components/Screen';
+import type { TabNavigation } from '../../navigation/types';
+import { loadLibraryResult, removeFromLibrary } from '../../storage/library';
+import type { LibraryEntry } from '../../storage/library';
+import { loadProgressMany } from '../../storage/readerProgress';
+import type { ReaderProgress } from '../../storage/readerProgress';
+import { useColors } from '../../theme/colors';
+import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
 
 let cachedEntries: LibraryEntry[] | null = null;
 let cachedProgress: Record<string, ReaderProgress> = {};

@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import DiscoverScreen from '../screens/DiscoverScreen';
-import LibraryScreen from '../screens/LibraryScreen';
-import SettingsScreen from '../screens/SettingsScreen';
+import DiscoverScreen from '../screens/discover/DiscoverScreen';
+import LibraryScreen from '../screens/library/LibraryScreen';
+import SettingsScreen from '../screens/settings/SettingsScreen';
 import { useColors } from '../theme/colors';
 import type { MainTabsParamList } from './types';
 

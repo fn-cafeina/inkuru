@@ -1,16 +1,19 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
+import type { ScrollViewInstance } from 'react-native';
 import { ScrollView, Switch, Text } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 
-import { AppPressable } from '../components/AppPressable';
-import { PageTitle } from '../components/PageTitle';
-import { ReaderPreferenceSections } from '../components/ReaderPreferenceSections';
-import { Screen } from '../components/Screen';
-import { SettingSection } from '../components/SettingSection';
-import { useReaderSettings } from '../hooks/useReaderSettings';
-import { useColors } from '../theme/colors';
+import { AppPressable } from '../../components/AppPressable';
+import { PageTitle } from '../../components/PageTitle';
+import { ReaderPreferenceSections } from '../../components/ReaderPreferenceSections';
+import { Screen } from '../../components/Screen';
+import { SettingSection } from '../../components/SettingSection';
+import { useReaderSettings } from '../../hooks/useReaderSettings';
+import { useColors } from '../../theme/colors';
 
 export default function SettingsScreen() {
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  useScrollToTop(scrollRef);
   const {
     mode,
     scale,
@@ -39,6 +42,7 @@ export default function SettingsScreen() {
     <Screen>
       <PageTitle>Ajustes</PageTitle>
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-4 pb-6"
