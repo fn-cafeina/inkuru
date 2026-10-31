@@ -17,8 +17,10 @@ import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
 import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
+import { isReaderData } from '../../source/guards';
 import { fetchReader } from '../../source/zonatmo';
 import type { MangaChapter, ReaderData } from '../../source/zonatmo';
+import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
@@ -74,6 +76,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const { data, hasError, loading, reload } = useRemoteData(
     fetcher,
     `reader:${chapterPath}`,
+    {
+      freshMs: CACHE_FRESH_MS.chapter,
+      persist: true,
+      validate: isReaderData,
+    },
   );
   const { page, setPage, total, restored } = useReaderProgress({
     path: chapterPath,

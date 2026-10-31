@@ -15,8 +15,10 @@ import { useRemoteData } from '../../hooks/useRemoteData';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
+import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
 import type { MangaDetail } from '../../source/zonatmo';
+import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
 import {
@@ -51,7 +53,11 @@ export default function MangaScreen({ navigation, route }: Props) {
     [path],
   );
   const { data, hasError, loading, reload, refreshing, refresh } =
-    useRemoteData(fetcher, `manga:${path}`);
+    useRemoteData(fetcher, `manga:${path}`, {
+      freshMs: CACHE_FRESH_MS.manga,
+      persist: true,
+      validate: isMangaDetail,
+    });
   const [progress, setProgress] = useState<ReaderProgress | null>(
     () => localCache.get(path)?.progress ?? null,
   );

@@ -21,8 +21,10 @@ import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
 import { useRemoteData } from '../hooks/useRemoteData';
 import type { TabNavigation } from '../navigation/types';
+import { isCatalogPage } from '../source/guards';
 import { fetchCatalog, fetchSearch } from '../source/zonatmo';
 import type { CatalogPage, MangaListItem } from '../source/zonatmo';
+import { CACHE_FRESH_MS } from '../storage/queryCache';
 import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
 
@@ -164,7 +166,11 @@ function DiscoverResults({
     [page, term],
   );
   const { data, hasError, loading, fetching, refreshing, reload, refresh } =
-    useRemoteData(fetcher, `discover:${term}:${page}`);
+    useRemoteData(fetcher, `discover:${term}:${page}`, {
+      freshMs: CACHE_FRESH_MS.catalog,
+      persist: true,
+      validate: isCatalogPage,
+    });
   const [items, setItems] = useState<MangaListItem[]>(() => data?.items ?? []);
   const [hasMore, setHasMore] = useState(() => data?.hasMore ?? false);
   const [activeTerm, setActiveTerm] = useState(term);
