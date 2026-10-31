@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
@@ -21,11 +22,13 @@ export function ChapterRow({
   title,
   date,
   state,
+  trailing,
   onPress,
 }: {
   title: string;
   date?: string;
   state?: ChapterRowState;
+  trailing?: ReactNode;
   onPress: () => void;
 }) {
   const colors = useColors();
@@ -54,6 +57,7 @@ export function ChapterRow({
           {date}
         </Text>
       ) : null}
+      {trailing ? <View className="ml-2">{trailing}</View> : null}
       {state === 'selected' ? (
         <View className="ml-2">
           <Feather name="check" size={18} color={colors.accent} />

@@ -196,6 +196,7 @@ export default function MangaScreen({ navigation, route }: Props) {
       ) : data ? (
         <MangaChapterList
           manga={data}
+          mangaPath={path}
           chapters={visibleChapters}
           ranges={ranges}
           rangeIndex={rangeIndex}
