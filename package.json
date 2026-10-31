@@ -36,7 +36,7 @@
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
-    "check:parser": "bun src/source/zonatmo.check.ts",
+    "check:parser": "bun src/source/zonatmo.check.ts && bun src/source/guards.check.ts",
     "check:discover": "bun src/screens/discoverFeed.check.ts",
     "check:downloads": "bun src/downloads/runState.check.ts && bun src/downloads/ownership.check.ts && bun src/downloads/timeout.check.ts && bun src/storage/serialize.check.ts"
   },

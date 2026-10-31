@@ -76,8 +76,26 @@ export function isMangaDetail(value: unknown): value is MangaDetail {
   );
 }
 
+// -1 is the parser's "no selected option"; anything else must address
+// a chapter, or the reader would render an undefined entry from cache.
+function isChapterIndex(value: unknown, chapterCount: number): boolean {
+  return (
+    typeof value === 'number' &&
+    Number.isInteger(value) &&
+    value >= -1 &&
+    value < chapterCount
+  );
+}
+
 export function isReaderData(value: unknown): value is ReaderData {
   if (!isRecord(value)) {
+    return false;
+  }
+
+  if (
+    !Array.isArray(value.chapters) ||
+    !value.chapters.every(isMangaChapter)
+  ) {
     return false;
   }
 
@@ -85,11 +103,9 @@ export function isReaderData(value: unknown): value is ReaderData {
     isString(value.title) &&
     isOptionalString(value.mangaTitle) &&
     Array.isArray(value.pages) &&
+    value.pages.length > 0 &&
     value.pages.every(isString) &&
-    Array.isArray(value.chapters) &&
-    value.chapters.every(isMangaChapter) &&
-    typeof value.chapterIndex === 'number' &&
-    Number.isFinite(value.chapterIndex) &&
+    isChapterIndex(value.chapterIndex, value.chapters.length) &&
     (value.prev === undefined || isMangaChapter(value.prev)) &&
     (value.next === undefined || isMangaChapter(value.next))
   );
