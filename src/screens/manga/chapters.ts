@@ -9,7 +9,7 @@ export type ChapterRange = {
   chapters: MangaChapter[];
 };
 
-export type ChapterState = 'current' | 'read';
+type ChapterState = 'current' | 'read';
 
 /**
  * The source lists chapters newest first (see the reader adapter contract in

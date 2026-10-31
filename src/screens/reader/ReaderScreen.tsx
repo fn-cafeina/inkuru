@@ -212,9 +212,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
               onOpenPrev={openChapter}
               onOpenPicker={() => setPickerOpen(true)}
             />
-          ) : (
-            <ReaderSkeleton width={viewWidth} height={viewHeight} />
-          )}
+          ) : null}
 
           {chromeVisible ? (
             <ReaderProgressBar

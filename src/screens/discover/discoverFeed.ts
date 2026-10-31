@@ -11,7 +11,7 @@ export type CatalogFeedState = {
   refreshing: boolean;
 };
 
-export type CatalogFeedAction =
+type CatalogFeedAction =
   | { type: 'term'; term: string }
   | {
       type: 'loaded';

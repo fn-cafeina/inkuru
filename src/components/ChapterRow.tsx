@@ -5,7 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { AppPressable } from './AppPressable';
 import { useColors } from '../theme/colors';
 
-export type ChapterRowState = 'current' | 'read' | 'selected';
+type ChapterRowState = 'current' | 'read' | 'selected';
 
 /** Base height of a chapter row; dividers add 1px on top (see CHAPTER_ROW_STEP). */
 export const CHAPTER_ROW_HEIGHT = 56;

@@ -11,9 +11,6 @@ import { palette } from '../../../theme/colors';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { ReaderPage } from '../components/ReaderPage';
 
-/** Estimated height until a page reports its real size. */
-const PAGE_HEIGHT_RATIO = READER_PAGE_ASPECT_RATIO;
-
 export function VerticalPages({
   pages,
   width,
@@ -76,7 +73,9 @@ export function VerticalPages({
         onPageChange(index);
       },
   );
-  const pageHeight = width / PAGE_HEIGHT_RATIO;
+
+  /** Estimated height until a page reports its real size. */
+  const pageHeight = width / READER_PAGE_ASPECT_RATIO;
   const getItemLayout = useCallback(
     (_: ArrayLike<string> | null | undefined, index: number) => ({
       length: pageHeight,
