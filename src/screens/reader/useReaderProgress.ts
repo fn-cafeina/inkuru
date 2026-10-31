@@ -55,7 +55,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
   const restored = restoredPath === path;
 
   useEffect(() => {
-    if (!restored) {
+    if (!restored || !data) {
       return;
     }
 
@@ -73,7 +73,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
         void markChapterRead(mangaPath, path);
       }
     }
-  }, [data?.title, mangaPath, path, restored, safePage, title, total]);
+  }, [data, mangaPath, path, restored, safePage, title, total]);
 
   // Warm the adjacent pages so swipes do not wait on the network.
   useEffect(() => {
