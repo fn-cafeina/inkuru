@@ -1,12 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
-import {
-  FlatList,
-  Modal,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, Text, TextInput, View } from 'react-native';
+import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
@@ -52,27 +47,31 @@ export function ChapterPicker({
     );
   }, [chapters, query]);
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
+    <Animated.View
+      entering={FadeIn.duration(120)}
+      className="absolute inset-0 justify-end"
+      style={{ zIndex: 50 }}
     >
-      <View
-        className="flex-1 justify-end"
+      <AppPressable
+        accessible={false}
+        onPress={onClose}
+        pressFeedback={false}
+        className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
+      />
+      <Animated.View
+        entering={SlideInDown.duration(200)}
+        className="rounded-t-2xl"
+        style={{
+          backgroundColor: colors.surface,
+          maxHeight: SHEET_MAX_HEIGHT,
+        }}
       >
-        <AppPressable
-          accessible={false}
-          onPress={onClose}
-          pressFeedback={false}
-          className="absolute inset-0"
-        />
-        <View
-          className="rounded-t-2xl"
-          style={{ backgroundColor: colors.surface, maxHeight: SHEET_MAX_HEIGHT }}
-        >
           <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
               className="text-base font-semibold"
@@ -151,8 +150,7 @@ export function ChapterPicker({
               paddingBottom: insets.bottom + 16,
             }}
           />
-        </View>
-      </View>
-    </Modal>
+      </Animated.View>
+    </Animated.View>
   );
 }

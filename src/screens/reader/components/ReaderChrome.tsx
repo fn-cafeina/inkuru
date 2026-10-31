@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { ScreenHeader } from '../../../components/ScreenHeader';
@@ -53,7 +54,9 @@ export function ReaderChrome({
       ) : null}
 
       {visible ? (
-        <View
+        <Animated.View
+          entering={FadeIn.duration(150)}
+          exiting={FadeOut.duration(150)}
           className="absolute left-0 right-0 top-0 bg-zinc-950"
           style={{ paddingTop: topInset }}
         >
@@ -81,7 +84,7 @@ export function ReaderChrome({
               </View>
             }
           />
-        </View>
+        </Animated.View>
       ) : null}
     </>
   );

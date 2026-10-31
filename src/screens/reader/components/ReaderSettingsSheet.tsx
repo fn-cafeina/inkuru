@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { Modal, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../../components/AppPressable';
@@ -40,27 +41,31 @@ export function ReaderSettingsSheet({
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
+  if (!visible) {
+    return null;
+  }
+
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
+    <Animated.View
+      entering={FadeIn.duration(120)}
+      className="absolute inset-0 justify-end"
+      style={{ zIndex: 50 }}
     >
-      <View
-        className="flex-1 justify-end"
+      <AppPressable
+        accessible={false}
+        onPress={onClose}
+        pressFeedback={false}
+        className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
+      />
+      <Animated.View
+        entering={SlideInDown.duration(200)}
+        className="rounded-t-2xl"
+        style={{
+          backgroundColor: colors.surface,
+          maxHeight: SHEET_MAX_HEIGHT,
+        }}
       >
-        <AppPressable
-          accessible={false}
-          onPress={onClose}
-          pressFeedback={false}
-          className="absolute inset-0"
-        />
-        <View
-          className="rounded-t-2xl"
-          style={{ backgroundColor: colors.surface, maxHeight: SHEET_MAX_HEIGHT }}
-        >
           <View className="min-h-14 flex-row items-center justify-between px-4">
             <Text
               className="text-base font-semibold"
@@ -96,17 +101,24 @@ export function ReaderSettingsSheet({
                 />
               ))}
             </SettingSection>
-            <SettingSection title="Escala de página" groupRole="radiogroup">
-              {READER_SCALE_OPTIONS.map((option, index) => (
-                <ChoiceRow
-                  key={option.value}
-                  label={option.label}
-                  selected={scale === option.value}
-                  divider={index > 0}
-                  onPress={() => onSelectScale(option.value)}
-                />
-              ))}
-            </SettingSection>
+            {mode === 'webtoon' ? (
+              <Text className="mt-1 px-1 text-xs text-zinc-500 dark:text-zinc-400">
+                La escala solo se aplica en modo paginado.
+              </Text>
+            ) : null}
+            {mode !== 'webtoon' ? (
+              <SettingSection title="Escala de página" groupRole="radiogroup">
+                {READER_SCALE_OPTIONS.map((option, index) => (
+                  <ChoiceRow
+                    key={option.value}
+                    label={option.label}
+                    selected={scale === option.value}
+                    divider={index > 0}
+                    onPress={() => onSelectScale(option.value)}
+                  />
+                ))}
+              </SettingSection>
+            ) : null}
             <SettingSection title="Calidad de imagen" groupRole="radiogroup">
               {READER_QUALITY_OPTIONS.map((option, index) => (
                 <ChoiceRow
@@ -119,8 +131,7 @@ export function ReaderSettingsSheet({
               ))}
             </SettingSection>
           </ScrollView>
-        </View>
-      </View>
-    </Modal>
+      </Animated.View>
+    </Animated.View>
   );
 }

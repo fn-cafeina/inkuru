@@ -50,6 +50,7 @@ export function ReaderPages({
       onOpenNext={onOpenNext}
       onOpenPrev={onOpenPrev}
       onOpenPicker={onOpenPicker}
+      onToggleChrome={onToggleChrome}
     />
   );
 

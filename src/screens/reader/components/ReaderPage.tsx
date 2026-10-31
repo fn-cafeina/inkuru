@@ -60,7 +60,7 @@ export function ReaderPage({
   });
   const overflowsX = baseWidth > viewportWidth + 0.5;
   const overflowsY = baseHeight > viewportHeight + 0.5;
-  const { gesture, animatedStyle } = usePageGestures({
+  const { gesture, animatedStyle, zoomed, resetZoom } = usePageGestures({
     baseWidth,
     baseHeight,
     viewportWidth,
@@ -82,93 +82,115 @@ export function ReaderPage({
   }
 
   return (
-    <GestureDetector gesture={gesture}>
-      <View
-        className="bg-zinc-950"
-        style={{
-          width: viewportWidth,
-          height: viewportHeight,
-          overflow: 'hidden',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {failed ? (
-          <AppPressable
-            accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
-            onPress={() => {
-              setFailed(false);
-              setLoaded(false);
-              setAttempt((current) => current + 1);
-            }}
-            style={
-              paged
-                ? { width: '100%', height: '100%' }
-                : { width, height: baseHeight }
-            }
-            className="items-center justify-center px-4"
-          >
-            <Text className="text-center text-xs text-zinc-300">
-              No se pudo cargar. Toca para reintentar.
-            </Text>
-          </AppPressable>
-        ) : (
-          <View style={{ width: baseWidth, height: baseHeight }}>
-            {loaded ? null : (
-              <View
-                accessible={false}
-                importantForAccessibility="no-hide-descendants"
-                pointerEvents="none"
-                className="absolute inset-0 items-center justify-center bg-zinc-900"
+    <View
+      className="bg-zinc-950"
+      style={{
+        width: viewportWidth,
+        height: viewportHeight,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {failed ? (
+        <AppPressable
+          accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
+          onPress={() => {
+            setFailed(false);
+            setLoaded(false);
+            setAttempt((current) => current + 1);
+          }}
+          style={
+            paged
+              ? { width: '100%', height: '100%' }
+              : { width, height: baseHeight }
+          }
+          className="items-center justify-center px-4"
+        >
+          <Text className="text-center text-xs text-zinc-300">
+            No se pudo cargar. Toca para reintentar.
+          </Text>
+        </AppPressable>
+      ) : (
+        <>
+          <GestureDetector gesture={gesture}>
+            <View style={{ width: baseWidth, height: baseHeight }}>
+              {loaded ? null : (
+                <View
+                  accessible={false}
+                  importantForAccessibility="no-hide-descendants"
+                  pointerEvents="none"
+                  className="absolute inset-0 items-center justify-center bg-zinc-900"
+                >
+                  <ActivityIndicator color="#a1a1aa" />
+                </View>
+              )}
+              <Animated.View
+                style={[
+                  { width: baseWidth, height: baseHeight },
+                  animatedStyle,
+                ]}
               >
-                <ActivityIndicator color="#a1a1aa" />
-              </View>
-            )}
-            <Animated.View
-              style={[{ width: baseWidth, height: baseHeight }, animatedStyle]}
+                <Image
+                  key={attempt}
+                  source={{ uri }}
+                  style={{ width: baseWidth, height: baseHeight }}
+                  contentFit="fill"
+                  cachePolicy="memory-disk"
+                  recyclingKey={uri}
+                  transition={100}
+                  // `original` and the sharper quality tiers decode the full
+                  // bitmap; `balanced` downsamples to the view size.
+                  allowDownscaling={
+                    quality === 'balanced' && scaleMode !== 'original'
+                  }
+                  onLoad={(event) => {
+                    const { width: sourceWidth, height: sourceHeight } =
+                      event.source;
+
+                    if (sourceWidth > 0 && sourceHeight > 0) {
+                      setSource({ width: sourceWidth, height: sourceHeight });
+                    }
+
+                    setLoaded(true);
+                  }}
+                  onError={() => {
+                    setFailed(true);
+                    setLoaded(false);
+                  }}
+                  accessible
+                  accessibilityLabel={label}
+                  accessibilityActions={actions}
+                  onAccessibilityAction={(event) => {
+                    if (event.nativeEvent.actionName === 'increment') {
+                      onNextPage?.();
+                    } else if (event.nativeEvent.actionName === 'decrement') {
+                      onPreviousPage?.();
+                    }
+                  }}
+                />
+              </Animated.View>
+            </View>
+          </GestureDetector>
+          {zoomed ? (
+            <View
+              pointerEvents="box-none"
+              className="absolute left-0 right-0 top-4 items-center"
             >
-              <Image
-                key={attempt}
-                source={{ uri }}
-                style={{ width: baseWidth, height: baseHeight }}
-                contentFit="fill"
-                cachePolicy="memory-disk"
-                recyclingKey={uri}
-                transition={100}
-                // `original` and the sharper quality tiers decode the full
-                // bitmap; `balanced` downsamples to the view size.
-                allowDownscaling={
-                  quality === 'balanced' && scaleMode !== 'original'
-                }
-                onLoad={(event) => {
-                  const { width: sourceWidth, height: sourceHeight } =
-                    event.source;
-
-                  if (sourceWidth > 0 && sourceHeight > 0) {
-                    setSource({ width: sourceWidth, height: sourceHeight });
-                  }
-
-                  setLoaded(true);
-                }}
-                onError={() => {
-                  setFailed(true);
-                  setLoaded(false);
-                }}
-                accessible
-                accessibilityLabel={label}
-                accessibilityActions={actions}
-                onAccessibilityAction={(event) => {
-                  if (event.nativeEvent.actionName === 'increment') {
-                    onNextPage?.();
-                  } else if (event.nativeEvent.actionName === 'decrement') {
-                    onPreviousPage?.();
-                  }
-                }}
-              />
-            </Animated.View>
-          </View>
-        )}
-      </View>
-    </GestureDetector>
+              <AppPressable
+                accessibilityLabel="Restablecer zoom"
+                onPress={resetZoom}
+                className="rounded-full px-4 py-2"
+                style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+              >
+                <Text className="text-xs font-medium text-white">
+                  Restablecer zoom
+                </Text>
+              </AppPressable>
+            </View>
+          ) : null}
+        </>
+      )}
+    </View>
   );
 }
