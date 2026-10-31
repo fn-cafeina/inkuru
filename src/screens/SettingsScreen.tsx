@@ -88,7 +88,11 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-4 pb-6"
       >
-        <SettingSection title="Modo de lectura" groupRole="radiogroup">
+        <SettingSection
+          title="Modo de lectura"
+          groupRole="radiogroup"
+          className="mt-0"
+        >
           {READER_MODE_OPTIONS.map((option, index) => (
             <ChoiceRow
               key={option.value}
@@ -112,6 +116,7 @@ export default function SettingsScreen() {
               <ChoiceRow
                 key={option.value}
                 label={option.label}
+                description={option.description}
                 selected={scale === option.value}
                 divider={index > 0}
                 onPress={() => selectScale(option.value)}

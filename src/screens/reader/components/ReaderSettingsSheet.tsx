@@ -113,6 +113,7 @@ export function ReaderSettingsSheet({
                   <ChoiceRow
                     key={option.value}
                     label={option.label}
+                    description={option.description}
                     selected={scale === option.value}
                     divider={index > 0}
                     onPress={() => onSelectScale(option.value)}
