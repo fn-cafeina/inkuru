@@ -44,6 +44,7 @@ export default function LibraryScreen() {
   const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
   const mounted = useRef(true);
+  const loadTicket = useRef(0);
   const cardWidth = mangaCardWidth(width);
 
   useEffect(() => {
@@ -55,6 +56,10 @@ export default function LibraryScreen() {
   }, []);
 
   const load = useCallback(async (showSpinner = false) => {
+    // A ticket guards against a slow refresh resolving after the user has
+    // already removed an entry, which would resurrect it from stale data.
+    const ticket = ++loadTicket.current;
+
     setChecking(true);
     setFailed(false);
 
@@ -64,7 +69,7 @@ export default function LibraryScreen() {
 
     const result = await loadLibraryResult();
 
-    if (!mounted.current) {
+    if (!mounted.current || ticket !== loadTicket.current) {
       return;
     }
 
@@ -79,7 +84,7 @@ export default function LibraryScreen() {
       result.entries.map((entry) => entry.path),
     );
 
-    if (!mounted.current) {
+    if (!mounted.current || ticket !== loadTicket.current) {
       return;
     }
 
@@ -116,6 +121,9 @@ export default function LibraryScreen() {
               Alert.alert('No se pudo quitar', 'Inténtalo de nuevo.');
               return;
             }
+
+            // Invalidate any in-flight load so it cannot restore the entry.
+            loadTicket.current += 1;
 
             const next = entries.filter((item) => item.path !== entry.path);
 
