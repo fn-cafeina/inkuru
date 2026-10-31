@@ -148,6 +148,25 @@ assertEqual(
 );
 assertEqual(catalog.hasMore, true, 'catálogo con siguiente página');
 
+// The parser must accept single-quoted attributes, which are valid HTML.
+const singleQuoted = parseCatalog(
+  CATALOG_FIXTURE.replace(/src="([^"]*covers[^"]*)"/g, "src='$1'"),
+);
+
+assertEqual(singleQuoted.items.length, 2, 'catálogo con comillas simples');
+assertEqual(
+  item(singleQuoted.items, 0).cover,
+  'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
+  'portada del catálogo con comillas simples',
+);
+
+// A card whose class attribute uses single quotes must still be found.
+const singleQuotedClass = parseCatalog(
+  CATALOG_FIXTURE.replace(/class="element /g, "class='element "),
+);
+
+assertEqual(singleQuotedClass.items.length, 2, 'clase de tarjeta con comillas simples');
+
 const lastCatalog = parseCatalog(CATALOG_FIXTURE.replace(' rel="next"', ''));
 
 assertEqual(lastCatalog.items.length, 2, 'última página con mangas');

@@ -18,13 +18,18 @@ const ENTITIES: Record<string, string> = {
   rsquo: '’',
 };
 
+// Matches a class attribute in either quote style.
+function classAttr(className: string): string {
+  return `\\bclass\\s*=\\s*(?:"[^"]*\\b${className}\\b[^"]*"|'[^']*\\b${className}\\b[^']*')`;
+}
+
 export function extractBlocks(
   html: string,
   tag: string,
   className: string | undefined,
 ): string[] {
   const opening = className
-    ? `<${tag}\\b[^>]*\\bclass\\s*=\\s*"[^"]*\\b${className}\\b[^"]*"[^>]*>`
+    ? `<${tag}\\b[^>]*${classAttr(className)}[^>]*>`
     : `<${tag}\\b[^>]*>`;
   const pattern = new RegExp(`${opening}[\\s\\S]*?</${tag}>`, 'gi');
 
@@ -36,10 +41,7 @@ export function tagWithClass(
   tag: string,
   className: string,
 ): string | undefined {
-  const pattern = new RegExp(
-    `<${tag}\\b[^>]*\\bclass\\s*=\\s*"[^"]*\\b${className}\\b[^"]*"[^>]*>`,
-    'i',
-  );
+  const pattern = new RegExp(`<${tag}\\b[^>]*${classAttr(className)}[^>]*>`, 'i');
 
   return html.match(pattern)?.[0];
 }
@@ -60,8 +62,10 @@ export function textWithClass(
 }
 
 export function attribute(tag: string, name: string): string | undefined {
-  const match = tag.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*"([^"]*)"`, 'i'));
-  const value = match?.[1];
+  const match = tag.match(
+    new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'),
+  );
+  const value = match?.[1] ?? match?.[2];
 
   return value !== undefined ? decodeEntities(value) : undefined;
 }
