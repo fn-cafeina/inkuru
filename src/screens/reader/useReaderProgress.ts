@@ -84,7 +84,11 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     for (const index of [safePage - 1, safePage + 1, safePage + 2]) {
       const pageUrl = data.pages[index];
 
-      if (index >= 0 && pageUrl !== undefined) {
+      if (
+        index >= 0 &&
+        pageUrl !== undefined &&
+        !pageUrl.startsWith('file://')
+      ) {
         void Image.prefetch(pageUrl);
       }
     }

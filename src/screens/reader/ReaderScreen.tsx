@@ -17,6 +17,7 @@ import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
 import { loadReadChapters } from '../../storage/readerProgress';
 import { ascendingChapters } from '../manga/chapters';
+import { loadDownloadedReader } from '../../downloads/manager';
 import { isReaderData } from '../../source/guards';
 import { fetchReader } from '../../source/zonatmo';
 import type { MangaChapter, ReaderData } from '../../source/zonatmo';
@@ -70,7 +71,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
   const [readChapters, setReadChapters] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const fetcher = useCallback(
-    (signal: AbortSignal) => fetchReader(chapterPath, signal),
+    async (signal: AbortSignal) => {
+      const local = await loadDownloadedReader(chapterPath);
+
+      return local ?? fetchReader(chapterPath, signal);
+    },
     [chapterPath],
   );
   const { data, hasError, loading, reload } = useRemoteData(
