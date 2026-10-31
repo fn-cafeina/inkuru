@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { ScrollView, Switch, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -7,75 +7,33 @@ import { PageTitle } from '../components/PageTitle';
 import { ReaderPreferenceSections } from '../components/ReaderPreferenceSections';
 import { Screen } from '../components/Screen';
 import { SettingSection } from '../components/SettingSection';
+import { useReaderSettings } from '../hooks/useReaderSettings';
 import { useColors } from '../theme/colors';
-import {
-  DEFAULT_READER_MODE,
-  DEFAULT_READER_QUALITY,
-  DEFAULT_READER_SCALE,
-  loadKeepAwake,
-  loadReaderMode,
-  loadReaderQuality,
-  loadReaderScale,
-  saveKeepAwake,
-  saveReaderMode,
-  saveReaderQuality,
-  saveReaderScale,
-} from '../storage/readerSettings';
-import type {
-  ReaderMode,
-  ReaderQuality,
-  ReaderScale,
-} from '../storage/readerSettings';
 
 export default function SettingsScreen() {
-  const [mode, setMode] = useState<ReaderMode>(DEFAULT_READER_MODE);
-  const [scale, setScale] = useState<ReaderScale>(DEFAULT_READER_SCALE);
-  const [quality, setQuality] = useState<ReaderQuality>(DEFAULT_READER_QUALITY);
-  const [keepAwake, setKeepAwake] = useState(true);
+  const {
+    mode,
+    scale,
+    quality,
+    keepAwake,
+    restore,
+    selectMode,
+    selectScale,
+    selectQuality,
+    selectKeepAwake,
+  } = useReaderSettings();
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
 
-      void Promise.all([
-        loadReaderMode(),
-        loadReaderScale(),
-        loadReaderQuality(),
-        loadKeepAwake(),
-      ]).then(([storedMode, storedScale, storedQuality, storedKeepAwake]) => {
-        if (active) {
-          setMode(storedMode ?? DEFAULT_READER_MODE);
-          setScale(storedScale ?? DEFAULT_READER_SCALE);
-          setQuality(storedQuality ?? DEFAULT_READER_QUALITY);
-          setKeepAwake(storedKeepAwake);
-        }
-      });
+      void restore(() => active);
 
       return () => {
         active = false;
       };
-    }, []),
+    }, [restore]),
   );
-
-  const selectMode = (next: ReaderMode) => {
-    setMode(next);
-    void saveReaderMode(next);
-  };
-
-  const selectScale = (next: ReaderScale) => {
-    setScale(next);
-    void saveReaderScale(next);
-  };
-
-  const selectQuality = (next: ReaderQuality) => {
-    setQuality(next);
-    void saveReaderQuality(next);
-  };
-
-  const selectKeepAwake = (next: boolean) => {
-    setKeepAwake(next);
-    void saveKeepAwake(next);
-  };
 
   return (
     <Screen>
