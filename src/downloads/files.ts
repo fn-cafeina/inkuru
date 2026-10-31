@@ -136,16 +136,16 @@ export async function readDownloadFile(
   return wrapper;
 }
 
+/**
+ * Cheap existence check for startup: parsing each wrapper here would read the
+ * whole chapter list on the JS thread. Ownership is enforced on write, read and
+ * delete, where the cost is paid once.
+ */
 export function hasDownloadFiles(chapterPath: string): boolean {
   const directory = chapterDirectory(chapterPath);
 
-  if (!directory.exists) {
-    return false;
-  }
-
   return (
-    new File(directory, READER_FILE).exists &&
-    ownsDirectory(chapterPath, directory)
+    directory.exists && new File(directory, READER_FILE).exists
   );
 }
 
