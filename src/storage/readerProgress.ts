@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { withLock } from './serialize';
+
 export type ReaderProgress = {
   chapterPath: string;
   chapterTitle: string;
@@ -107,22 +109,24 @@ export async function loadReadChapters(mangaPath: string): Promise<string[]> {
   }
 }
 
-export async function markChapterRead(
+export function markChapterRead(
   mangaPath: string,
   chapterPath: string,
 ): Promise<void> {
-  try {
-    const current = await loadReadChapters(mangaPath);
+  return withLock(readKey(mangaPath), async () => {
+    try {
+      const current = await loadReadChapters(mangaPath);
 
-    if (current.includes(chapterPath)) {
-      return;
+      if (current.includes(chapterPath)) {
+        return;
+      }
+
+      await AsyncStorage.setItem(
+        readKey(mangaPath),
+        JSON.stringify([...current, chapterPath]),
+      );
+    } catch {
+      // Read marks are a convenience; a storage failure must not block reading.
     }
-
-    await AsyncStorage.setItem(
-      readKey(mangaPath),
-      JSON.stringify([...current, chapterPath]),
-    );
-  } catch {
-    // Read marks are a convenience; a storage failure must not block reading.
-  }
+  });
 }

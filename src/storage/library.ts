@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { withLock } from './serialize';
+
 export type LibraryEntry = {
   path: string;
   title: string;
@@ -32,40 +34,44 @@ export async function isInLibrary(path: string): Promise<boolean> {
   return entries.some((entry) => entry.path === path);
 }
 
-export async function addToLibrary(entry: LibraryEntry): Promise<boolean> {
-  try {
-    const entries = await readLibrary();
+export function addToLibrary(entry: LibraryEntry): Promise<boolean> {
+  return withLock(LIBRARY_KEY, async () => {
+    try {
+      const entries = await readLibrary();
 
-    if (entries.some((current) => current.path === entry.path)) {
+      if (entries.some((current) => current.path === entry.path)) {
+        return true;
+      }
+
+      await AsyncStorage.setItem(
+        LIBRARY_KEY,
+        JSON.stringify([...entries, entry]),
+      );
+
       return true;
+    } catch {
+      return false;
     }
-
-    await AsyncStorage.setItem(
-      LIBRARY_KEY,
-      JSON.stringify([...entries, entry]),
-    );
-
-    return true;
-  } catch {
-    return false;
-  }
+  });
 }
 
-export async function removeFromLibrary(path: string): Promise<boolean> {
-  try {
-    const entries = await readLibrary();
-    const next = entries.filter((entry) => entry.path !== path);
+export function removeFromLibrary(path: string): Promise<boolean> {
+  return withLock(LIBRARY_KEY, async () => {
+    try {
+      const entries = await readLibrary();
+      const next = entries.filter((entry) => entry.path !== path);
 
-    if (next.length === entries.length) {
+      if (next.length === entries.length) {
+        return true;
+      }
+
+      await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(next));
+
       return true;
+    } catch {
+      return false;
     }
-
-    await AsyncStorage.setItem(LIBRARY_KEY, JSON.stringify(next));
-
-    return true;
-  } catch {
-    return false;
-  }
+  });
 }
 
 async function readLibrary(): Promise<LibraryEntry[]> {
