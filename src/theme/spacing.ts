@@ -11,5 +11,5 @@ export const CARD_RADIUS = 16;
 export const MEDIA_RADIUS = 12;
 export const GRID_GAP = 12;
 export const GRID_CARD_PADDING = 4;
-export const SHEET_MAX_HEIGHT = '80%';
+export const SHEET_HEIGHT = '50%';
 export const MANGA_COVER_WIDTH = 144;

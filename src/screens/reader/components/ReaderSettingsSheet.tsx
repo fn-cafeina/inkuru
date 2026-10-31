@@ -17,7 +17,7 @@ import type {
   ReaderScale,
 } from '../../../storage/readerSettings';
 import { useColors } from '../../../theme/colors';
-import { SHEET_MAX_HEIGHT } from '../../../theme/spacing';
+import { SHEET_HEIGHT } from '../../../theme/spacing';
 
 export function ReaderSettingsSheet({
   visible,
@@ -63,7 +63,7 @@ export function ReaderSettingsSheet({
         className="rounded-t-2xl"
         style={{
           backgroundColor: colors.surface,
-          maxHeight: SHEET_MAX_HEIGHT,
+          height: SHEET_HEIGHT,
         }}
       >
           <View className="min-h-14 flex-row items-center justify-between px-4">
