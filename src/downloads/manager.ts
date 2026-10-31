@@ -1,5 +1,5 @@
-import { forgetRemoteData } from '../hooks/useRemoteData';
 import { fetchReader } from '../source/zonatmo';
+import { forgetRemoteCache } from '../storage/remoteCache';
 import type { ReaderData } from '../source/zonatmo';
 import {
   deleteChapterFiles,
@@ -136,7 +136,7 @@ export async function deleteDownload(chapterPath: string) {
   states.delete(chapterPath);
   records.delete(chapterPath);
   deleteChapterFiles(chapterPath);
-  forgetRemoteData(`reader:${chapterPath}`);
+  forgetRemoteCache(`reader:${chapterPath}`);
   await removeRecord(chapterPath);
   notify();
 }
@@ -279,7 +279,7 @@ async function runDownload(input: DownloadInput) {
     records.set(chapterPath, record);
     await upsertRecord(record);
     states.delete(chapterPath);
-    forgetRemoteData(`reader:${chapterPath}`);
+    forgetRemoteCache(`reader:${chapterPath}`);
     notify();
   } catch {
     const wasCancelled =
