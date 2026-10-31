@@ -20,8 +20,8 @@ export const READER_SCALE_OPTIONS = [
 ] as const;
 
 export const READER_QUALITY_OPTIONS = [
-  { value: 'balanced', label: 'Normal' },
-  { value: 'original', label: 'Original' },
+  { value: 'balanced', label: 'Equilibrada' },
+  { value: 'original', label: 'Máxima' },
 ] as const;
 
 const MODE_KEY = 'reader:mode';
