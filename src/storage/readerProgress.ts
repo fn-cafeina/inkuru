@@ -6,18 +6,15 @@ export type ReaderProgress = {
   page: number;
 };
 
-const progressKey = (mangaPath: string) => `reader:progress:${mangaPath}`;
+const PROGRESS_PREFIX = 'reader:progress:';
+const progressKey = (mangaPath: string) => `${PROGRESS_PREFIX}${mangaPath}`;
 
-export async function loadProgress(
-  mangaPath: string,
-): Promise<ReaderProgress | null> {
+function parseProgress(raw: string | null | undefined): ReaderProgress | null {
+  if (!raw) {
+    return null;
+  }
+
   try {
-    const raw = await AsyncStorage.getItem(progressKey(mangaPath));
-
-    if (!raw) {
-      return null;
-    }
-
     const value: unknown = JSON.parse(raw);
 
     if (typeof value !== 'object' || value === null) {
@@ -43,6 +40,37 @@ export async function loadProgress(
     };
   } catch {
     return null;
+  }
+}
+
+export async function loadProgress(
+  mangaPath: string,
+): Promise<ReaderProgress | null> {
+  try {
+    return parseProgress(await AsyncStorage.getItem(progressKey(mangaPath)));
+  } catch {
+    return null;
+  }
+}
+
+export async function loadProgressMany(
+  mangaPaths: string[],
+): Promise<Record<string, ReaderProgress>> {
+  try {
+    const pairs = await AsyncStorage.multiGet(mangaPaths.map(progressKey));
+    const result: Record<string, ReaderProgress> = {};
+
+    for (const [key, raw] of pairs) {
+      const progress = parseProgress(raw);
+
+      if (progress) {
+        result[key.slice(PROGRESS_PREFIX.length)] = progress;
+      }
+    }
+
+    return result;
+  } catch {
+    return {};
   }
 }
 

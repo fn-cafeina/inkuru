@@ -21,7 +21,7 @@ import { Screen } from '../components/Screen';
 import type { TabNavigation } from '../navigation/types';
 import { loadLibraryResult, removeFromLibrary } from '../storage/library';
 import type { LibraryEntry } from '../storage/library';
-import { loadProgress } from '../storage/readerProgress';
+import { loadProgressMany } from '../storage/readerProgress';
 import type { ReaderProgress } from '../storage/readerProgress';
 import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
@@ -74,16 +74,8 @@ export default function LibraryScreen() {
       return;
     }
 
-    const loadedProgress: Record<string, ReaderProgress> = {};
-
-    await Promise.all(
-      result.entries.map(async (entry) => {
-        const value = await loadProgress(entry.path);
-
-        if (value) {
-          loadedProgress[entry.path] = value;
-        }
-      }),
+    const loadedProgress = await loadProgressMany(
+      result.entries.map((entry) => entry.path),
     );
 
     if (!mounted.current) {
