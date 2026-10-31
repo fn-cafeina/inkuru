@@ -166,6 +166,15 @@ export default function ReaderScreen({ navigation, route }: Props) {
     return () => subscription.remove();
   }, [chromeVisible, pickerOpen, settingsOpen]);
 
+  const goBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
+  };
+
   return (
     // The reader fills the whole window behind both system bars.
     <View className="flex-1 bg-zinc-950">
@@ -218,7 +227,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           visible={chromeVisible}
           showError={showError}
           topInset={insets.top}
-          onBack={() => navigation.goBack()}
+          onBack={goBack}
           onOpenPicker={() => setPickerOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
           onRetry={reload}

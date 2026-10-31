@@ -158,6 +158,14 @@ export default function MangaScreen({ navigation, route }: Props) {
   const selectRange = (index: number) => {
     setActiveRange(index);
   };
+  const goBack = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.reset({ index: 0, routes: [{ name: 'Tabs' }] });
+  };
   const showRefreshError = hasError && data !== null;
 
   return (
@@ -165,7 +173,7 @@ export default function MangaScreen({ navigation, route }: Props) {
       <ScreenHeader
         title={mangaTitle(data, title)}
         titleVisible={barTitleVisible}
-        onBack={() => navigation.goBack()}
+        onBack={goBack}
         action={
           <AppPressable
             accessibilityLabel={
