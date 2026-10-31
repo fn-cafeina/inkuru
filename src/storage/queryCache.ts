@@ -126,6 +126,21 @@ async function prune(entries: IndexEntry[]): Promise<IndexEntry[]> {
   return next;
 }
 
+/**
+ * Cache entries with no index entry are deleted as orphans. Pure so the
+ * self-check can prove a stale index no longer decides deletions.
+ */
+export function findOrphans(
+  keys: readonly string[],
+  entries: readonly IndexEntry[],
+): string[] {
+  const known = new Set(entries.map((entry) => storageKey(entry.key)));
+
+  return keys.filter(
+    (key) => key.startsWith(ENTRY_PREFIX) && !known.has(key),
+  );
+}
+
 async function sweepOnce() {
   if (swept) {
     return;
@@ -138,10 +153,7 @@ async function sweepOnce() {
   }
 
   swept = true;
-  const known = new Set((index ?? []).map((entry) => storageKey(entry.key)));
-  const orphans = keys.filter(
-    (key) => key.startsWith(ENTRY_PREFIX) && !known.has(key),
-  );
+  const orphans = findOrphans(keys, index ?? []);
 
   if (orphans.length > 0) {
     await AsyncStorage.multiRemove(orphans).catch(() => undefined);
