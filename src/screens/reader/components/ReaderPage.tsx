@@ -54,7 +54,6 @@ export function ReaderPage({
     ratio,
     width,
     height,
-    source,
     scaleMode,
     paged,
   });
@@ -139,11 +138,9 @@ export function ReaderPage({
                   cachePolicy="memory-disk"
                   recyclingKey={uri}
                   transition={100}
-                  // `original` and the sharper quality tiers decode the full
-                  // bitmap; `balanced` downsamples to the view size.
-                  allowDownscaling={
-                    quality === 'balanced' && scaleMode !== 'original'
-                  }
+                  // `balanced` downsamples to the view size; `original`
+                  // decodes the full bitmap.
+                  allowDownscaling={quality === 'balanced'}
                   onLoad={(event) => {
                     const { width: sourceWidth, height: sourceHeight } =
                       event.source;

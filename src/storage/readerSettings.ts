@@ -1,14 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type ReaderMode = 'webtoon' | 'paged-ltr' | 'paged-rtl';
-export type ReaderScale =
-  | 'fit-screen'
-  | 'fit-width'
-  | 'fit-height'
-  | 'fill'
-  | 'original'
-  | 'stretch';
-export type ReaderQuality = 'balanced' | 'high' | 'maximum';
+export type ReaderScale = 'fit-screen' | 'fit-width';
+export type ReaderQuality = 'balanced' | 'original';
 
 export const DEFAULT_READER_MODE: ReaderMode = 'webtoon';
 export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
@@ -33,12 +27,16 @@ export const READER_MODE_OPTIONS = [
 ] as const;
 
 export const READER_SCALE_OPTIONS = [
-  { value: 'fit-screen', label: 'Ajustar pantalla' },
-  { value: 'fit-width', label: 'Ajustar ancho' },
-  { value: 'fit-height', label: 'Ajustar alto' },
-  { value: 'fill', label: 'Rellenar (recortar)' },
-  { value: 'original', label: 'Tamaño original' },
-  { value: 'stretch', label: 'Estirar' },
+  {
+    value: 'fit-screen',
+    label: 'Ajustar pantalla',
+    description: 'La página completa dentro de la pantalla.',
+  },
+  {
+    value: 'fit-width',
+    label: 'Ajustar ancho',
+    description: 'Usa todo el ancho; las páginas altas se pueden desplazar.',
+  },
 ] as const;
 
 export const READER_QUALITY_OPTIONS = [
@@ -48,14 +46,9 @@ export const READER_QUALITY_OPTIONS = [
     description: 'Menos datos y carga más rápida.',
   },
   {
-    value: 'high',
-    label: 'Alta',
-    description: 'Mejor detalle por página.',
-  },
-  {
-    value: 'maximum',
-    label: 'Máxima',
-    description: 'Sin reducción de la imagen original.',
+    value: 'original',
+    label: 'Original',
+    description: 'Máximo detalle; usa más datos.',
   },
 ] as const;
 
@@ -94,9 +87,21 @@ export async function loadReaderScale(): Promise<ReaderScale | null> {
   try {
     const value = await AsyncStorage.getItem(SCALE_KEY);
 
-    return READER_SCALE_OPTIONS.some((option) => option.value === value)
-      ? (value as ReaderScale)
-      : null;
+    if (value === 'fit-width') {
+      return 'fit-width';
+    }
+
+    if (
+      value === 'fit-screen' ||
+      value === 'fit-height' ||
+      value === 'fill' ||
+      value === 'original' ||
+      value === 'stretch'
+    ) {
+      return 'fit-screen';
+    }
+
+    return null;
   } catch {
     return null;
   }
@@ -114,9 +119,15 @@ export async function loadReaderQuality(): Promise<ReaderQuality | null> {
   try {
     const value = await AsyncStorage.getItem(QUALITY_KEY);
 
-    return READER_QUALITY_OPTIONS.some((option) => option.value === value)
-      ? (value as ReaderQuality)
-      : null;
+    if (value === 'balanced') {
+      return 'balanced';
+    }
+
+    if (value === 'high' || value === 'maximum' || value === 'original') {
+      return 'original';
+    }
+
+    return null;
   } catch {
     return null;
   }
