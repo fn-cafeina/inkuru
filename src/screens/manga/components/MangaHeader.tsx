@@ -63,7 +63,6 @@ export function MangaHeader({
       <MangaCoverInfo
         manga={manga}
         status={factValue('Estado')}
-        author={factValue('Autor')}
         updated={factValue('Actualizado')}
       />
 
@@ -160,12 +159,10 @@ export function MangaHeader({
 function MangaCoverInfo({
   manga,
   status,
-  author,
   updated,
 }: {
   manga: MangaDetail;
   status?: string;
-  author?: string;
   updated?: string;
 }) {
   const colors = useColors();
@@ -202,14 +199,6 @@ function MangaCoverInfo({
               {status}
             </Text>
           </View>
-        ) : null}
-        {author ? (
-          <Text
-            numberOfLines={2}
-            className="mt-2 text-sm text-zinc-700 dark:text-zinc-300"
-          >
-            {author}
-          </Text>
         ) : null}
         {updated ? (
           <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">

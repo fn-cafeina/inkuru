@@ -138,7 +138,6 @@ export function parseManga(html: string): MangaDetail {
       ...fact('Estado', parseMangaStatus(html)),
       ...fact('Tipo', textWithClass(html, 'h1', 'book-type')),
       ...fact('Demografia', demography),
-      ...fact('Autor', textWithClass(html, 'span', 'badge-transparent')),
     ],
     synopsis: parseMangaSynopsis(html),
     chapters: extractBlocks(html, 'li', 'upload-link')
