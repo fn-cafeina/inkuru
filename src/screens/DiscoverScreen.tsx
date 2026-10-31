@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
@@ -94,6 +94,53 @@ function mergeItems(current: MangaListItem[], next: MangaListItem[]) {
   return merged;
 }
 
+function DiscoverFallback({
+  term,
+  loading,
+  fetching,
+  hasError,
+  data,
+  cardWidth,
+  onClear,
+  onRetry,
+}: {
+  term: string;
+  loading: boolean;
+  fetching: boolean;
+  hasError: boolean;
+  data: CatalogPage | null;
+  cardWidth: number;
+  onClear: () => void;
+  onRetry: () => void;
+}) {
+  if (loading || fetching || (data?.items.length ?? 0) > 0) {
+    return <MangaGridSkeleton cardWidth={cardWidth} />;
+  }
+
+  if (hasError) {
+    return (
+      <ErrorState
+        message={term ? 'No se pudo buscar' : 'No se pudo cargar el catálogo'}
+        onRetry={onRetry}
+      />
+    );
+  }
+
+  return (
+    <EmptyState
+      title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
+      subtitle={
+        term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
+      }
+      action={
+        <Button variant="secondary" onPress={term ? onClear : onRetry}>
+          {term ? 'Ver catálogo' : 'Reintentar'}
+        </Button>
+      }
+    />
+  );
+}
+
 function DiscoverResults({
   term,
   onClear,
@@ -142,9 +189,10 @@ function DiscoverResults({
 
   // Mirroring fetched pages into the accumulated list is the external-system
   // sync this effect exists for; the set-state-in-effect heuristic cannot tell
-  // it apart from a cascading render.
+  // it apart from a cascading render. Layout timing keeps the empty state from
+  // painting for one frame before the fetched page is applied.
   /* eslint-disable react-hooks/set-state-in-effect -- accumulate fetched pages */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!data) {
       return;
     }
@@ -213,32 +261,16 @@ function DiscoverResults({
   };
 
   if (items.length === 0) {
-    if (loading || fetching) {
-      return <MangaGridSkeleton cardWidth={cardWidth} />;
-    }
-
-    if (hasError) {
-      return (
-        <ErrorState
-          message={
-            term ? 'No se pudo buscar' : 'No se pudo cargar el catálogo'
-          }
-          onRetry={reload}
-        />
-      );
-    }
-
     return (
-      <EmptyState
-        title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
-        subtitle={
-          term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
-        }
-        action={
-          <Button variant="secondary" onPress={term ? onClear : reload}>
-            {term ? 'Ver catálogo' : 'Reintentar'}
-          </Button>
-        }
+      <DiscoverFallback
+        term={term}
+        loading={loading}
+        fetching={fetching}
+        hasError={hasError}
+        data={data}
+        cardWidth={cardWidth}
+        onClear={onClear}
+        onRetry={reload}
       />
     );
   }
