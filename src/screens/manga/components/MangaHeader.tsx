@@ -12,7 +12,6 @@ import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
 import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 import { useColors } from '../../../theme/colors';
-import { formatSourceDate } from '../../../utils/formatDate';
 import type { ChapterRange } from '../chapters';
 import { TagRow } from './TagRow';
 
@@ -61,11 +60,7 @@ export function MangaHeader({
 
   return (
     <View>
-      <MangaCoverInfo
-        manga={manga}
-        status={factValue('Estado')}
-        updated={factValue('Actualizado')}
-      />
+      <MangaCoverInfo manga={manga} status={factValue('Estado')} />
 
       {readChapter ? (
         <View className="mt-4 px-4">
@@ -160,11 +155,9 @@ export function MangaHeader({
 function MangaCoverInfo({
   manga,
   status,
-  updated,
 }: {
   manga: MangaDetail;
   status?: string;
-  updated?: string;
 }) {
   const colors = useColors();
 
@@ -203,11 +196,6 @@ function MangaCoverInfo({
               {status}
             </Text>
           </View>
-        ) : null}
-        {updated ? (
-          <Text className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            {`Actualizado ${formatSourceDate(updated)}`}
-          </Text>
         ) : null}
       </View>
     </View>

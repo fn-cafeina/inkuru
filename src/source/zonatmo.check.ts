@@ -47,21 +47,11 @@ assertEqual(
   'portada del manga',
 );
 assertEqual(manga.tags.join('|'), 'Acción|Aventura', 'tags del manga');
-assertEqual(manga.facts.length, 3, 'facts del manga');
+assertEqual(manga.facts.length, 1, 'facts del manga');
 assertEqual(
   manga.facts.find((fact) => fact.label === 'Estado')?.value,
   'Ongoing',
   'estado',
-);
-assertEqual(
-  manga.facts.find((fact) => fact.label === 'Tipo')?.value,
-  'MANGA',
-  'tipo',
-);
-assertEqual(
-  manga.facts.find((fact) => fact.label === 'Demografia')?.value,
-  'Seinen',
-  'demografía',
 );
 assert(manga.synopsis.includes('Ciudad-Z'), 'sinopsis decodificada');
 assertEqual(manga.chapters.length, 2, 'capítulos del manga');

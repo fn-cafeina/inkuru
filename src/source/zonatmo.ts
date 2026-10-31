@@ -125,19 +125,11 @@ export function parseManga(html: string): MangaDetail {
   const tags = extractBlocks(html, 'a', 'badge-primary')
     .map(cleanText)
     .filter((tag) => tag.length > 0);
-  const demography =
-    textWithClass(html, 'div', 'demography') ??
-    textWithClass(html, 'span', 'demography');
-
   return {
     title,
     cover,
     tags,
-    facts: [
-      ...fact('Estado', parseMangaStatus(html)),
-      ...fact('Tipo', textWithClass(html, 'h1', 'book-type')),
-      ...fact('Demografia', demography),
-    ],
+    facts: fact('Estado', parseMangaStatus(html)),
     synopsis: parseMangaSynopsis(html),
     chapters: extractBlocks(html, 'li', 'upload-link')
       .map(parseMangaChapter)
