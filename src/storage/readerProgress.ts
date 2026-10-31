@@ -88,6 +88,17 @@ export async function saveProgress(
 }
 
 const readKey = (mangaPath: string) => `reader:read:${mangaPath}`;
+const pagePrefix = 'reader:page:';
+
+export const pageProgressKey = (chapterPath: string) =>
+  `${pagePrefix}${chapterPath}`;
+
+/** Per-chapter page marks are useless once the files are gone. */
+export function forgetPageProgress(chapterPath: string): Promise<void> {
+  return AsyncStorage.removeItem(pageProgressKey(chapterPath)).catch(
+    () => undefined,
+  );
+}
 
 export async function loadReadChapters(mangaPath: string): Promise<string[]> {
   try {

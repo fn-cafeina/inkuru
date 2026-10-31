@@ -3,10 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { AppState } from 'react-native';
 
-import { markChapterRead, saveProgress } from '../../storage/readerProgress';
+import {
+  markChapterRead,
+  pageProgressKey,
+  saveProgress,
+} from '../../storage/readerProgress';
 import type { ReaderData } from '../../source/zonatmo';
 
-const pageKey = (path: string) => `reader:page:${path}`;
 const PROGRESS_WRITE_DELAY = 500;
 
 type PendingProgress = {
@@ -48,7 +51,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     }
 
     pendingRef.current = null;
-    void AsyncStorage.setItem(pageKey(pending.path), String(pending.page)).catch(
+    void AsyncStorage.setItem(pageProgressKey(pending.path), String(pending.page)).catch(
       () => undefined,
     );
 
@@ -68,7 +71,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
       let nextPage = 0;
 
       try {
-        const storedPage = await AsyncStorage.getItem(pageKey(path));
+        const storedPage = await AsyncStorage.getItem(pageProgressKey(path));
         const parsedPage = Number.parseInt(storedPage ?? '', 10);
 
         if (Number.isFinite(parsedPage) && parsedPage > 0) {

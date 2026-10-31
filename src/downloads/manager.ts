@@ -1,5 +1,6 @@
 import { fetchReader } from '../source/zonatmo';
 import { forgetRemoteCache } from '../storage/remoteCache';
+import { forgetPageProgress } from '../storage/readerProgress';
 import type { ReaderData } from '../source/zonatmo';
 import {
   deleteChapterFiles,
@@ -157,6 +158,7 @@ export async function deleteDownload(chapterPath: string) {
   records.delete(chapterPath);
   const deleted = deleteChapterFiles(chapterPath);
   forgetRemoteCache(`reader:${chapterPath}`);
+  void forgetPageProgress(chapterPath);
   notify();
 
   if (!deleted && hasDownloadFiles(chapterPath)) {
