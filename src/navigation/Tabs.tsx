@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import DiscoverScreen from '../screens/DiscoverScreen';
-import DownloadsScreen from '../screens/DownloadsScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { useColors } from '../theme/colors';
@@ -14,10 +13,6 @@ type IconProps = { color: string; size: number };
 
 const LibraryIcon = ({ color, size }: IconProps) => (
   <Feather name="book-open" size={size} color={color} />
-);
-
-const DownloadsIcon = ({ color, size }: IconProps) => (
-  <Feather name="download" size={size} color={color} />
 );
 
 const DiscoverIcon = ({ color, size }: IconProps) => (
@@ -49,11 +44,6 @@ export function MainTabs() {
         name="Library"
         component={LibraryScreen}
         options={{ title: 'Biblioteca', tabBarIcon: LibraryIcon }}
-      />
-      <Tab.Screen
-        name="Downloads"
-        component={DownloadsScreen}
-        options={{ title: 'Descargas', tabBarIcon: DownloadsIcon }}
       />
       <Tab.Screen
         name="Discover"

@@ -7,7 +7,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 export type MainTabsParamList = {
   Library: undefined;
-  Downloads: undefined;
   Discover: undefined;
   Settings: undefined;
 };
