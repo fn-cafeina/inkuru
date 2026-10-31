@@ -1,14 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState } from 'react-native';
 
 const PREFIX = 'cache:query:';
 const ENTRY_PREFIX = `${PREFIX}v1:`;
-const INDEX_KEY = `${PREFIX}index`;
 const VERSION = 1;
 const MAX_ENTRIES = 200;
 const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-const INDEX_WRITE_DELAY = 1000;
 
 export const CACHE_FRESH_MS = {
   catalog: 10 * 60 * 1000,
@@ -20,29 +17,11 @@ type IndexEntry = { key: string; savedAt: number; bytes: number };
 type StoredEntry = { v: number; savedAt: number; value: unknown };
 
 let index: IndexEntry[] | null = null;
-let indexTimer: ReturnType<typeof setTimeout> | null = null;
-let pendingIndex: IndexEntry[] | null = null;
 let tail: Promise<void> = Promise.resolve();
 let swept = false;
 
 function storageKey(key: string) {
   return `${ENTRY_PREFIX}${encodeURIComponent(key)}`;
-}
-
-function isIndexEntry(value: unknown): value is IndexEntry {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const record = value as Record<string, unknown>;
-
-  return (
-    typeof record.key === 'string' &&
-    typeof record.savedAt === 'number' &&
-    Number.isFinite(record.savedAt) &&
-    typeof record.bytes === 'number' &&
-    Number.isFinite(record.bytes)
-  );
 }
 
 function isStoredEntry(value: unknown): value is StoredEntry {
@@ -64,34 +43,6 @@ function enqueue(operation: () => Promise<void>): Promise<void> {
   const next = tail.then(operation, operation);
   tail = next.catch(() => undefined);
   return next;
-}
-
-function flushIndex() {
-  if (indexTimer) {
-    clearTimeout(indexTimer);
-    indexTimer = null;
-  }
-
-  const entries = pendingIndex;
-
-  pendingIndex = null;
-
-  if (!entries) {
-    return;
-  }
-
-  void AsyncStorage.setItem(INDEX_KEY, JSON.stringify(entries)).catch(
-    () => undefined,
-  );
-}
-
-function scheduleIndex(entries: IndexEntry[]) {
-  index = entries;
-  pendingIndex = entries;
-
-  if (!indexTimer) {
-    indexTimer = setTimeout(flushIndex, INDEX_WRITE_DELAY);
-  }
 }
 
 async function rebuildIndex(): Promise<IndexEntry[]> {
@@ -127,48 +78,21 @@ async function rebuildIndex(): Promise<IndexEntry[]> {
   }
 
   index = entries;
-  await AsyncStorage.setItem(INDEX_KEY, JSON.stringify(entries)).catch(
-    () => undefined,
-  );
 
   return entries;
 }
 
+/**
+ * The index is rebuilt from the entries on disk on first use: a debounced
+ * index copy can lag behind the entries after a crash, and the orphan sweep
+ * would then delete valid entries as unknown.
+ */
 async function loadIndex(): Promise<IndexEntry[]> {
   if (index) {
     return index;
   }
 
-  const raw = await AsyncStorage.getItem(INDEX_KEY).catch(() => null);
-
-  if (raw) {
-    try {
-      const parsed: unknown = JSON.parse(raw);
-
-      if (Array.isArray(parsed) && parsed.every(isIndexEntry)) {
-        index = parsed;
-        return index;
-      }
-    } catch {
-      // Rebuild below.
-    }
-  }
-
   return rebuildIndex();
-}
-
-async function persistIndex(entries: IndexEntry[]) {
-  index = entries;
-  pendingIndex = null;
-
-  if (indexTimer) {
-    clearTimeout(indexTimer);
-    indexTimer = null;
-  }
-
-  await AsyncStorage.setItem(INDEX_KEY, JSON.stringify(entries)).catch(
-    () => undefined,
-  );
 }
 
 async function prune(entries: IndexEntry[]): Promise<IndexEntry[]> {
@@ -265,7 +189,7 @@ export function writeCache(key: string, value: unknown): void {
       const entries = (await loadIndex()).filter((entry) => entry.key !== key);
 
       entries.push({ key, savedAt, bytes: raw.length });
-      scheduleIndex(await prune(entries));
+      index = await prune(entries);
       await sweepOnce();
     } catch {
       // The cache is best-effort; a failed write must not break the screen.
@@ -278,15 +202,9 @@ export function removeCache(key: string): Promise<void> {
     try {
       await AsyncStorage.removeItem(storageKey(key));
       const entries = await loadIndex();
-      await persistIndex(entries.filter((entry) => entry.key !== key));
+      index = entries.filter((entry) => entry.key !== key);
     } catch {
       // Ignore: stale entries are pruned later.
     }
   });
 }
-
-AppState.addEventListener('change', (state) => {
-  if (state !== 'active') {
-    flushIndex();
-  }
-});
