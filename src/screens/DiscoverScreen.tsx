@@ -3,6 +3,7 @@ import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   Text,
   TextInput,
   useWindowDimensions,
@@ -11,6 +12,7 @@ import {
 import { useNavigation, useScrollToTop } from '@react-navigation/native';
 
 import { AppPressable } from '../components/AppPressable';
+import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { MangaGridCard } from '../components/MangaGridCard';
@@ -56,7 +58,7 @@ export default function DiscoverScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
-            placeholder="Buscar manga"
+            placeholder="Título, autor o género"
             placeholderTextColor={colors.iconInactive}
             className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
           />
@@ -73,7 +75,7 @@ export default function DiscoverScreen() {
         </View>
       </View>
 
-      <DiscoverResults key={term} term={term} />
+      <DiscoverResults term={term} onClear={clear} />
     </Screen>
   );
 }
@@ -92,7 +94,13 @@ function mergeItems(current: MangaListItem[], next: MangaListItem[]) {
   return merged;
 }
 
-function DiscoverResults({ term }: { term: string }) {
+function DiscoverResults({
+  term,
+  onClear,
+}: {
+  term: string;
+  onClear: () => void;
+}) {
   const navigation = useNavigation<TabNavigation<'Discover'>>();
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(1);
@@ -108,16 +116,29 @@ function DiscoverResults({ term }: { term: string }) {
     },
     [page, term],
   );
-  const { data, hasError, loading, fetching, reload } = useRemoteData(
-    fetcher,
-    `discover:${term}:${page}`,
-  );
+  const { data, hasError, loading, fetching, refreshing, reload, refresh } =
+    useRemoteData(fetcher, `discover:${term}:${page}`);
   const [items, setItems] = useState<MangaListItem[]>(() => data?.items ?? []);
   const [hasMore, setHasMore] = useState(() => data?.hasMore ?? false);
+  const [activeTerm, setActiveTerm] = useState(term);
   const appliedPage = useRef(data ? page : 0);
   const pendingPage = useRef<number | null>(null);
   const colors = useColors();
   const cardWidth = mangaCardWidth(width);
+
+  // A term change resets pagination without remounting the list, so previous
+  // results stay on screen until the first page of the new query arrives.
+  if (activeTerm !== term) {
+    setActiveTerm(term);
+    setPage(1);
+    setHasMore(false);
+  }
+
+  useEffect(() => {
+    appliedPage.current = 0;
+    pendingPage.current = null;
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [term]);
 
   // Mirroring fetched pages into the accumulated list is the external-system
   // sync this effect exists for; the set-state-in-effect heuristic cannot tell
@@ -191,21 +212,33 @@ function DiscoverResults({ term }: { term: string }) {
     }
   };
 
-  if (loading && items.length === 0) {
-    return <MangaGridSkeleton cardWidth={cardWidth} />;
-  }
-
-  if (hasError && items.length === 0) {
-    return (
-      <ErrorState message="No se pudo cargar el catálogo" onRetry={reload} />
-    );
-  }
-
   if (items.length === 0) {
+    if (loading) {
+      return <MangaGridSkeleton cardWidth={cardWidth} />;
+    }
+
+    if (hasError) {
+      return (
+        <ErrorState
+          message={
+            term ? 'No se pudo buscar' : 'No se pudo cargar el catálogo'
+          }
+          onRetry={reload}
+        />
+      );
+    }
+
     return (
       <EmptyState
-        title="Sin resultados"
-        subtitle="Prueba con otro título."
+        title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
+        subtitle={
+          term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
+        }
+        action={
+          <Button variant="secondary" onPress={term ? onClear : reload}>
+            {term ? 'Ver catálogo' : 'Reintentar'}
+          </Button>
+        }
       />
     );
   }
@@ -229,6 +262,14 @@ function DiscoverResults({ term }: { term: string }) {
       )}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refresh}
+          colors={[colors.accent]}
+          progressBackgroundColor={colors.surface}
+        />
+      }
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
@@ -245,7 +286,7 @@ function DiscoverResults({ term }: { term: string }) {
                 No se pudo cargar más. Reintentar
               </Text>
             </AppPressable>
-          ) : fetching ? (
+          ) : fetching && hasMore ? (
             <ActivityIndicator size="small" color={colors.iconInactive} />
           ) : null}
         </View>
