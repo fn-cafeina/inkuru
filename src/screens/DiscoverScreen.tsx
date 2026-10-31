@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
@@ -19,14 +19,11 @@ import { MangaGridCard } from '../components/MangaGridCard';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { MangaGridSkeleton } from '../components/Skeleton';
-import { useRemoteData } from '../hooks/useRemoteData';
 import type { TabNavigation } from '../navigation/types';
-import { isCatalogPage } from '../source/guards';
-import { fetchCatalog, fetchSearch } from '../source/zonatmo';
-import type { CatalogPage, MangaListItem } from '../source/zonatmo';
-import { CACHE_FRESH_MS } from '../storage/queryCache';
+import type { MangaListItem } from '../source/zonatmo';
 import { useColors } from '../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../theme/gridLayout';
+import { useDiscoverFeed } from './useDiscoverFeed';
 
 export default function DiscoverScreen() {
   const colors = useColors();
@@ -82,26 +79,11 @@ export default function DiscoverScreen() {
   );
 }
 
-function mergeItems(current: MangaListItem[], next: MangaListItem[]) {
-  const merged = [...current];
-  const seen = new Set(current.map((item) => item.path));
-
-  for (const item of next) {
-    if (!seen.has(item.path)) {
-      seen.add(item.path);
-      merged.push(item);
-    }
-  }
-
-  return merged;
-}
-
 function DiscoverFallback({
   term,
   loading,
   fetching,
   hasError,
-  data,
   cardWidth,
   onClear,
   onRetry,
@@ -110,12 +92,11 @@ function DiscoverFallback({
   loading: boolean;
   fetching: boolean;
   hasError: boolean;
-  data: CatalogPage | null;
   cardWidth: number;
   onClear: () => void;
   onRetry: () => void;
 }) {
-  if (loading || fetching || (data?.items.length ?? 0) > 0) {
+  if (loading || fetching) {
     return <MangaGridSkeleton cardWidth={cardWidth} />;
   }
 
@@ -152,128 +133,40 @@ function DiscoverResults({
 }) {
   const navigation = useNavigation<TabNavigation<'Discover'>>();
   const { width } = useWindowDimensions();
-  const [page, setPage] = useState(1);
   const listRef = useRef<FlatList<MangaListItem>>(null);
   useScrollToTop(listRef);
-  const fetcher = useCallback(
-    async (signal: AbortSignal): Promise<CatalogPage> => {
-      if (term) {
-        return { items: await fetchSearch(term, signal), hasMore: false };
-      }
-
-      return fetchCatalog(page, signal);
-    },
-    [page, term],
-  );
-  const { data, hasError, loading, fetching, refreshing, reload, refresh } =
-    useRemoteData(fetcher, `discover:${term}:${page}`, {
-      freshMs: CACHE_FRESH_MS.catalog,
-      persist: true,
-      validate: isCatalogPage,
-    });
-  const [items, setItems] = useState<MangaListItem[]>(() => data?.items ?? []);
-  const [hasMore, setHasMore] = useState(() => data?.hasMore ?? false);
-  const [activeTerm, setActiveTerm] = useState(term);
-  const appliedPage = useRef(data ? page : 0);
-  const pendingPage = useRef<number | null>(null);
+  const {
+    items,
+    itemsTerm,
+    hasMore,
+    loading,
+    fetching,
+    hasError,
+    refreshing,
+    reload,
+    refresh,
+    loadMore,
+  } = useDiscoverFeed(term);
   const colors = useColors();
   const cardWidth = mangaCardWidth(width);
-
-  // A term change resets pagination without remounting the list, so previous
-  // results stay on screen until the first page of the new query arrives.
-  if (activeTerm !== term) {
-    setActiveTerm(term);
-    setPage(1);
-    setHasMore(false);
-  }
+  // Keep the previous results visible while the next term loads, but never
+  // present them as the result of a query that already failed.
+  const showItems = items.length > 0 && (itemsTerm === term || fetching);
 
   useEffect(() => {
-    appliedPage.current = 0;
-    pendingPage.current = null;
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
   }, [term]);
-
-  // Mirroring fetched pages into the accumulated list is the external-system
-  // sync this effect exists for; the set-state-in-effect heuristic cannot tell
-  // it apart from a cascading render. Layout timing keeps the empty state from
-  // painting for one frame before the fetched page is applied.
-  /* eslint-disable react-hooks/set-state-in-effect -- accumulate fetched pages */
-  useLayoutEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    if (page === 1) {
-      appliedPage.current = 1;
-      setItems(data.items);
-      setHasMore(data.hasMore);
-
-      if (!data.hasMore) {
-        pendingPage.current = null;
-      }
-
-      return;
-    }
-
-    if (appliedPage.current === page) {
-      if (pendingPage.current === page) {
-        pendingPage.current = null;
-      }
-
-      return;
-    }
-
-    appliedPage.current = page;
-    setItems((current) => mergeItems(current, data.items));
-    setHasMore(data.hasMore);
-
-    if (pendingPage.current === page || !data.hasMore) {
-      pendingPage.current = null;
-    }
-  }, [data, page]);
-
-  // A page requested while the current request was in flight resumes here, so
-  // a short list does not lose the onEndReached that fired during revalidation.
-  useEffect(() => {
-    const pending = pendingPage.current;
-
-    if (fetching || hasError || !hasMore || pending === null || pending === page) {
-      return;
-    }
-
-    setPage(pending);
-  }, [fetching, hasError, hasMore, page]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
   const openManga = (item: MangaListItem) =>
     navigation.navigate('Manga', { path: item.path, title: item.title });
 
-  const loadMore = () => {
-    if (
-      hasError ||
-      !hasMore ||
-      pendingPage.current !== null ||
-      items.length === 0
-    ) {
-      return;
-    }
-
-    // Assigned synchronously, so two onEndReached in one frame advance once.
-    pendingPage.current = page + 1;
-
-    if (!fetching) {
-      setPage(pendingPage.current);
-    }
-  };
-
-  if (items.length === 0) {
+  if (!showItems) {
     return (
       <DiscoverFallback
         term={term}
         loading={loading}
         fetching={fetching}
         hasError={hasError}
-        data={data}
         cardWidth={cardWidth}
         onClear={onClear}
         onRetry={reload}
