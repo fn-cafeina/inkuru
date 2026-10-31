@@ -17,10 +17,6 @@
       "backgroundColor": "#fafafa",
       "softwareKeyboardLayoutMode": "pan",
       "predictiveBackGestureEnabled": true
-    },
-    "plugins": [
-      "expo-font",
-      "expo-image"
-    ]
+    }
   }
 }
