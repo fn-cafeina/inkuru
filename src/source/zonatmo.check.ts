@@ -153,6 +153,14 @@ const lastCatalog = parseCatalog(CATALOG_FIXTURE.replace(' rel="next"', ''));
 assertEqual(lastCatalog.items.length, 2, 'última página con mangas');
 assertEqual(lastCatalog.hasMore, false, 'última página sin siguiente');
 
+// A rel="next" that is not a paginator link must not count as more pages.
+const headRelNext = parseCatalog(
+  CATALOG_FIXTURE.replace(' rel="next"', '') +
+    '<head><link rel="next" href="/biblioteca?page=3"></head>',
+);
+
+assertEqual(headRelNext.hasMore, false, 'rel="next" fuera del paginador');
+
 const emptyCatalog = parseCatalog(CATALOG_EMPTY_FIXTURE);
 
 assertEqual(emptyCatalog.items.length, 0, 'catálogo vacío');

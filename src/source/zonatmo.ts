@@ -206,7 +206,14 @@ export function parseCatalog(html: string): CatalogPage {
     .map(parseCatalogItem)
     .filter(isDefined);
 
-  return { items, hasMore: /\brel\s*=\s*"next"/i.test(html) };
+  return {
+    items,
+    // Scoped to a paginator link: a stray rel="next" in <head> or a comment
+    // must not be read as "has more" and trigger endless empty page fetches.
+    hasMore: /<a\b[^>]*\bclass\s*=\s*"[^"]*\bpage-link\b[^"]*"[^>]*\brel\s*=\s*"next"/i.test(
+      html,
+    ),
+  };
 }
 
 function parseCatalogItem(block: string): MangaListItem | undefined {
