@@ -46,12 +46,13 @@ export default function LibraryScreen() {
   const mounted = useRef(true);
   const cardWidth = mangaCardWidth(width);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
       mounted.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const load = useCallback(async (showSpinner = false) => {
     setChecking(true);
