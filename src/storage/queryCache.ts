@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppState } from 'react-native';
 
 const PREFIX = 'cache:query:';
 const ENTRY_PREFIX = `${PREFIX}v1:`;
@@ -7,6 +8,7 @@ const VERSION = 1;
 const MAX_ENTRIES = 200;
 const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+const INDEX_WRITE_DELAY = 1000;
 
 export const CACHE_FRESH_MS = {
   catalog: 10 * 60 * 1000,
@@ -18,6 +20,8 @@ type IndexEntry = { key: string; savedAt: number; bytes: number };
 type StoredEntry = { v: number; savedAt: number; value: unknown };
 
 let index: IndexEntry[] | null = null;
+let indexTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingIndex: IndexEntry[] | null = null;
 let tail: Promise<void> = Promise.resolve();
 let swept = false;
 
@@ -60,6 +64,34 @@ function enqueue(operation: () => Promise<void>): Promise<void> {
   const next = tail.then(operation, operation);
   tail = next.catch(() => undefined);
   return next;
+}
+
+function flushIndex() {
+  if (indexTimer) {
+    clearTimeout(indexTimer);
+    indexTimer = null;
+  }
+
+  const entries = pendingIndex;
+
+  pendingIndex = null;
+
+  if (!entries) {
+    return;
+  }
+
+  void AsyncStorage.setItem(INDEX_KEY, JSON.stringify(entries)).catch(
+    () => undefined,
+  );
+}
+
+function scheduleIndex(entries: IndexEntry[]) {
+  index = entries;
+  pendingIndex = entries;
+
+  if (!indexTimer) {
+    indexTimer = setTimeout(flushIndex, INDEX_WRITE_DELAY);
+  }
 }
 
 async function rebuildIndex(): Promise<IndexEntry[]> {
@@ -127,6 +159,13 @@ async function loadIndex(): Promise<IndexEntry[]> {
 
 async function persistIndex(entries: IndexEntry[]) {
   index = entries;
+  pendingIndex = null;
+
+  if (indexTimer) {
+    clearTimeout(indexTimer);
+    indexTimer = null;
+  }
+
   await AsyncStorage.setItem(INDEX_KEY, JSON.stringify(entries)).catch(
     () => undefined,
   );
@@ -223,7 +262,7 @@ export function writeCache(key: string, value: unknown): void {
       const entries = (await loadIndex()).filter((entry) => entry.key !== key);
 
       entries.push({ key, savedAt, bytes: raw.length });
-      await persistIndex(await prune(entries));
+      scheduleIndex(await prune(entries));
       await sweepOnce();
     } catch {
       // The cache is best-effort; a failed write must not break the screen.
@@ -242,3 +281,9 @@ export function removeCache(key: string): Promise<void> {
     }
   });
 }
+
+AppState.addEventListener('change', (state) => {
+  if (state !== 'active') {
+    flushIndex();
+  }
+});
