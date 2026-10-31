@@ -41,6 +41,7 @@ export default function LibraryScreen() {
   const [progress, setProgress] =
     useState<Record<string, ReaderProgress>>(cachedProgress);
   const [loaded, setLoaded] = useState(cachedEntries !== null);
+  const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
   const mounted = useRef(true);
   const cardWidth = mangaCardWidth(width);
@@ -53,8 +54,10 @@ export default function LibraryScreen() {
   );
 
   const load = useCallback(async (showSpinner = false) => {
+    setChecking(true);
+    setFailed(false);
+
     if (showSpinner) {
-      setFailed(false);
       setLoaded(false);
     }
 
@@ -67,6 +70,7 @@ export default function LibraryScreen() {
     if (result.failed) {
       setFailed(true);
       setLoaded(true);
+      setChecking(false);
       return;
     }
 
@@ -94,6 +98,7 @@ export default function LibraryScreen() {
     setEntries(sorted);
     setProgress(loadedProgress);
     setLoaded(true);
+    setChecking(false);
   }, []);
 
   useFocusEffect(
@@ -146,7 +151,7 @@ export default function LibraryScreen() {
           message="No se pudo leer la biblioteca"
           onRetry={retry}
         />
-      ) : !loaded ? (
+      ) : !loaded || (checking && entries.length === 0) ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color={colors.iconInactive} />
         </View>
