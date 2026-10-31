@@ -211,11 +211,13 @@ export default function ReaderScreen({ navigation, route }: Props) {
           <ReaderSkeleton width={viewWidth} height={viewHeight} />
         )}
 
-        <ReaderProgressBar
-          page={page}
-          total={total}
-          bottomInset={insets.bottom}
-        />
+        {chromeVisible ? (
+          <ReaderProgressBar
+            page={page}
+            total={total}
+            bottomInset={insets.bottom}
+          />
+        ) : null}
         <ReaderChrome
           title={readerTitle(data, chapterTitle)}
           subtitle={readerSubtitle(data, chapterTitle)}

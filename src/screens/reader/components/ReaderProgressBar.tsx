@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 export function ReaderProgressBar({
   page,
@@ -14,7 +15,9 @@ export function ReaderProgressBar({
   }
 
   return (
-    <View
+    <Animated.View
+      entering={FadeIn.duration(150)}
+      exiting={FadeOut.duration(150)}
       pointerEvents="none"
       accessible
       accessibilityRole="progressbar"
@@ -43,6 +46,6 @@ export function ReaderProgressBar({
           {page + 1} / {total}
         </Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
