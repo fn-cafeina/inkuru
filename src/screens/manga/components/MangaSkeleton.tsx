@@ -1,4 +1,4 @@
-import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
@@ -29,8 +29,6 @@ export function MangaSkeleton() {
           <Skeleton className="h-5 w-3/4 rounded" />
           <Skeleton className="mt-1 h-5 w-1/2 rounded" />
           <Skeleton className="mt-2 h-6 w-24 rounded-full" />
-          <Skeleton className="mt-2 h-4 w-2/3 rounded" />
-          <Skeleton className="mt-1 h-3 w-1/2 rounded" />
         </View>
       </View>
 
@@ -60,8 +58,6 @@ export function MangaSkeleton() {
           </View>
         </View>
       ))}
-
-      <ActivityIndicator className="mt-4" color="#a1a1aa" />
     </ScrollView>
   );
 }
