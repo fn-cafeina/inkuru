@@ -93,6 +93,7 @@ export default function SettingsScreen() {
             <ChoiceRow
               key={option.value}
               label={option.label}
+              description={option.description}
               selected={mode === option.value}
               divider={index > 0}
               onPress={() => selectMode(option.value)}
@@ -124,6 +125,7 @@ export default function SettingsScreen() {
             <ChoiceRow
               key={option.value}
               label={option.label}
+              description={option.description}
               selected={quality === option.value}
               divider={index > 0}
               onPress={() => selectQuality(option.value)}

@@ -95,6 +95,7 @@ export function ReaderSettingsSheet({
                 <ChoiceRow
                   key={option.value}
                   label={option.label}
+                  description={option.description}
                   selected={mode === option.value}
                   divider={index > 0}
                   onPress={() => onSelectMode(option.value)}
@@ -124,6 +125,7 @@ export function ReaderSettingsSheet({
                 <ChoiceRow
                   key={option.value}
                   label={option.label}
+                  description={option.description}
                   selected={quality === option.value}
                   divider={index > 0}
                   onPress={() => onSelectQuality(option.value)}

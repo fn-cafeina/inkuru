@@ -15,9 +15,21 @@ export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
 export const DEFAULT_READER_QUALITY: ReaderQuality = 'balanced';
 
 export const READER_MODE_OPTIONS = [
-  { value: 'webtoon', label: 'Vertical' },
-  { value: 'paged-ltr', label: 'Izquierda a derecha' },
-  { value: 'paged-rtl', label: 'Derecha a izquierda' },
+  {
+    value: 'webtoon',
+    label: 'Vertical',
+    description: 'Páginas continuas, ideal para webtoon.',
+  },
+  {
+    value: 'paged-ltr',
+    label: 'Izquierda a derecha',
+    description: 'Una página a la vez, de izquierda a derecha.',
+  },
+  {
+    value: 'paged-rtl',
+    label: 'Derecha a izquierda',
+    description: 'Una página a la vez, estilo manga.',
+  },
 ] as const;
 
 export const READER_SCALE_OPTIONS = [
@@ -30,9 +42,21 @@ export const READER_SCALE_OPTIONS = [
 ] as const;
 
 export const READER_QUALITY_OPTIONS = [
-  { value: 'balanced', label: 'Equilibrada' },
-  { value: 'high', label: 'Alta' },
-  { value: 'maximum', label: 'Máxima' },
+  {
+    value: 'balanced',
+    label: 'Equilibrada',
+    description: 'Menos datos y carga más rápida.',
+  },
+  {
+    value: 'high',
+    label: 'Alta',
+    description: 'Mejor detalle por página.',
+  },
+  {
+    value: 'maximum',
+    label: 'Máxima',
+    description: 'Sin reducción de la imagen original.',
+  },
 ] as const;
 
 const MODE_KEY = 'reader:mode';
