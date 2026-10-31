@@ -120,8 +120,15 @@ export function ReaderPage({
           </Text>
         </AppPressable>
       ) : (
-        <>
-          <GestureDetector gesture={gesture}>
+        <GestureDetector gesture={gesture}>
+          <View
+            style={{
+              width: viewportWidth,
+              height: viewportHeight,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
             <View style={{ width: baseWidth, height: baseHeight }}>
               {loaded ? null : (
                 <View
@@ -179,8 +186,8 @@ export function ReaderPage({
                 />
               </Animated.View>
             </View>
-          </GestureDetector>
-        </>
+          </View>
+        </GestureDetector>
       )}
     </View>
   );
