@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, Switch, Text, View } from 'react-native';
+import { ScrollView, Switch, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ChoiceRow } from '../components/ChoiceRow';
+import { AppPressable } from '../components/AppPressable';
 import { PageTitle } from '../components/PageTitle';
 import { Screen } from '../components/Screen';
 import { SettingSection } from '../components/SettingSection';
@@ -98,18 +99,25 @@ export default function SettingsScreen() {
             />
           ))}
         </SettingSection>
+        {mode === 'webtoon' ? (
+          <Text className="mt-1 px-1 text-xs text-zinc-500 dark:text-zinc-400">
+            La escala solo se aplica en modo paginado.
+          </Text>
+        ) : null}
 
-        <SettingSection title="Escala de página" groupRole="radiogroup">
-          {READER_SCALE_OPTIONS.map((option, index) => (
-            <ChoiceRow
-              key={option.value}
-              label={option.label}
-              selected={scale === option.value}
-              divider={index > 0}
-              onPress={() => selectScale(option.value)}
-            />
-          ))}
-        </SettingSection>
+        {mode !== 'webtoon' ? (
+          <SettingSection title="Escala de página" groupRole="radiogroup">
+            {READER_SCALE_OPTIONS.map((option, index) => (
+              <ChoiceRow
+                key={option.value}
+                label={option.label}
+                selected={scale === option.value}
+                divider={index > 0}
+                onPress={() => selectScale(option.value)}
+              />
+            ))}
+          </SettingSection>
+        ) : null}
 
         <SettingSection title="Calidad de imagen" groupRole="radiogroup">
           {READER_QUALITY_OPTIONS.map((option, index) => (
@@ -147,17 +155,24 @@ function SwitchRow({
   const colors = useColors();
 
   return (
-    <View className="min-h-14 flex-row items-center px-4">
+    <AppPressable
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: value }}
+      onPress={() => onValueChange(!value)}
+      className="min-h-14 flex-row items-center px-4"
+    >
       <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
         {label}
       </Text>
       <Switch
-        accessibilityLabel={label}
+        accessible={false}
+        pointerEvents="none"
         value={value}
         onValueChange={onValueChange}
         trackColor={{ false: colors.iconInactive, true: colors.accent }}
         thumbColor="#ffffff"
       />
-    </View>
+    </AppPressable>
   );
 }
