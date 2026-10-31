@@ -31,12 +31,16 @@ const queue: DownloadInput[] = [];
 const listeners = new Set<() => void>();
 
 let version = 0;
+let recordsSnapshot: DownloadRecord[] = [];
 let running = false;
 let initialized = false;
 let initializing: Promise<void> | null = null;
 
 function notify() {
   version += 1;
+  recordsSnapshot = [...records.values()].sort(
+    (a, b) => b.completedAt - a.completedAt,
+  );
 
   for (const listener of listeners) {
     listener();
@@ -53,6 +57,11 @@ export function subscribe(listener: () => void) {
 
 export function getVersion() {
   return version;
+}
+
+/** Newest completed downloads first; the snapshot changes only on notify. */
+export function getDownloadRecords(): DownloadRecord[] {
+  return recordsSnapshot;
 }
 
 export function getDownloadState(

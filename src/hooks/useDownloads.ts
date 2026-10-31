@@ -1,6 +1,7 @@
 import { useEffect, useSyncExternalStore } from 'react';
 
 import {
+  getDownloadRecords,
   getDownloadState,
   getVersion,
   initializeDownloads,
@@ -26,5 +27,15 @@ export function useIsChapterDownloaded(chapterPath: string): boolean {
     subscribe,
     () => getDownloadState(chapterPath)?.status === 'done',
     () => false,
+  );
+}
+
+export function useDownloadRecords() {
+  useDownloadsReady();
+
+  return useSyncExternalStore(
+    subscribe,
+    getDownloadRecords,
+    getDownloadRecords,
   );
 }
