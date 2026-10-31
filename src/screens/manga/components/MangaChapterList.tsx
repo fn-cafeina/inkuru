@@ -63,6 +63,14 @@ export function MangaChapterList({
   onScrollPast,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
+  const readCount = useMemo(
+    () =>
+      manga.chapters.reduce(
+        (count, chapter) => (readSet.has(chapter.path) ? count + 1 : count),
+        0,
+      ),
+    [manga.chapters, readSet],
+  );
   const colors = useColors();
   const listRef = useRef<FlatList<MangaChapter>>(null);
 
@@ -130,7 +138,7 @@ export function MangaChapterList({
         <View>
           <MangaHeader
             manga={manga}
-            readCount={readSet.size}
+            readCount={readCount}
             resumeChapter={resumeChapter}
             sortOrder={sortOrder}
             ranges={ranges}
