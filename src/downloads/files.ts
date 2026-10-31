@@ -71,7 +71,10 @@ export async function downloadPage(
       throw error;
     }
 
-    // One retry for transient CDN failures; the file is overwritten.
+    // One retry for transient CDN failures, after a short pause so the CDN
+    // can recover; the file is overwritten. downloadFileAsync rejects on
+    // non-2xx, so an HTML error page is never stored as an image.
+    await new Promise((resolve) => setTimeout(resolve, 500));
     await File.downloadFileAsync(url, destination, {
       idempotent: true,
       signal,
