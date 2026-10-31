@@ -7,7 +7,11 @@ import type {
   ReaderQuality,
   ReaderScale,
 } from '../../../storage/readerSettings';
+import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { ReaderPage } from '../components/ReaderPage';
+
+/** Estimated height until a page reports its real size. */
+const PAGE_HEIGHT_RATIO = READER_PAGE_ASPECT_RATIO;
 
 export function VerticalPages({
   pages,
@@ -32,6 +36,10 @@ export function VerticalPages({
 }) {
   const listRef = useRef<FlatList<string>>(null);
   const didRetry = useRef(false);
+  const initialIndex =
+    pages.length > 0 ? Math.min(initialPage, pages.length - 1) : 0;
+  // The initial scroll can report page 0 before it lands; do not persist that.
+  const pendingRestore = useRef(initialIndex > 0);
   const [zoomed, setZoomed] = useState(false);
   const [footerReady, setFooterReady] = useState(pages.length === 0);
   const markFooterReady = useCallback(() => setFooterReady(true), []);
@@ -39,10 +47,30 @@ export function VerticalPages({
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
         const index = viewableItems[0]?.index;
-        if (index != null) {
-          onPageChange(index);
+
+        if (index == null) {
+          return;
         }
+
+        if (pendingRestore.current) {
+          if (index === 0) {
+            return;
+          }
+
+          pendingRestore.current = false;
+        }
+
+        onPageChange(index);
       },
+  );
+  const pageHeight = width / PAGE_HEIGHT_RATIO;
+  const getItemLayout = useCallback(
+    (_: ArrayLike<string> | null | undefined, index: number) => ({
+      length: pageHeight,
+      offset: pageHeight * index,
+      index,
+    }),
+    [pageHeight],
   );
   const [viewabilityConfig] = useState(() => ({
     itemVisiblePercentThreshold: 50,
@@ -115,6 +143,8 @@ export function VerticalPages({
       onScrollToIndexFailed={onScrollToIndexFailed}
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
+      getItemLayout={getItemLayout}
+      initialScrollIndex={pages.length > 0 ? initialIndex : undefined}
       initialNumToRender={2}
       maxToRenderPerBatch={3}
       windowSize={5}
