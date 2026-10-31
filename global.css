@@ -1,6 +1,2 @@
 @import 'tailwindcss';
 @import 'uniwind';
-
-@theme {
-  --color-accent-500: #4f7a3e;
-}
