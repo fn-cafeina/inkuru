@@ -248,7 +248,13 @@ async function runDownload(input: DownloadInput) {
       throw new Error('stale');
     }
 
-    const total = data.pages.length;
+    const pages = data.pages.filter((url) => url.length > 0);
+    const total = pages.length;
+
+    if (total === 0) {
+      throw new Error('no pages');
+    }
+
     const directory = prepareChapterDirectory(chapterPath);
     const localPages: string[] = [];
     let completed = 0;
@@ -265,7 +271,7 @@ async function runDownload(input: DownloadInput) {
 
         const index = cursor;
         cursor += 1;
-        const url = data.pages[index];
+        const url = pages[index];
 
         if (!url) {
           continue;
