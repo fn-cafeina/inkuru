@@ -213,7 +213,7 @@ function DiscoverResults({
   };
 
   if (items.length === 0) {
-    if (loading) {
+    if (loading || fetching) {
       return <MangaGridSkeleton cardWidth={cardWidth} />;
     }
 
