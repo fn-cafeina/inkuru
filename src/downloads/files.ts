@@ -1,13 +1,12 @@
 import { Directory, File } from 'expo-file-system';
 
 import { isReaderData } from '../source/guards';
-import { ownsChapterPath } from './ownership';
+import { isChapterDirName } from './ownership';
 import { isDownloadRecord } from './types';
 import type { DownloadFile, DownloadRecord } from './types';
 import {
-  chapterDirectory,
+  chapterSlots,
   ensureRoot,
-  hashKey,
   pageExtension,
 } from './paths';
 
@@ -57,10 +56,6 @@ function directoryOwner(
   }
 }
 
-function ownsDirectory(chapterPath: string, directory: Directory): boolean {
-  return ownsChapterPath(chapterPath, directoryOwner(directory));
-}
-
 export async function downloadPage(
   url: string,
   destination: File,
@@ -85,23 +80,49 @@ export async function downloadPage(
 }
 
 export function prepareChapterDirectory(chapterPath: string): Directory {
-  const directory = chapterDirectory(chapterPath);
+  let freeSlot: Directory | null = null;
+  let blankSlot: Directory | null = null;
 
-  if (directory.exists) {
-    if (!ownsDirectory(chapterPath, directory)) {
-      throw new Error('download directory collision');
+  for (const directory of chapterSlots(chapterPath)) {
+    if (!directory.exists) {
+      freeSlot ??= directory;
+      continue;
     }
 
-    try {
-      directory.delete();
-    } catch {
-      // Recreated below.
+    const owner = directoryOwner(directory);
+
+    if (owner === chapterPath) {
+      wipeDirectory(directory);
+      return directory;
     }
+
+    if (owner === undefined) {
+      // Interrupted download without marker: reusable under ownership rules.
+      blankSlot ??= directory;
+    }
+
+    // null (unreadable) or another chapter: never reuse, keep scanning so a
+    // slot this chapter already owns is preferred over a free one.
   }
 
-  directory.create({ intermediates: true, idempotent: true });
+  const target = freeSlot ?? blankSlot;
 
-  return directory;
+  if (target) {
+    wipeDirectory(target);
+    target.create({ intermediates: true, idempotent: true });
+    return target;
+  }
+
+  // 100 slots all owned by other chapters would need 100 hash collisions.
+  throw new Error('download directory collision');
+}
+
+function wipeDirectory(directory: Directory) {
+  try {
+    directory.delete();
+  } catch {
+    // Recreated by the caller.
+  }
 }
 
 export function pageFile(
@@ -130,59 +151,85 @@ export async function writeDownloadFile(
 export async function readDownloadFile(
   chapterPath: string,
 ): Promise<DownloadFile | null> {
-  const directory = chapterDirectory(chapterPath);
+  for (const directory of chapterSlots(chapterPath)) {
+    if (!directory.exists) {
+      continue;
+    }
 
-  if (!directory.exists) {
-    return null;
+    const wrapper = await readWrapper(new File(directory, READER_FILE));
+
+    if (wrapper?.record.chapterPath === chapterPath) {
+      return wrapper;
+    }
   }
 
-  const wrapper = await readWrapper(new File(directory, READER_FILE));
-
-  if (!wrapper || wrapper.record.chapterPath !== chapterPath) {
-    return null;
-  }
-
-  return wrapper;
+  return null;
 }
 
 /**
- * Cheap existence check for startup: parsing each wrapper here would read the
- * whole chapter list on the JS thread. Ownership is enforced on write, read and
- * delete, where the cost is paid once.
+ * Whether a directory with this chapter's marker exists. Markers are parsed
+ * (once per record at startup) so a hash collision or an unreadable copy
+ * cannot pass as this chapter's files. An unreadable marker counts as absent:
+ * the record is dropped from the index and reconcileDirectories sweeps the
+ * corrupt directory on the next launch.
  */
 export function hasDownloadFiles(chapterPath: string): boolean {
-  const directory = chapterDirectory(chapterPath);
+  for (const directory of chapterSlots(chapterPath)) {
+    if (directory.exists && directoryOwner(directory) === chapterPath) {
+      return true;
+    }
+  }
 
-  return (
-    directory.exists && new File(directory, READER_FILE).exists
-  );
+  return false;
 }
 
-/** Returns whether the directory was actually removed. */
+/**
+ * Clears every directory that might belong to the chapter. Returns false when
+ * anything of unknown or possibly-own ownership survives, so the caller keeps
+ * the index record instead of losing track of the files.
+ */
 export function deleteChapterFiles(chapterPath: string): boolean {
-  const directory = chapterDirectory(chapterPath);
+  let remaining = false;
 
-  if (!directory.exists || !ownsDirectory(chapterPath, directory)) {
-    return false;
-  }
-
-  try {
-    const reader = new File(directory, READER_FILE);
-
-    if (reader.exists) {
-      reader.delete();
+  for (const directory of chapterSlots(chapterPath)) {
+    if (!directory.exists) {
+      continue;
     }
-  } catch {
-    // If the marker survives, the directory removal below still has a chance.
+
+    const owner = directoryOwner(directory);
+
+    if (owner === null) {
+      // Unreadable marker: might be this chapter's corrupt copy.
+      remaining = true;
+      continue;
+    }
+
+    if (owner !== undefined && owner !== chapterPath) {
+      // Another chapter's directory: not ours to delete.
+      continue;
+    }
+
+    // Ours, or an interrupted download without marker.
+
+    try {
+      const reader = new File(directory, READER_FILE);
+
+      if (reader.exists) {
+        reader.delete();
+      }
+    } catch {
+      // If the marker survives, the directory removal below still has a chance.
+    }
+
+    try {
+      directory.delete();
+    } catch {
+      // A directory without the marker is swept on the next launch.
+      remaining = true;
+    }
   }
 
-  try {
-    directory.delete();
-    return true;
-  } catch {
-    // A directory without the marker is swept on the next launch.
-    return false;
-  }
+  return !remaining;
 }
 
 /** Remove interrupted downloads and recover completed ones missing from the index. */
@@ -213,7 +260,7 @@ export async function reconcileDirectories(
 
     const wrapper = await readWrapper(file);
 
-    if (!wrapper || hashKey(wrapper.record.chapterPath) !== entry.name) {
+    if (!wrapper || !isChapterDirName(wrapper.record.chapterPath, entry.name)) {
       try {
         entry.delete();
       } catch {

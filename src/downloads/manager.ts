@@ -12,7 +12,7 @@ import {
   writeDownloadFile,
 } from './files';
 import { loadDownloadIndex, removeRecord, upsertRecord } from './metadata';
-import { hashKey } from './paths';
+import { chapterDirNames } from './paths';
 import { createRunTracker } from './runState';
 import { withTimeout } from './timeout';
 import type {
@@ -198,7 +198,7 @@ export function initializeDownloads(): Promise<void> {
       }
 
       const knownDirs = new Set(
-        valid.map((record) => hashKey(record.chapterPath)),
+        valid.flatMap((record) => chapterDirNames(record.chapterPath)),
       );
       const recovered = await reconcileDirectories(knownDirs).catch(() => []);
 

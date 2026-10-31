@@ -1,30 +1,32 @@
-import { ownsChapterPath } from './ownership';
+import { hashKey, isChapterDirName } from './ownership';
 
-function assertEqual<T>(actual: T, expected: T, label: string): void {
-  if (actual !== expected) {
-    throw new Error(`${label}: esperado ${String(expected)}, recibido ${String(actual)}`);
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
   }
 }
 
-assertEqual(
-  ownsChapterPath('/chapter/1', undefined),
-  true,
-  'una carpeta sin registro se puede usar',
+const path = '/library/manga/8232/one-punch-man';
+const base = hashKey(path);
+
+assert(/^[0-9a-f]{8}$/.test(base), 'hashKey produce 8 dígitos hexadecimales');
+assert(hashKey(path) === base, 'hashKey es estable');
+assert(hashKey(`${path}-x`) !== base, 'rutas distintas dan hashes distintos');
+
+assert(isChapterDirName(path, base), 'nombre base pertenece al capítulo');
+assert(isChapterDirName(path, `${base}-2`), 'sufijo de colisión pertenece');
+assert(isChapterDirName(path, `${base}-100`), 'sufijo alto pertenece');
+assert(
+  !isChapterDirName(path, `${base}-x`),
+  'sufijo no numérico no pertenece',
 );
-assertEqual(
-  ownsChapterPath('/chapter/1', '/chapter/1'),
-  true,
-  'la carpeta propia se puede usar',
+assert(
+  !isChapterDirName(path, `${base}-2-3`),
+  'sufijo doble no pertenece',
 );
-assertEqual(
-  ownsChapterPath('/chapter/1', '/chapter/2'),
-  false,
-  'una carpeta ajena se rechaza',
-);
-assertEqual(
-  ownsChapterPath('/chapter/1', null),
-  false,
-  'un marcador ilegible se rechaza',
+assert(
+  !isChapterDirName('/chapter/other', base),
+  'otro capítulo no reclama el nombre',
 );
 
-console.log('download ownership ok');
+console.log('download directory names ok');
