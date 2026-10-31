@@ -1,6 +1,7 @@
 import { Directory, File } from 'expo-file-system';
 
 import { isReaderData } from '../source/guards';
+import { ownsChapterPath } from './ownership';
 import { isDownloadRecord } from './types';
 import type { DownloadFile, DownloadRecord } from './types';
 import {
@@ -34,6 +35,26 @@ async function readWrapper(target: File): Promise<DownloadFile | null> {
   }
 }
 
+function directoryOwner(directory: Directory): string | undefined {
+  const file = new File(directory, READER_FILE);
+
+  if (!file.exists) {
+    return undefined;
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(file.textSync());
+
+    return isDownloadFile(parsed) ? parsed.record.chapterPath : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function ownsDirectory(chapterPath: string, directory: Directory): boolean {
+  return ownsChapterPath(chapterPath, directoryOwner(directory));
+}
+
 export async function downloadPage(
   url: string,
   destination: File,
@@ -61,6 +82,10 @@ export function prepareChapterDirectory(chapterPath: string): Directory {
   const directory = chapterDirectory(chapterPath);
 
   if (directory.exists) {
+    if (!ownsDirectory(chapterPath, directory)) {
+      throw new Error('download directory collision');
+    }
+
     try {
       directory.delete();
     } catch {
@@ -114,13 +139,20 @@ export async function readDownloadFile(
 export function hasDownloadFiles(chapterPath: string): boolean {
   const directory = chapterDirectory(chapterPath);
 
-  return directory.exists && new File(directory, READER_FILE).exists;
+  if (!directory.exists) {
+    return false;
+  }
+
+  return (
+    new File(directory, READER_FILE).exists &&
+    ownsDirectory(chapterPath, directory)
+  );
 }
 
 export function deleteChapterFiles(chapterPath: string) {
   const directory = chapterDirectory(chapterPath);
 
-  if (!directory.exists) {
+  if (!directory.exists || !ownsDirectory(chapterPath, directory)) {
     return;
   }
 
