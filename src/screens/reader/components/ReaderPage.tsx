@@ -68,7 +68,7 @@ export function ReaderPage({
   });
   const overflowsX = baseWidth > viewportWidth + 0.5;
   const overflowsY = baseHeight > viewportHeight + 0.5;
-  const { gesture, animatedStyle, zoomed, resetZoom } = usePageGestures({
+  const { gesture, animatedStyle } = usePageGestures({
     baseWidth,
     baseHeight,
     viewportWidth,
@@ -180,23 +180,6 @@ export function ReaderPage({
               </Animated.View>
             </View>
           </GestureDetector>
-          {zoomed ? (
-            <View
-              pointerEvents="box-none"
-              className="absolute left-0 right-0 top-4 items-center"
-            >
-              <AppPressable
-                accessibilityLabel="Restablecer zoom"
-                onPress={resetZoom}
-                className="rounded-full px-4 py-2"
-                style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
-              >
-                <Text className="text-xs font-medium text-white">
-                  Restablecer zoom
-                </Text>
-              </AppPressable>
-            </View>
-          ) : null}
         </>
       )}
     </View>

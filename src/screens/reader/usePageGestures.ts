@@ -12,7 +12,6 @@ import {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import type { SharedValue } from 'react-native-reanimated';
 
 import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
@@ -25,22 +24,6 @@ const SETTLE_DURATION = 180;
 // finger clearly left the touch slop.
 const PAN_OFFSET: [number, number] = [-8, 8];
 
-function resetTransform(
-  scale: SharedValue<number>,
-  translateX: SharedValue<number>,
-  translateY: SharedValue<number>,
-  savedScale: SharedValue<number>,
-  savedX: SharedValue<number>,
-  savedY: SharedValue<number>,
-) {
-  scale.value = withTiming(1, { duration: SETTLE_DURATION });
-  translateX.value = withTiming(0, { duration: SETTLE_DURATION });
-  translateY.value = withTiming(0, { duration: SETTLE_DURATION });
-  savedScale.value = 1;
-  savedX.value = 0;
-  savedY.value = 0;
-}
-
 type Params = {
   baseWidth: number;
   baseHeight: number;
@@ -52,7 +35,6 @@ type Params = {
   onZoomChange: (zoomed: boolean) => void;
 };
 
-// eslint-disable-next-line max-lines-per-function -- the gesture worklets share one zoom state
 export function usePageGestures({
   baseWidth,
   baseHeight,
@@ -272,10 +254,5 @@ export function usePageGestures({
     ],
   }));
 
-  const resetZoom = () => {
-    resetTransform(scale, translateX, translateY, savedScale, savedX, savedY);
-    notifyZoom(false);
-  };
-
-  return { gesture, animatedStyle, zoomed, resetZoom };
+  return { gesture, animatedStyle };
 }
