@@ -11,7 +11,10 @@ export type ChapterRange = {
 
 export type ChapterState = 'current' | 'read';
 
-/** The source lists chapters newest first; ranges are built oldest first. */
+/**
+ * The source lists chapters newest first (see the reader adapter contract in
+ * source/zonatmo.ts parseReader); ranges are built oldest first.
+ */
 export function ascendingChapters(chapters: MangaChapter[]): MangaChapter[] {
   return [...chapters].reverse();
 }

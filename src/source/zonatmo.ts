@@ -97,10 +97,8 @@ async function fetchText(
   path: string,
   signal?: AbortSignal,
 ): Promise<string> {
-  const url = /^https?:\/\//i.test(path)
-    ? path
-    : `${BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
-  const response = await fetch(url, { signal });
+  // Callers pass origin-stripped paths; absoluteUrl owns the rule.
+  const response = await fetch(absoluteUrl(path), { signal });
 
   if (!response.ok) {
     throw new Error(`ZonaTMO respondió HTTP ${response.status}`);
@@ -155,7 +153,10 @@ export function parseReader(html: string): ReaderData {
   const selectBlock = html.match(
     /<select[^>]*\bid="chapterSelect"[^>]*>([\s\S]*?)<\/select>/i,
   )?.[1];
-  // ZonaTMO lists chapters oldest first; the rest of the app expects newest first.
+  // Contract: ZonaTMO lists chapters oldest first, so the reader adapter
+  // reverses to newest first — the order every consumer (chapters.ts,
+  // ReaderTransition, chapter pickers) assumes. If the site reorders its
+  // <select>, fix this line only.
   const options = selectBlock
     ? extractBlocks(selectBlock, 'option', undefined)
         .map(parseReaderChapter)
