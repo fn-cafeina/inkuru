@@ -38,7 +38,7 @@
     "lint": "expo lint",
     "check:parser": "bun src/source/zonatmo.check.ts",
     "check:discover": "bun src/screens/discoverFeed.check.ts",
-    "check:downloads": "bun src/downloads/runState.check.ts && bun src/downloads/ownership.check.ts && bun src/storage/serialize.check.ts"
+    "check:downloads": "bun src/downloads/runState.check.ts && bun src/downloads/ownership.check.ts && bun src/downloads/timeout.check.ts && bun src/storage/serialize.check.ts"
   },
   "private": true,
   "trustedDependencies": [

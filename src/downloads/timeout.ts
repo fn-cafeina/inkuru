@@ -6,5 +6,9 @@ export function withTimeout<T>(
 ): Promise<T> {
   const timer = setTimeout(() => controller.abort(), ms);
 
-  return task().finally(() => clearTimeout(timer));
+  // Promise.resolve() keeps the timer tied to the settle path even when the
+  // task throws synchronously, which would otherwise leak an abort later.
+  return Promise.resolve()
+    .then(task)
+    .finally(() => clearTimeout(timer));
 }
