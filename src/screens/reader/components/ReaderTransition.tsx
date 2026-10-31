@@ -40,6 +40,7 @@ export function ReaderTransition({
       className="bg-zinc-950"
     >
       <AppPressable
+        accessible={false}
         onPress={onToggleChrome}
         pressFeedback={false}
         className="flex-1 items-center justify-center px-4"

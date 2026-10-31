@@ -58,7 +58,7 @@ export default function DiscoverScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
-            placeholder="Título, autor o género"
+            placeholder="Título del manga"
             placeholderTextColor={colors.iconInactive}
             className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
           />

@@ -23,6 +23,9 @@ export function MangaGridCard({
   return (
     <AppPressable
       accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
+      accessibilityHint={
+        onLongPress ? 'Mantén pulsado para quitar de la biblioteca' : undefined
+      }
       onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={350}
