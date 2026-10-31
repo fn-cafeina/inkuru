@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { FlatList } from 'react-native';
+import { ActivityIndicator, FlatList, View } from 'react-native';
 import type { ListViewToken } from 'react-native';
 
 import type {
@@ -33,6 +33,8 @@ export function VerticalPages({
   const listRef = useRef<FlatList<string>>(null);
   const didRetry = useRef(false);
   const [zoomed, setZoomed] = useState(false);
+  const [footerReady, setFooterReady] = useState(pages.length === 0);
+  const markFooterReady = useCallback(() => setFooterReady(true), []);
   const [onViewableItemsChanged] = useState(
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
@@ -87,6 +89,7 @@ export function VerticalPages({
           paged={false}
           onTap={() => onToggleChrome()}
           onZoomChange={setZoomed}
+          onReady={index < pages.length - 1 ? undefined : markFooterReady}
           onNextPage={
             zoomed || index >= pages.length - 1
               ? undefined
@@ -97,7 +100,15 @@ export function VerticalPages({
           }
         />
       )}
-      ListFooterComponent={footer}
+      ListFooterComponent={
+        footerReady ? (
+          footer
+        ) : (
+          <View className="items-center py-8">
+            <ActivityIndicator color="#a1a1aa" />
+          </View>
+        )
+      }
       showsVerticalScrollIndicator={false}
       scrollEnabled={!zoomed}
       removeClippedSubviews={false}

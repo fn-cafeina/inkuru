@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { AccessibilityActionInfo } from 'react-native';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
@@ -25,6 +25,7 @@ type Props = {
   onZoomChange: (zoomed: boolean) => void;
   onNextPage?: () => void;
   onPreviousPage?: () => void;
+  onReady?: () => void;
 };
 
 export function ReaderPage({
@@ -39,11 +40,19 @@ export function ReaderPage({
   onZoomChange,
   onNextPage,
   onPreviousPage,
+  onReady,
 }: Props) {
   const [source, setSource] = useState<SourceSize | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const notified = useRef(false);
+  const notifyReady = () => {
+    if (!notified.current) {
+      notified.current = true;
+      onReady?.();
+    }
+  };
 
   const ratio = source ? source.width / source.height : READER_PAGE_ASPECT_RATIO;
   // Zoom is applied around the viewport centre, so the focal point is
@@ -150,10 +159,12 @@ export function ReaderPage({
                     }
 
                     setLoaded(true);
+                    notifyReady();
                   }}
                   onError={() => {
                     setFailed(true);
                     setLoaded(false);
+                    notifyReady();
                   }}
                   accessible
                   accessibilityLabel={label}
