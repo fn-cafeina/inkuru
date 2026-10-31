@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
+import { AppState } from 'react-native';
 
 import { markChapterRead, saveProgress } from '../../storage/readerProgress';
 import type { ReaderData } from '../../source/zonatmo';
@@ -90,6 +91,17 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
       flush();
     };
   }, [flush, path]);
+
+  // Android can kill a backgrounded app before the debounce timer fires.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') {
+        flush();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [flush]);
 
   useEffect(() => {
     if (!restored || !data) {
