@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { withLock } from './serialize';
+
 const PREFIX = 'cache:query:';
 const ENTRY_PREFIX = `${PREFIX}v1:`;
 const VERSION = 1;
@@ -16,8 +18,9 @@ export const CACHE_FRESH_MS = {
 type IndexEntry = { key: string; savedAt: number; bytes: number };
 type StoredEntry = { v: number; savedAt: number; value: unknown };
 
+const QUEUE_KEY = 'cache:query';
+
 let index: IndexEntry[] | null = null;
-let tail: Promise<void> = Promise.resolve();
 let swept = false;
 
 function storageKey(key: string) {
@@ -37,12 +40,6 @@ function isStoredEntry(value: unknown): value is StoredEntry {
     Number.isFinite(record.savedAt) &&
     'value' in record
   );
-}
-
-function enqueue(operation: () => Promise<void>): Promise<void> {
-  const next = tail.then(operation, operation);
-  tail = next.catch(() => undefined);
-  return next;
 }
 
 async function rebuildIndex(): Promise<IndexEntry[]> {
@@ -165,7 +162,7 @@ export async function readCache<T>(
   validate: (value: unknown) => value is T,
 ): Promise<{ value: T; savedAt: number } | null> {
   // Invalidation is queued; wait so a read cannot resurrect what a delete removed.
-  await tail;
+  await withLock(QUEUE_KEY, async () => undefined);
 
   const raw = await AsyncStorage.getItem(storageKey(key)).catch(() => null);
 
@@ -193,7 +190,7 @@ export async function readCache<T>(
 }
 
 export function writeCache(key: string, value: unknown): void {
-  void enqueue(async () => {
+  void withLock(QUEUE_KEY, async () => {
     try {
       const savedAt = Date.now();
       const raw = JSON.stringify({ v: VERSION, savedAt, value });
@@ -210,7 +207,7 @@ export function writeCache(key: string, value: unknown): void {
 }
 
 export function removeCache(key: string): Promise<void> {
-  return enqueue(async () => {
+  return withLock(QUEUE_KEY, async () => {
     try {
       await AsyncStorage.removeItem(storageKey(key));
       const entries = await loadIndex();
