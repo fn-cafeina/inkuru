@@ -156,17 +156,20 @@ export async function deleteDownload(chapterPath: string) {
   }
 
   states.delete(chapterPath);
-  records.delete(chapterPath);
   const deleted = deleteChapterFiles(chapterPath);
   forgetRemoteCache(readerCacheKey(chapterPath));
   void forgetPageProgress(chapterPath);
-  notify();
 
   if (!deleted && hasDownloadFiles(chapterPath)) {
     // The files survived (collision or unreadable marker); keeping the index
     // entry prevents reconcileDirectories from resurrecting them as unknown.
+    // The record stays in memory too, so the UI agrees with the index.
+    notify();
     return;
   }
+
+  records.delete(chapterPath);
+  notify();
 
   await initializeDownloads();
 
