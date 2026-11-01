@@ -107,6 +107,22 @@ assertEqual(
   'ruta de búsqueda',
 );
 assertEqual(item(search, 0).lastChapter, undefined, 'búsqueda sin último capítulo');
+const upgraded = parseSearch(
+  JSON.stringify([
+    {
+      title: 'Http',
+      cover: 'http://cdn.example/x.jpg',
+      url: 'https://zonatmo.org/library/manga/2/http',
+    },
+  ]),
+);
+
+assertEqual(
+  item(upgraded, 0).cover,
+  'https://cdn.example/x.jpg',
+  'una portada http se sirve por https',
+);
+
 assertEqual(parseSearch('[]').length, 0, 'búsqueda vacía');
 assertEqual(
   parseSearch(

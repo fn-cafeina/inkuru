@@ -339,9 +339,12 @@ function extractCover(block: string): string | undefined {
 }
 
 function toPath(url: string): string { return url.replace(/^https?:\/\/[^/]+/i, ''); }
+// Android blocks cleartext traffic, so an http source would never load.
 function absoluteUrl(source: string): string {
-  return /^https?:\/\//i.test(source)
-    ? source
-    : `${BASE_URL}${source.startsWith('/') ? '' : '/'}${source}`;
+  if (/^https?:\/\//i.test(source)) {
+    return source.replace(/^http:\/\//i, 'https://');
+  }
+
+  return `${BASE_URL}${source.startsWith('/') ? '' : '/'}${source}`;
 }
 function isDefined<T>(value: T | undefined): value is T { return value !== undefined; }
