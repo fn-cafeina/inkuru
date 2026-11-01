@@ -38,6 +38,7 @@
     "lint": "expo lint",
     "check:parser": "bun src/source/zonatmo.check.ts && bun src/source/guards.check.ts",
     "check:discover": "bun src/screens/discover/discoverFeed.check.ts",
+    "check:reader": "bun src/screens/manga/chapters.check.ts && bun src/screens/reader/readerMath.check.ts",
     "check:downloads": "bun src/downloads/runState.check.ts && bun src/downloads/ownership.check.ts && bun src/downloads/timeout.check.ts && bun src/storage/serialize.check.ts && bun src/storage/queryCache.check.ts && bun src/downloads/files.check.ts && bun src/downloads/manager.check.ts"
   },
   "private": true,
