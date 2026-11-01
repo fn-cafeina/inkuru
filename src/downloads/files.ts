@@ -7,6 +7,7 @@ import type { DownloadFile, DownloadRecord } from './types';
 import {
   chapterSlots,
   ensureRoot,
+  existingChapterDirs,
   pageExtension,
 } from './paths';
 
@@ -154,11 +155,7 @@ export async function writeDownloadFile(
 export async function readDownloadFile(
   chapterPath: string,
 ): Promise<DownloadFile | null> {
-  for (const directory of chapterSlots(chapterPath)) {
-    if (!directory.exists) {
-      continue;
-    }
-
+  for (const directory of existingChapterDirs(chapterPath)) {
     const wrapper = await readWrapper(new File(directory, READER_FILE));
 
     if (wrapper?.record.chapterPath === chapterPath) {
@@ -177,8 +174,8 @@ export async function readDownloadFile(
  * corrupt directory on the next launch.
  */
 export function hasDownloadFiles(chapterPath: string): boolean {
-  for (const directory of chapterSlots(chapterPath)) {
-    if (directory.exists && directoryOwner(directory) === chapterPath) {
+  for (const directory of existingChapterDirs(chapterPath)) {
+    if (directoryOwner(directory) === chapterPath) {
       return true;
     }
   }
@@ -194,11 +191,7 @@ export function hasDownloadFiles(chapterPath: string): boolean {
 export function deleteChapterFiles(chapterPath: string): boolean {
   let remaining = false;
 
-  for (const directory of chapterSlots(chapterPath)) {
-    if (!directory.exists) {
-      continue;
-    }
-
+  for (const directory of existingChapterDirs(chapterPath)) {
     const owner = directoryOwner(directory);
 
     if (owner === null) {

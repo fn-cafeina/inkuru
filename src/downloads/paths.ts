@@ -1,6 +1,6 @@
 import { Directory, Paths } from 'expo-file-system';
 
-import { hashKey } from './ownership';
+import { hashKey, isChapterDirName } from './ownership';
 
 const DOWNLOADS_DIRECTORY = 'downloads';
 const READER_EXTENSIONS = new Set([
@@ -36,6 +36,25 @@ export function chapterSlots(chapterPath: string): Directory[] {
   return chapterDirNames(chapterPath).map(
     (name) => new Directory(downloadsRoot(), name),
   );
+}
+
+/**
+ * Directories that already exist for the chapter. One root listing beats
+ * probing 100 candidate names on every read, delete and startup check.
+ */
+export function existingChapterDirs(chapterPath: string): Directory[] {
+  const root = downloadsRoot();
+
+  if (!root.exists) {
+    return [];
+  }
+
+  return root
+    .list()
+    .filter(
+      (entry): entry is Directory =>
+        entry instanceof Directory && isChapterDirName(chapterPath, entry.name),
+    );
 }
 
 export function pageExtension(url: string): string {
