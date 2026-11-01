@@ -42,7 +42,6 @@ export function useDiscoverFeed(term: string) {
     refresh,
   } = useRemoteData(fetcher, discoverCacheKey(term, page), {
     freshMs: CACHE_FRESH_MS.catalog,
-    persist: true,
     validate: isCatalogPage,
   });
 

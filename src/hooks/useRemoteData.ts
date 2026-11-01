@@ -29,9 +29,7 @@ type State<T> = {
 type Options<T> = {
   /** Skip revalidation while the cached value is younger than this. */
   freshMs?: number;
-  /** Persist successful results across app restarts. */
-  persist?: boolean;
-  /** Runtime guard for values read back from storage. */
+  /** Runtime guard for values read back from storage; enables persistence. */
   validate?: (value: unknown) => value is T;
 };
 
@@ -65,7 +63,7 @@ export function useRemoteData<T>(
   cacheKey?: string,
   options: Options<T> = {},
 ): RemoteData<T> {
-  const { freshMs, persist = false, validate } = options;
+  const { freshMs, validate } = options;
   const [state, setState] = useState<State<T>>(() =>
     initialState<T>(cacheKey, freshMs),
   );
@@ -108,7 +106,7 @@ export function useRemoteData<T>(
         if (key !== undefined) {
           writeRemoteCache(key, result, savedAt);
 
-          if (persist) {
+          if (validate) {
             writeCache(key, result);
           }
         }
@@ -146,7 +144,7 @@ export function useRemoteData<T>(
         }
       }
     },
-    [cacheKey, fetcher, persist],
+    [cacheKey, fetcher, validate],
   );
 
   useEffect(() => {
@@ -156,7 +154,7 @@ export function useRemoteData<T>(
       const key = cacheKey;
       const inMemory = readRemoteCache<T>(key);
 
-      if (key !== undefined && persist && validate && !inMemory) {
+      if (key !== undefined && validate && !inMemory) {
         const stored = await readCache(key, validate);
 
         if (cancelled) {
@@ -196,7 +194,7 @@ export function useRemoteData<T>(
       requestRef.current += 1;
       controllerRef.current?.abort();
     };
-  }, [run, cacheKey, freshMs, persist, validate]);
+  }, [run, cacheKey, freshMs, validate]);
 
   const reload = useCallback(() => {
     void run('reload');

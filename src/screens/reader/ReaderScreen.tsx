@@ -83,7 +83,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
     readerCacheKey(chapterPath),
     {
       freshMs: downloaded ? 0 : CACHE_FRESH_MS.chapter,
-      persist: true,
       validate: isReaderData,
     },
   );
