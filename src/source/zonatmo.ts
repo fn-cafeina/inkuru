@@ -211,8 +211,9 @@ export function parseCatalog(html: string): CatalogPage {
     items,
     // Scoped to a paginator link: a stray rel="next" in <head> or a comment
     // must not be read as "has more" and trigger endless empty page fetches.
-    hasMore: /<a\b[^>]*\bclass\s*=\s*"[^"]*\bpage-link\b[^"]*"[^>]*\brel\s*=\s*"next"/i.test(
-      html,
+    // Attribute order and quote style are not assumed.
+    hasMore: extractBlocks(html, 'a', 'page-link').some((anchor) =>
+      /\brel\s*=\s*["']next["']/i.test(anchor),
     ),
   };
 }

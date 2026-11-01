@@ -52,7 +52,7 @@ export function textWithClass(
   className: string,
 ): string | undefined {
   const pattern = new RegExp(
-    `<${tag}\\b[^>]*\\bclass\\s*=\\s*"[^"]*\\b${className}\\b[^"]*"[^>]*>([\\s\\S]*?)</${tag}>`,
+    `<${tag}\\b[^>]*${classAttr(className)}[^>]*>([\\s\\S]*?)</${tag}>`,
     'i',
   );
   const match = html.match(pattern);

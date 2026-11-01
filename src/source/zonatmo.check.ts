@@ -167,6 +167,37 @@ const singleQuotedClass = parseCatalog(
 
 assertEqual(singleQuotedClass.items.length, 2, 'clase de tarjeta con comillas simples');
 
+// Text helpers read class attributes too, so the same card must keep its title.
+const singleQuotedTitle = parseCatalog(
+  CATALOG_FIXTURE.replace(/class="text-truncate"/g, "class='text-truncate'"),
+);
+
+assertEqual(singleQuotedTitle.items.length, 2, 'título con comillas simples');
+assertEqual(
+  item(singleQuotedTitle.items, 0).title,
+  'ONE PUNCH-MAN',
+  'texto con comillas simples',
+);
+
+const singleQuotedDetail = parseManga(
+  MANGA_FIXTURE.replace(
+    'class="element-title my-2"',
+    "class='element-title my-2'",
+  ),
+);
+
+assertEqual(singleQuotedDetail.title, 'ONE PUNCH-MAN', 'detalle con comillas simples');
+
+// Attribute order inside the paginator must not decide hasMore.
+const reorderedPaginator = parseCatalog(
+  CATALOG_FIXTURE.replace(
+    'class="page-link" href="https://zonatmo.org/biblioteca?page=2" rel="next"',
+    'rel="next" class="page-link" href="https://zonatmo.org/biblioteca?page=2"',
+  ),
+);
+
+assertEqual(reorderedPaginator.hasMore, true, 'paginador con rel primero');
+
 const lastCatalog = parseCatalog(CATALOG_FIXTURE.replace(' rel="next"', ''));
 
 assertEqual(lastCatalog.items.length, 2, 'última página con mangas');
