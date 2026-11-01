@@ -108,6 +108,15 @@ assertEqual(
 );
 assertEqual(item(search, 0).lastChapter, undefined, 'búsqueda sin último capítulo');
 assertEqual(parseSearch('[]').length, 0, 'búsqueda vacía');
+assertEqual(
+  parseSearch(
+    JSON.stringify([
+      { title: 'Sin portada', cover: '', url: 'https://zonatmo.org/library/manga/1/sin-portada' },
+    ]),
+  ).length,
+  0,
+  'resultado sin portada se descarta',
+);
 expectThrow(
   () => parseSearch('nope'),
   'JSON inválido de búsqueda debe lanzar error',

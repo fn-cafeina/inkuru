@@ -241,9 +241,12 @@ function parseSearchItem(item: unknown): MangaListItem | undefined {
   const cover = typeof value.cover === 'string' ? value.cover : value.cover_url;
   const url = value.url;
 
+  // An empty cover would resolve to the site root and render a broken card.
   if (
     typeof title !== 'string' ||
+    title.length === 0 ||
     typeof cover !== 'string' ||
+    cover.length === 0 ||
     typeof url !== 'string'
   ) {
     return undefined;
