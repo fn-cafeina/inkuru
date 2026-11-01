@@ -50,17 +50,15 @@ export function MangaHeader({
 }: Props) {
   const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
-  const factValue = (label: string) => {
-    const value = manga.facts.find((fact) => fact.label === label)?.value;
-
-    return value ? FACT_VALUES[value] ?? value : undefined;
-  };
+  const status = manga.status
+    ? FACT_VALUES[manga.status] ?? manga.status
+    : undefined;
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
 
   return (
     <View>
-      <MangaCoverInfo manga={manga} status={factValue('Estado')} />
+      <MangaCoverInfo manga={manga} status={status} />
 
       {readChapter ? (
         <View className="mt-4 px-4">

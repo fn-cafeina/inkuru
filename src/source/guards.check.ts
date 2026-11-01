@@ -57,7 +57,7 @@ assert(
     cover: 'https://cdn/cover.jpg',
     synopsis: '...',
     tags: ['Accion'],
-    facts: [{ label: 'Autor', value: 'Alguien' }],
+    status: 'Ongoing',
     chapters: [chapter],
   }),
   'detalle válido debe aceptarse',
@@ -68,10 +68,10 @@ assert(
     cover: 'https://cdn/cover.jpg',
     synopsis: '...',
     tags: ['Accion'],
-    facts: [{ label: 'Autor' }],
+    status: 7,
     chapters: [chapter],
   }),
-  'dato sin valor debe rechazarse',
+  'estado no textual debe rechazarse',
 );
 
 const item = {

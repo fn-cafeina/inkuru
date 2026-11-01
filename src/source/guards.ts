@@ -2,7 +2,6 @@ import type {
   CatalogPage,
   MangaChapter,
   MangaDetail,
-  MangaFact,
   MangaListItem,
   ReaderData,
 } from './zonatmo';
@@ -40,12 +39,6 @@ function isMangaListItem(value: unknown): value is MangaListItem {
   );
 }
 
-function isMangaFact(value: unknown): value is MangaFact {
-  return (
-    isRecord(value) && isString(value.label) && isString(value.value)
-  );
-}
-
 export function isCatalogPage(value: unknown): value is CatalogPage {
   if (!isRecord(value)) {
     return false;
@@ -69,8 +62,7 @@ export function isMangaDetail(value: unknown): value is MangaDetail {
     isString(value.synopsis) &&
     Array.isArray(value.tags) &&
     value.tags.every(isString) &&
-    Array.isArray(value.facts) &&
-    value.facts.every(isMangaFact) &&
+    isOptionalString(value.status) &&
     Array.isArray(value.chapters) &&
     value.chapters.every(isMangaChapter)
   );

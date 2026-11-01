@@ -25,16 +25,11 @@ export type MangaChapter = {
   path: string;
 };
 
-export type MangaFact = {
-  label: string;
-  value: string;
-};
-
 export type MangaDetail = {
   title: string;
   cover: string;
   tags: string[];
-  facts: MangaFact[];
+  status?: string;
   synopsis: string;
   chapters: MangaChapter[];
 };
@@ -127,7 +122,7 @@ export function parseManga(html: string): MangaDetail {
     title,
     cover,
     tags,
-    facts: fact('Estado', parseMangaStatus(html)),
+    status: parseMangaStatus(html),
     synopsis: parseMangaSynopsis(html),
     chapters: extractBlocks(html, 'li', 'upload-link')
       .map(parseMangaChapter)
@@ -340,7 +335,6 @@ function extractCover(block: string): string | undefined {
   return absoluteUrl(source);
 }
 
-function fact(label: string, value: string | undefined): MangaFact[] { return value ? [{ label, value }] : []; }
 function toPath(url: string): string { return url.replace(/^https?:\/\/[^/]+/i, ''); }
 function absoluteUrl(source: string): string {
   return /^https?:\/\//i.test(source)
