@@ -73,6 +73,16 @@ export function usePageGestures({
     },
     [onZoomChange],
   );
+  const resetZoom = () => {
+    'worklet';
+    scale.value = withTiming(1, { duration: SETTLE_DURATION });
+    translateX.value = withTiming(0, { duration: SETTLE_DURATION });
+    translateY.value = withTiming(0, { duration: SETTLE_DURATION });
+    savedScale.value = 1;
+    savedX.value = 0;
+    savedY.value = 0;
+    runOnJS(notifyZoom)(false);
+  };
   const settle = () => {
     'worklet';
     savedScale.value = scale.value;
@@ -80,14 +90,7 @@ export function usePageGestures({
     savedY.value = translateY.value;
 
     if (scale.value <= RESET_THRESHOLD) {
-      scale.value = withTiming(1, { duration: SETTLE_DURATION });
-      translateX.value = withTiming(0, { duration: SETTLE_DURATION });
-      translateY.value = withTiming(0, { duration: SETTLE_DURATION });
-      savedScale.value = 1;
-      savedX.value = 0;
-      savedY.value = 0;
-      runOnJS(notifyZoom)(false);
-
+      resetZoom();
       return;
     }
 
@@ -110,9 +113,7 @@ export function usePageGestures({
 
   const pinch = usePinchGesture({
     onActivate: (event) => {
-      // notifyZoom keeps zoomedRef in sync so the cleanup releases the
-      // parent scroll lock if this row is recycled mid-pinch.
-      runOnJS(notifyZoom)(true);
+      // Scroll lock turns on once the pinch passes the reset threshold.
       startScale.value = savedScale.value;
       startX.value = savedX.value;
       startY.value = savedY.value;
@@ -121,6 +122,12 @@ export function usePageGestures({
     },
     onUpdate: (event) => {
       const nextScale = clamp(startScale.value * event.scale, 1, MAX_ZOOM);
+
+      // Lock scroll once the pinch passes the reset threshold.
+      if (scale.value <= RESET_THRESHOLD && nextScale > RESET_THRESHOLD) {
+        runOnJS(notifyZoom)(true);
+      }
+
       const next = zoomAroundPoint(
         startScale.value,
         startX.value,
@@ -192,14 +199,7 @@ export function usePageGestures({
       const focalY = event.y - viewportHeight / 2;
 
       if (scale.value > RESET_THRESHOLD) {
-        scale.value = withTiming(1, { duration: SETTLE_DURATION });
-        translateX.value = withTiming(0, { duration: SETTLE_DURATION });
-        translateY.value = withTiming(0, { duration: SETTLE_DURATION });
-        savedScale.value = 1;
-        savedX.value = 0;
-        savedY.value = 0;
-        runOnJS(notifyZoom)(false);
-
+        resetZoom();
         return;
       }
 
