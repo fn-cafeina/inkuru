@@ -1,4 +1,4 @@
-import { pageBox } from './readerPageLayout';
+import { pageBox, pageLayoutAt } from './readerPageLayout';
 import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
@@ -69,5 +69,21 @@ const fitWidth = pageBox({
 });
 
 assertEqual(fitWidth.baseWidth, 200, 'fit-width ignora la altura en paginado');
+
+// pageLayoutAt: real measured heights with an estimate fallback.
+const noHeights = pageLayoutAt([], 3, 100);
+
+assertEqual(noHeights.offset, 300, 'sin mediciones usa el fallback');
+assertEqual(noHeights.length, 100, 'sin mediciones usa el fallback de alto');
+
+const sparse = pageLayoutAt([120, 90], 3, 100);
+
+assertEqual(sparse.offset, 310, 'suma mediciones y fallback para el resto');
+assertEqual(sparse.length, 100, 'un índice sin medir usa el fallback');
+
+const measured = pageLayoutAt([120, 90, 80, 200], 3, 100);
+
+assertEqual(measured.offset, 290, 'suma solo las mediciones reales');
+assertEqual(measured.length, 200, 'usa la altura real medida');
 
 console.log('reader geometry ok');

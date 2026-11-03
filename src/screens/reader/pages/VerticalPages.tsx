@@ -10,6 +10,7 @@ import type {
 import { palette } from '../../../theme/colors';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { ReaderPage } from '../components/ReaderPage';
+import { pageLayoutAt } from '../readerPageLayout';
 
 export function VerticalPages({
   pages,
@@ -76,12 +77,13 @@ export function VerticalPages({
 
   /** Estimated height until a page reports its real size. */
   const pageHeight = width / READER_PAGE_ASPECT_RATIO;
+  // Real measured row heights; unmeasured indices fall back to the estimate.
+  // getItemLayout reads the ref, so rows re-measuring (image load) propagate
+  // without a re-render: VirtualizedList re-derives spacers on cell layout.
+  const heightsRef = useRef<number[]>([]);
   const getItemLayout = useCallback(
-    (_: ArrayLike<string> | null | undefined, index: number) => ({
-      length: pageHeight,
-      offset: pageHeight * index,
-      index,
-    }),
+    (_: ArrayLike<string> | null | undefined, index: number) =>
+      pageLayoutAt(heightsRef.current, index, pageHeight),
     [pageHeight],
   );
   const [viewabilityConfig] = useState(() => ({
@@ -121,26 +123,32 @@ export function VerticalPages({
       data={pages}
       keyExtractor={(_, index) => String(index)}
       renderItem={({ item, index }) => (
-        <ReaderPage
-          uri={item}
-          label={`Página ${index + 1}`}
-          width={width}
-          height={windowHeight}
-          scaleMode={scale}
-          quality={quality}
-          paged={false}
-          onTap={() => onToggleChrome()}
-          onZoomChange={setZoomed}
-          onReady={index < pages.length - 1 ? undefined : markFooterReady}
-          onNextPage={
-            zoomed || index >= pages.length - 1
-              ? undefined
-              : () => goToPage(index + 1)
-          }
-          onPreviousPage={
-            zoomed || index === 0 ? undefined : () => goToPage(index - 1)
-          }
-        />
+        <View
+          onLayout={(event) => {
+            heightsRef.current[index] = event.nativeEvent.layout.height;
+          }}
+        >
+          <ReaderPage
+            uri={item}
+            label={`Página ${index + 1}`}
+            width={width}
+            height={windowHeight}
+            scaleMode={scale}
+            quality={quality}
+            paged={false}
+            onTap={() => onToggleChrome()}
+            onZoomChange={setZoomed}
+            onReady={index < pages.length - 1 ? undefined : markFooterReady}
+            onNextPage={
+              zoomed || index >= pages.length - 1
+                ? undefined
+                : () => goToPage(index + 1)
+            }
+            onPreviousPage={
+              zoomed || index === 0 ? undefined : () => goToPage(index - 1)
+            }
+          />
+        </View>
       )}
       ListFooterComponent={
         footerReady ? (
