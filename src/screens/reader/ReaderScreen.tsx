@@ -209,12 +209,9 @@ export default function ReaderScreen({ navigation, route }: Props) {
               width={viewWidth}
               height={viewHeight}
               bottomInset={insets.bottom}
-              title={chapterTitle}
               onPageChange={setPage}
               onToggleChrome={toggleChrome}
               onOpenNext={openChapter}
-              onOpenPrev={openChapter}
-              onOpenPicker={() => setPickerOpen(true)}
             />
           ) : null}
 

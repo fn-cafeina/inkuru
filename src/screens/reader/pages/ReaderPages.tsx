@@ -17,12 +17,9 @@ export function ReaderPages({
   width,
   height,
   bottomInset,
-  title,
   onPageChange,
   onToggleChrome,
   onOpenNext,
-  onOpenPrev,
-  onOpenPicker,
 }: {
   data: ReaderData;
   mode: ReaderMode;
@@ -32,25 +29,18 @@ export function ReaderPages({
   width: number;
   height: number;
   bottomInset: number;
-  title: string;
   onPageChange: (page: number) => void;
   onToggleChrome: () => void;
   onOpenNext: (chapter: MangaChapter) => void;
-  onOpenPrev: (chapter: MangaChapter) => void;
-  onOpenPicker: () => void;
 }) {
   const footer = (
     <ReaderTransition
-      currentTitle={data.title || title}
       next={data.next}
-      prev={data.prev}
       width={width}
       height={height}
       bottomInset={bottomInset}
       chapterIndex={data.chapterIndex}
       onOpenNext={onOpenNext}
-      onOpenPrev={onOpenPrev}
-      onOpenPicker={onOpenPicker}
       onToggleChrome={onToggleChrome}
     />
   );
