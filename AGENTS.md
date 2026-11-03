@@ -16,9 +16,12 @@ Android manga reader app.
 - `bun run start` — dev server
 - `bun run typecheck` — `tsc --noEmit`
 - `bun run lint` — ESLint
-- `bun run check:parser` — parser self-check
+- `bun run check:parser` — source parser self-check
 - `bun run check:discover` — discover feed self-check
-- `bun run check:downloads` — download state self-check
+- `bun run check:reader` — chapter ranges and reader geometry self-check
+- `bun run check:downloads` — download, storage and cache self-check
+- `npx expo-doctor` — dependency health check; CI runs it, run it after
+  adding or upgrading dependencies
 
 ## Platform
 
@@ -42,14 +45,24 @@ Android manga reader app.
   `components/` and pure helpers next to the screen.
 - Shared UI lives in `src/components/`. Move a component there only when more
   than one screen uses it.
+- `src/source/` holds the HTML parsers; `src/downloads/` the download
+  lifecycle; `src/storage/` persistence and the query cache; `src/hooks/`
+  shared hooks; `src/navigation/` the tabs and stack; `src/theme/` colors.
 - Keep files under 300 lines (blank lines and comments excluded); ESLint
   enforces this with `max-lines`.
 
-## Commits
+## Testing
 
-- One small, atomic, scoped commit per change. Do not mix unrelated fixes,
-  refactors or docs.
-- Use Conventional Commits: `fix(scope):`, `refactor(scope):`,
-  `perf(scope):`, `test(scope):`, `ci:`, `docs:`, `chore:`.
-- Run `bun run typecheck`, `bun run lint` and the relevant `check:*` scripts
-  before each commit. All must pass.
+- No test framework. Self-checks are plain scripts `*.check.ts` run directly
+  with `bun <file>`, using hand-rolled `assert` that throws on failure.
+- New non-trivial logic (parser, reducer, file handling, math) needs one
+  `*.check.ts` next to the code, wired into its `check:*` script in
+  `package.json`.
+- Do not add `*.test.ts` files or a test runner; nothing executes them.
+- Fixtures live in `__fixtures__/` next to their module.
+
+## Lint
+
+ESLint (`bun run lint`) enforces beyond `max-lines`: no `any`, no non-null
+assertion (`!`), no floating promises, no import cycles, `complexity` max 15,
+`max-depth` 4, `max-lines-per-function` 200, exhaustive hook deps.
