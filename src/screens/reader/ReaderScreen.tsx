@@ -41,10 +41,6 @@ function readerSubtitle(
   return data?.mangaTitle ? data.title || title : undefined;
 }
 
-function chapterNeighbors(data: ReaderData | null) {
-  return { prev: data?.prev, next: data?.next };
-}
-
 function sheetAccessibility(pickerOpen: boolean, settingsOpen: boolean) {
   const open = pickerOpen || settingsOpen;
 
@@ -118,8 +114,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const showError = hasError && data !== null;
   const ready = preferencesLoaded && restored;
-  const { prev, next } = chapterNeighbors(data);
-
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -220,10 +214,6 @@ export default function ReaderScreen({ navigation, route }: Props) {
               page={page}
               total={total}
               bottomInset={insets.bottom}
-              prev={prev}
-              next={next}
-              onOpenPrev={openChapter}
-              onOpenNext={openChapter}
             />
           ) : null}
           <ReaderChrome

@@ -1,10 +1,5 @@
-import { Feather } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-
-import { AppPressable } from '../../../components/AppPressable';
-import type { MangaChapter } from '../../../source/zonatmo';
-import { palette } from '../../../theme/colors';
 
 const BAR_BACKGROUND = 'rgba(9, 9, 11, 0.7)';
 
@@ -12,18 +7,10 @@ export function ReaderProgressBar({
   page,
   total,
   bottomInset,
-  prev,
-  next,
-  onOpenPrev,
-  onOpenNext,
 }: {
   page: number;
   total: number;
   bottomInset: number;
-  prev?: MangaChapter;
-  next?: MangaChapter;
-  onOpenPrev: (chapter: MangaChapter) => void;
-  onOpenNext: (chapter: MangaChapter) => void;
 }) {
   if (total <= 0) {
     return null;
@@ -37,22 +24,6 @@ export function ReaderProgressBar({
       className="absolute left-4 right-4 flex-row items-center"
       style={{ bottom: bottomInset + 8 }}
     >
-      <AppPressable
-        accessibilityLabel="Capítulo anterior"
-        accessibilityState={{ disabled: !prev }}
-        disabled={!prev}
-        onPress={() => {
-          if (prev) {
-            onOpenPrev(prev);
-          }
-        }}
-        className={`mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800 ${
-          prev ? '' : 'opacity-40'
-        }`}
-        style={{ backgroundColor: BAR_BACKGROUND }}
-      >
-        <Feather name="chevrons-left" size={18} color={palette.dark.text} />
-      </AppPressable>
       <View
         accessible
         accessibilityRole="progressbar"
@@ -77,22 +48,6 @@ export function ReaderProgressBar({
           {page + 1} / {total}
         </Text>
       </View>
-      <AppPressable
-        accessibilityLabel="Capítulo siguiente"
-        accessibilityState={{ disabled: !next }}
-        disabled={!next}
-        onPress={() => {
-          if (next) {
-            onOpenNext(next);
-          }
-        }}
-        className={`ml-2 min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800 ${
-          next ? '' : 'opacity-40'
-        }`}
-        style={{ backgroundColor: BAR_BACKGROUND }}
-      >
-        <Feather name="chevrons-right" size={18} color={palette.dark.text} />
-      </AppPressable>
     </Animated.View>
   );
 }
