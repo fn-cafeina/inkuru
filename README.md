@@ -39,7 +39,7 @@ request.
 ## Structure
 
 - `src/screens/` — one folder per screen: `discover`, `library`,
-  `manga`, `reader`, `settings`
+  `manga`, `reader`
 - `src/components/` — UI shared between screens
 - `src/source/` — HTML parsers for the content source
 - `src/downloads/` — download lifecycle, file management

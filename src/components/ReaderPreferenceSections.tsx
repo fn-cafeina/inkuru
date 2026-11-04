@@ -11,7 +11,7 @@ import type {
   ReaderScale,
 } from '../storage/readerSettings';
 
-/** Reader mode, scale and quality rows shared by Settings and the sheet. */
+/** Reader mode, scale and quality rows of the reader settings sheet. */
 export function ReaderPreferenceSections({
   mode,
   scale,

@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import DiscoverScreen from '../screens/discover/DiscoverScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
-import SettingsScreen from '../screens/settings/SettingsScreen';
 import { useColors } from '../theme/colors';
 import type { MainTabsParamList } from './types';
 
@@ -17,10 +16,6 @@ const LibraryIcon = ({ color, size }: IconProps) => (
 
 const DiscoverIcon = ({ color, size }: IconProps) => (
   <Feather name="compass" size={size} color={color} />
-);
-
-const SettingsIcon = ({ color, size }: IconProps) => (
-  <Feather name="settings" size={size} color={color} />
 );
 
 export function MainTabs() {
@@ -49,11 +44,6 @@ export function MainTabs() {
         name="Discover"
         component={DiscoverScreen}
         options={{ title: 'Explorar', tabBarIcon: DiscoverIcon }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{ title: 'Ajustes', tabBarIcon: SettingsIcon }}
       />
     </Tab.Navigator>
   );
