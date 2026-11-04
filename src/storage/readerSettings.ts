@@ -27,110 +27,89 @@ export const READER_QUALITY_OPTIONS = [
 const MODE_KEY = 'reader:mode';
 const SCALE_KEY = 'reader:scale';
 const QUALITY_KEY = 'reader:quality';
-
-export async function loadReaderMode(): Promise<ReaderMode | null> {
-  try {
-    const value = await AsyncStorage.getItem(MODE_KEY);
-
-    // `vertical` and `paged` are the pre-mode-split values.
-    if (value === 'vertical' || value === 'webtoon') {
-      return 'webtoon';
-    }
-
-    if (value === 'paged' || value === 'paged-rtl') {
-      return 'paged-rtl';
-    }
-
-    return value === 'paged-ltr' ? 'paged-ltr' : null;
-  } catch {
-    return null;
-  }
-}
-
-export async function saveReaderMode(mode: ReaderMode): Promise<void> {
-  try {
-    await AsyncStorage.setItem(MODE_KEY, mode);
-  } catch {
-    // A storage failure must not block reading.
-  }
-}
-
-export async function loadReaderScale(): Promise<ReaderScale | null> {
-  try {
-    const value = await AsyncStorage.getItem(SCALE_KEY);
-
-    if (value === 'fit-width') {
-      return 'fit-width';
-    }
-
-    if (
-      value === 'fit-screen' ||
-      value === 'fit-height' ||
-      value === 'fill' ||
-      value === 'original' ||
-      value === 'stretch'
-    ) {
-      return 'fit-screen';
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export async function saveReaderScale(scale: ReaderScale): Promise<void> {
-  try {
-    await AsyncStorage.setItem(SCALE_KEY, scale);
-  } catch {
-    // A storage failure must not block reading.
-  }
-}
-
-export async function loadReaderQuality(): Promise<ReaderQuality | null> {
-  try {
-    const value = await AsyncStorage.getItem(QUALITY_KEY);
-
-    if (value === 'balanced') {
-      return 'balanced';
-    }
-
-    if (value === 'high' || value === 'maximum' || value === 'original') {
-      return 'original';
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-export async function saveReaderQuality(
-  quality: ReaderQuality,
-): Promise<void> {
-  try {
-    await AsyncStorage.setItem(QUALITY_KEY, quality);
-  } catch {
-    // A storage failure must not block reading.
-  }
-}
-
 const KEEP_AWAKE_KEY = 'reader:keepAwake';
 
-export async function loadKeepAwake(): Promise<boolean> {
-  try {
-    const value = await AsyncStorage.getItem(KEEP_AWAKE_KEY);
+// Stored values accepted as-is or mapped to their current name: the mode
+// split and the older scale/quality synonyms.
+const MODE_VALUES: Record<string, ReaderMode> = {
+  webtoon: 'webtoon',
+  'paged-ltr': 'paged-ltr',
+  'paged-rtl': 'paged-rtl',
+  vertical: 'webtoon',
+  paged: 'paged-rtl',
+};
 
-    return value === null ? true : value === 'true';
+const SCALE_VALUES: Record<string, ReaderScale> = {
+  'fit-screen': 'fit-screen',
+  'fit-width': 'fit-width',
+  'fit-height': 'fit-screen',
+  fill: 'fit-screen',
+  original: 'fit-screen',
+  stretch: 'fit-screen',
+};
+
+const QUALITY_VALUES: Record<string, ReaderQuality> = {
+  balanced: 'balanced',
+  original: 'original',
+  high: 'original',
+  maximum: 'original',
+};
+
+const KEEP_AWAKE_VALUES: Record<string, boolean> = {
+  true: true,
+  false: false,
+};
+
+/** Stored value in its current name; null when missing or unknown. */
+async function loadSetting<T>(
+  key: string,
+  values: Record<string, T>,
+): Promise<T | null> {
+  try {
+    const value = await AsyncStorage.getItem(key);
+
+    return value === null ? null : (values[value] ?? null);
   } catch {
-    return true;
+    return null;
   }
 }
 
-export async function saveKeepAwake(keepAwake: boolean): Promise<void> {
+async function saveSetting(key: string, value: string): Promise<void> {
   try {
-    await AsyncStorage.setItem(KEEP_AWAKE_KEY, String(keepAwake));
+    await AsyncStorage.setItem(key, value);
   } catch {
     // A storage failure must not block reading.
   }
+}
+
+export function loadReaderMode(): Promise<ReaderMode | null> {
+  return loadSetting(MODE_KEY, MODE_VALUES);
+}
+
+export function saveReaderMode(mode: ReaderMode): Promise<void> {
+  return saveSetting(MODE_KEY, mode);
+}
+
+export function loadReaderScale(): Promise<ReaderScale | null> {
+  return loadSetting(SCALE_KEY, SCALE_VALUES);
+}
+
+export function saveReaderScale(scale: ReaderScale): Promise<void> {
+  return saveSetting(SCALE_KEY, scale);
+}
+
+export function loadReaderQuality(): Promise<ReaderQuality | null> {
+  return loadSetting(QUALITY_KEY, QUALITY_VALUES);
+}
+
+export function saveReaderQuality(quality: ReaderQuality): Promise<void> {
+  return saveSetting(QUALITY_KEY, quality);
+}
+
+export async function loadKeepAwake(): Promise<boolean> {
+  return (await loadSetting(KEEP_AWAKE_KEY, KEEP_AWAKE_VALUES)) ?? true;
+}
+
+export function saveKeepAwake(keepAwake: boolean): Promise<void> {
+  return saveSetting(KEEP_AWAKE_KEY, String(keepAwake));
 }

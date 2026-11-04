@@ -157,7 +157,11 @@ assertEqual(await settings.loadKeepAwake(), true, 'sin valor, mantener encendida
 storage.set('reader:keepAwake', 'false');
 assertEqual(await settings.loadKeepAwake(), false, 'false se lee como apagado');
 storage.set('reader:keepAwake', 'zarro');
-assertEqual(await settings.loadKeepAwake(), false, 'solo true enciende');
+assertEqual(
+  await settings.loadKeepAwake(),
+  true,
+  'un valor desconocido cae en el valor por defecto',
+);
 
 await settings.saveReaderMode('paged-ltr');
 assertEqual(await settings.loadReaderMode(), 'paged-ltr', 'el modo hace roundtrip');
