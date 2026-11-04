@@ -1,4 +1,10 @@
-import { pageBox, pageLayoutAt } from './readerPageLayout';
+import {
+  knownPageRatio,
+  pageBox,
+  pageLayoutAt,
+  rememberPageRatio,
+} from './readerPageLayout';
+import { READER_PAGE_ASPECT_RATIO } from '../../theme/layout';
 import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
@@ -85,5 +91,28 @@ const measured = pageLayoutAt([120, 90, 80, 200], 3, 100);
 
 assertEqual(measured.offset, 290, 'suma solo las mediciones reales');
 assertEqual(measured.length, 200, 'usa la altura real medida');
+
+// ratio cache: a measured page keeps its proportion across row remounts.
+assertEqual(
+  knownPageRatio('page-1.jpg'),
+  READER_PAGE_ASPECT_RATIO,
+  'una página sin medir usa la proporción estimada',
+);
+
+rememberPageRatio('page-1.jpg', { width: 800, height: 1200 });
+
+assertEqual(
+  knownPageRatio('page-1.jpg'),
+  800 / 1200,
+  'una página medida conserva su proporción',
+);
+
+rememberPageRatio('page-2.jpg', { width: 0, height: 0 });
+
+assertEqual(
+  knownPageRatio('page-2.jpg'),
+  READER_PAGE_ASPECT_RATIO,
+  'un tamaño inválido no se cachea',
+);
 
 console.log('reader geometry ok');

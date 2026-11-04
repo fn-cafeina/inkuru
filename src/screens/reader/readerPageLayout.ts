@@ -1,6 +1,22 @@
 import type { ReaderScale } from '../../storage/readerSettings';
+import { READER_PAGE_ASPECT_RATIO } from '../../theme/layout';
 
 export type SourceSize = { width: number; height: number };
+
+// Measured page proportions survive row recycling: a remounted row starts at
+// its real height instead of the estimate, so rows never resize under the
+// reader and getItemLayout keeps the last measured heights.
+const ratioCache = new Map<string, number>();
+
+export function knownPageRatio(uri: string): number {
+  return ratioCache.get(uri) ?? READER_PAGE_ASPECT_RATIO;
+}
+
+export function rememberPageRatio(uri: string, size: SourceSize): void {
+  if (size.width > 0 && size.height > 0) {
+    ratioCache.set(uri, size.width / size.height);
+  }
+}
 
 /**
  * Page box in points. Paged mode honours the page-fitting preference;

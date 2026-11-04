@@ -6,10 +6,9 @@ import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
-import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { palette } from '../../../theme/colors';
 import { AppPressable } from '../../../components/AppPressable';
-import { pageBox } from '../readerPageLayout';
+import { knownPageRatio, pageBox, rememberPageRatio } from '../readerPageLayout';
 import type { SourceSize } from '../readerPageLayout';
 import { usePageGestures } from '../usePageGestures';
 
@@ -55,7 +54,9 @@ export function ReaderPage({
     }
   };
 
-  const ratio = source ? source.width / source.height : READER_PAGE_ASPECT_RATIO;
+  // A remounted row starts at its measured proportion when the page was seen
+  // before, so the row never resizes back to the estimate.
+  const ratio = source ? source.width / source.height : knownPageRatio(uri);
   // Zoom is applied around the viewport centre, so the focal point is
   // expressed relative to it.
   const viewportWidth = width;
@@ -161,6 +162,11 @@ export function ReaderPage({
                   onLoad={(event) => {
                     const { width: sourceWidth, height: sourceHeight } =
                       event.source;
+
+                    rememberPageRatio(uri, {
+                      width: sourceWidth,
+                      height: sourceHeight,
+                    });
 
                     if (sourceWidth > 0 && sourceHeight > 0) {
                       setSource({ width: sourceWidth, height: sourceHeight });
