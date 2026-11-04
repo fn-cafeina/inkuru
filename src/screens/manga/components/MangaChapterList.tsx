@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { Alert, FlatList, RefreshControl, View } from 'react-native';
 
 import { ChapterRow } from '../../../components/ChapterRow';
@@ -72,13 +72,7 @@ export function MangaChapterList({
     [manga.chapters, readSet],
   );
   const colors = useColors();
-  const listRef = useRef<FlatList<MangaChapter>>(null);
-
   useDownloadVersion();
-
-  useEffect(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [rangeIndex]);
 
   const handleDownload = (chapter: MangaChapter) => {
     const status = getDownloadState(chapter.path)?.status;
@@ -116,7 +110,6 @@ export function MangaChapterList({
 
   return (
     <FlatList
-      ref={listRef}
       data={chapters}
       keyExtractor={(item) => item.path}
       ItemSeparatorComponent={ListDivider}
