@@ -100,6 +100,26 @@ export function VerticalPages({
       return;
     }
     didRetry.current = true;
+    const heights = heightsRef.current;
+    let measured = true;
+
+    for (let i = 0; i <= info.index; i++) {
+      if (heights[i] == null) {
+        measured = false;
+        break;
+      }
+    }
+
+    if (measured) {
+      // Every row up to the target is measured, so one offset lands exactly
+      // instead of an estimated jump followed by a correction.
+      listRef.current?.scrollToOffset({
+        offset: pageLayoutAt(heights, info.index, pageHeight).offset,
+        animated: false,
+      });
+      return;
+    }
+
     listRef.current?.scrollToOffset({
       offset: info.averageItemLength * info.index,
       animated: false,
