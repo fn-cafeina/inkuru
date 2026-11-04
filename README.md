@@ -1,4 +1,4 @@
-# inkuru
+# Inkuru
 
 Android manga reader built with Expo SDK 58.
 
@@ -49,7 +49,7 @@ request.
 
 ## Legal
 
-inkuru is an independent third-party client. It is not affiliated with,
+Inkuru is an independent third-party client. It is not affiliated with,
 endorsed by, or sponsored by any service or content provider it may access.
 
 The app does not host, store, or distribute manga content. All content
