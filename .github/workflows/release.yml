@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+
+jobs:
+  quality:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: quality
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_BUILD_NO_EXPO_GO_WARNING: 'true'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - run: bun install --frozen-lockfile
+      - name: Tag must match app.json and package.json
+        run: |
+          v=${GITHUB_REF_NAME#v}
+          app=$(node -p "require('./app.json').expo.version")
+          pkg=$(node -p "require('./package.json').version")
+          if [ "$app" != "$v" ]; then
+            echo "app.json version $app != tag $GITHUB_REF_NAME"; exit 1
+          fi
+          if [ "$pkg" != "$v" ]; then
+            echo "package.json version $pkg != tag $GITHUB_REF_NAME"; exit 1
+          fi
+      - name: Build APK
+        env:
+          EAS_LOCAL_BUILD_ARTIFACTS_DIR: ${{ github.workspace }}/build
+        run: bunx eas-cli@27.4.1 build --platform android --profile production --local --non-interactive
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inkuru-${{ github.ref_name }}
+          path: build/*.apk
+          if-no-files-found: error
+          retention-days: 7
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" build/*.apk \
+            --title "$GITHUB_REF_NAME" --generate-notes
