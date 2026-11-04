@@ -14,8 +14,23 @@
 - `bun run check:discover`: discover feed self-check
 - `bun run check:reader`: chapter ranges and reader geometry self-check
 - `bun run check:downloads`: download, storage and cache self-check
-- `npx expo-doctor`: dependency health check; CI runs it, run it after
-  adding or upgrading dependencies
+- `bun run check:release`: release script self-check
+- `bun run release <version>`: bump, tag and push a release
+- `npx expo-doctor@1.21.5`: dependency health check; CI runs it, run it
+  after adding or upgrading dependencies
+
+## Release
+
+- Releases are cut from tags `v*.*.*` by `.github/workflows/release.yml`.
+- `bun run release 1.0.1` requires a clean tree, branch `main`, a new
+  version and a missing tag. It bumps `version` in `app.json` and
+  `package.json`, commits `chore(release): vX.Y.Z`, tags and pushes.
+  `--dry-run` prints the plan without touching anything.
+- CI is the quality gate. The workflow fails unless the tag matches
+  both version files, then builds the APK with a local EAS build and
+  publishes a GitHub Release with it attached.
+- Manual fallback: bump both files by hand, commit, tag `vX.Y.Z`, then
+  `git push origin main --follow-tags`.
 
 ## Platform
 
@@ -58,5 +73,7 @@
 ## Lint
 
 ESLint (`bun run lint`) enforces beyond `max-lines`: no `any`, no non-null
-assertion (`!`), no floating promises, no import cycles, `complexity` max 15,
-`max-depth` 4, `max-lines-per-function` 200, exhaustive hook deps.
+assertion (`!`), no floating promises, no misused promises, no `await` on
+non-promises, no import cycles, `switch` exhaustiveness, `eqeqeq` smart,
+`complexity` max 15, `max-depth` 4, `max-lines-per-function` 200,
+exhaustive hook deps, no leaked falsy render, no unstable nested components.
