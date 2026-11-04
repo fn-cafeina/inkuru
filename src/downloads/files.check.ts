@@ -13,8 +13,10 @@ const fake = createFakeFileSystem();
 
 mock.module('expo-file-system', () => fake.module);
 
+const { File } = await import('expo-file-system');
 const {
   deleteChapterFiles,
+  downloadPage,
   hasDownloadFiles,
   prepareChapterDirectory,
   readDownloadFile,
@@ -110,6 +112,24 @@ assert(
 assert(fake.exists(recovered), 'la carpeta recuperada se conserva');
 assert(!fake.exists(`${ROOT}/sin-marcador`), 'una carpeta sin marcador se barre');
 assert(hasDownloadFiles(chapterA), 'la descarga conocida sobrevive a la reconciliación');
+
+// Re-using a directory this chapter already owns wipes it, and the wipe must
+// leave an existing directory behind: the native download needs the parent.
+const owned = prepareChapterDirectory(chapterD);
+
+assert(fake.exists(recovered), 'la carpeta propia se recrea tras el vaciado');
+
+const page = new File(owned, '001.webp');
+
+await downloadPage(
+  'https://cdn.example/1.webp',
+  page,
+  new AbortController().signal,
+);
+assert(
+  fake.read(page.uri) === 'page:https://cdn.example/1.webp',
+  'la página se descarga en la carpeta recreada',
+);
 
 // Deleting only touches directories this chapter owns.
 assert(deleteChapterFiles(chapterA), 'se borran los ficheros del capítulo');

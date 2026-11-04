@@ -97,6 +97,9 @@ export function prepareChapterDirectory(chapterPath: string): Directory {
 
     if (owner === chapterPath) {
       wipeDirectory(directory);
+      // The native download writes straight into the path; without the
+      // directory it fails with a missing-parent error.
+      directory.create({ intermediates: true, idempotent: true });
       return directory;
     }
 

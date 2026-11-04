@@ -92,8 +92,18 @@ class FakeFile {
   }
 
   private writeSync(content: string): void {
-    createParents(this.uri);
+    this.ensureParent();
     store.set(this.uri, { kind: 'file', content });
+  }
+
+  // The native module writes into the path as-is: a missing parent directory
+  // is an error, never created for us.
+  private ensureParent(): void {
+    const parent = this.uri.slice(0, this.uri.lastIndexOf('/'));
+
+    if (store.get(parent)?.kind !== 'dir') {
+      throw new Error(`parent directory missing: ${parent}`);
+    }
   }
 
   static async downloadFileAsync(
@@ -104,7 +114,7 @@ class FakeFile {
       throw new Error(`download failed: ${url}`);
     }
 
-    createParents(target.uri);
+    target.ensureParent();
     store.set(target.uri, { kind: 'file', content: `page:${url}` });
 
     return target;
