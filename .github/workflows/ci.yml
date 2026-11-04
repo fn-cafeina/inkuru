@@ -21,5 +21,6 @@ jobs:
       - run: bun run check:downloads
       - run: bun run check:reader
       - run: bun run check:release
+      - run: bun run check:update
       - run: bun run lint
       - run: npx expo-doctor@1.21.5

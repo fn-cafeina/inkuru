@@ -1,0 +1,14 @@
+{
+  "tag_name": "v1.1.0",
+  "name": "v1.1.0",
+  "assets": [
+    {
+      "name": "inkuru.apk",
+      "browser_download_url": "https://github.com/fn-cafeina/inkuru/releases/download/v1.1.0/inkuru.apk"
+    },
+    {
+      "name": "notes.txt",
+      "browser_download_url": "https://github.com/fn-cafeina/inkuru/releases/download/v1.1.0/notes.txt"
+    }
+  ]
+}

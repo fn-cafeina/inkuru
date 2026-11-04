@@ -13,6 +13,7 @@
       },
       "backgroundColor": "#fafafa",
       "softwareKeyboardLayoutMode": "pan",
+      "permissions": ["REQUEST_INSTALL_PACKAGES"],
       "predictiveBackGestureEnabled": true,
       "package": "com.inkuru.app"
     },

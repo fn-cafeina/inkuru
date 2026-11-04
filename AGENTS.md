@@ -15,6 +15,7 @@
 - `bun run check:reader`: chapter ranges and reader geometry self-check
 - `bun run check:downloads`: download, storage and cache self-check
 - `bun run check:release`: release script self-check
+- `bun run check:update`: update version compare self-check
 - `bun run release <version>`: bump, tag and push a release
 - `npx expo-doctor@1.21.5`: dependency health check; CI runs it, run it
   after adding or upgrading dependencies
@@ -55,7 +56,8 @@
 - Shared UI lives in `src/components/`. Move a component there only when more
   than one screen uses it.
 - `src/source/` holds the HTML parsers; `src/downloads/` the download
-  lifecycle; `src/storage/` persistence and the query cache; `src/hooks/`
+  lifecycle; `src/update/` release check and APK install; `src/storage/`
+  persistence and the query cache; `src/hooks/`
   shared hooks; `src/navigation/` the tabs and stack; `src/theme/` colors.
 - Keep files under 300 lines (blank lines and comments excluded); ESLint
   enforces this with `max-lines`.

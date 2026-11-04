@@ -33,6 +33,7 @@ bun run android
 | `bun run check:reader` | Chapter ranges and reader geometry self-check |
 | `bun run check:downloads` | Download, storage and cache self-check |
 | `bun run check:release` | Release script self-check |
+| `bun run check:update` | Update version compare self-check |
 | `bun run release` | Bump, tag and push a release |
 
 CI runs all of the above plus `expo-doctor` on every push and pull
