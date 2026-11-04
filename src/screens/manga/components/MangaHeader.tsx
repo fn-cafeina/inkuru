@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -50,6 +50,17 @@ export function MangaHeader({
 }: Props) {
   const colors = useColors();
   const chipRowRef = useRef<ScrollViewInstance>(null);
+  const chipXs = useRef<(number | undefined)[]>([]);
+
+  // Bring the selected chip into view: on restore the row starts at offset 0,
+  // and a remembered middle range would otherwise be off screen.
+  useEffect(() => {
+    const x = chipXs.current[activeRange];
+
+    if (x !== undefined) {
+      chipRowRef.current?.scrollTo({ x, animated: false });
+    }
+  }, [activeRange]);
   const status = manga.status
     ? FACT_VALUES[manga.status] ?? manga.status
     : undefined;
@@ -99,22 +110,29 @@ export function MangaHeader({
                 ref={chipRowRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                // Keep the last range visible when it becomes selected.
-                onContentSizeChange={() => {
-                  if (ranges.length > 0 && activeRange === ranges.length - 1) {
-                    chipRowRef.current?.scrollToEnd({ animated: false });
-                  }
-                }}
                 contentContainerClassName="gap-2 pb-3"
               >
                 {ranges.map((range, index) => (
-                  <OptionChip
+                  <View
                     key={`${range.label}-${index}`}
-                    label={range.label}
-                    accessibilityLabel={`Capítulos ${range.label.replace('-', ' a ')}`}
-                    selected={index === activeRange}
-                    onPress={() => onSelectRange(index)}
-                  />
+                    onLayout={(event) => {
+                      const x = event.nativeEvent.layout.x;
+
+                      chipXs.current[index] = x;
+
+                      // First layout runs after the restore effect above.
+                      if (index === activeRange) {
+                        chipRowRef.current?.scrollTo({ x, animated: false });
+                      }
+                    }}
+                  >
+                    <OptionChip
+                      label={range.label}
+                      accessibilityLabel={`Capítulos ${range.label.replace('-', ' a ')}`}
+                      selected={index === activeRange}
+                      onPress={() => onSelectRange(index)}
+                    />
+                  </View>
                 ))}
               </ScrollView>
             </View>

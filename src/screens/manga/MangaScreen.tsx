@@ -26,8 +26,12 @@ import {
   ascendingChapters,
   chunkChapters,
   displayChapters,
+  rangeIndexForChapter,
 } from './chapters';
-import type { ChapterSort } from './chapters';
+import type {
+  ChapterRange,
+  ChapterSort,
+} from './chapters';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
@@ -53,6 +57,30 @@ function rememberLocal(path: string, state: MangaLocalState) {
       localCache.delete(oldest);
     }
   }
+}
+
+// Last range/sort picked per manga so reopening a title lands where the user
+// left off instead of back on the first range. Range stays null until picked,
+// so it keeps following the chapter in progress.
+// shortcut: no eviction; entries are two scalars, add an LRU like localCache if
+// the map ever grows past a handful of titles.
+type MangaViewState = { range: number | null; sort: ChapterSort };
+const viewCache = new Map<string, MangaViewState>();
+
+function rememberView(path: string, state: MangaViewState) {
+  viewCache.delete(path);
+  viewCache.set(path, state);
+}
+
+function resolveRangeIndex(
+  ranges: ChapterRange[],
+  active: number | null,
+  progress: ReaderProgress | null,
+): number {
+  // No manual pick yet: open on the range holding the chapter in progress.
+  const chosen = active ?? rangeIndexForChapter(ranges, progress?.chapterPath);
+
+  return Math.min(chosen, Math.max(ranges.length - 1, 0));
 }
 
 function mangaTitle(data: MangaDetail | null, fallback?: string): string {
@@ -84,8 +112,12 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [localLoaded, setLocalLoaded] = useState(
     () => localCache.has(path),
   );
-  const [sortOrder, setSortOrder] = useState<ChapterSort>('asc');
-  const [activeRange, setActiveRange] = useState(0);
+  const [sortOrder, setSortOrder] = useState<ChapterSort>(
+    () => viewCache.get(path)?.sort ?? 'asc',
+  );
+  const [activeRange, setActiveRange] = useState<number | null>(
+    () => viewCache.get(path)?.range ?? null,
+  );
   const [barTitleVisible, setBarTitleVisible] = useState(false);
 
   useFocusEffect(
@@ -158,18 +190,19 @@ export default function MangaScreen({ navigation, route }: Props) {
     [data],
   );
   const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
-  const rangeIndex = Math.min(
-    activeRange,
-    Math.max(ranges.length - 1, 0),
-  );
+  const rangeIndex = resolveRangeIndex(ranges, activeRange, progress);
   const activeChapters = ranges[rangeIndex]?.chapters ?? [];
   const visibleChapters = displayChapters(activeChapters, sortOrder);
 
   const toggleSort = () => {
-    setSortOrder((current) => (current === 'desc' ? 'asc' : 'desc'));
+    const next = sortOrder === 'desc' ? 'asc' : 'desc';
+
+    rememberView(path, { range: activeRange, sort: next });
+    setSortOrder(next);
   };
 
   const selectRange = (index: number) => {
+    rememberView(path, { range: index, sort: sortOrder });
     setActiveRange(index);
   };
   const goBack = () => goBackOrTabs(navigation);
