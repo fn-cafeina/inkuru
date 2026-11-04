@@ -38,13 +38,13 @@ request.
 
 ## Structure
 
-- `src/screens/` — one folder per screen: `discover`, `library`,
+- `src/screens/`: one folder per screen, `discover`, `library`,
   `manga`, `reader`
-- `src/components/` — UI shared between screens
-- `src/source/` — HTML parsers for the content source
-- `src/downloads/` — download lifecycle, file management
-- `src/storage/` — persistence, serialization, query cache
-- `src/navigation/`, `src/hooks/`, `src/theme/` — tabs and stack
+- `src/components/`: UI shared between screens
+- `src/source/`: HTML parsers for the content source
+- `src/downloads/`: download lifecycle, file management
+- `src/storage/`: persistence, serialization, query cache
+- `src/navigation/`, `src/hooks/`, `src/theme/`: tabs and stack
   navigation, shared hooks, colors
 
 ## Legal
@@ -56,7 +56,6 @@ The app does not host, store, or distribute manga content. All content
 belongs to its respective authors and rightsholders.
 
 Users are responsible for the content they access through the app.
-Support official releases.
 
 ## License
 
