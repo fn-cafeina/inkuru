@@ -113,7 +113,9 @@ export function usePageGestures({
 
   const pinch = usePinchGesture({
     onActivate: (event) => {
-      // Scroll lock turns on once the pinch passes the reset threshold.
+      // Lock the surrounding scroll as soon as the pinch is recognized;
+      // waiting for the reset threshold lets two-finger drags fight the list.
+      runOnJS(notifyZoom)(true);
       startScale.value = savedScale.value;
       startX.value = savedX.value;
       startY.value = savedY.value;
@@ -122,12 +124,6 @@ export function usePageGestures({
     },
     onUpdate: (event) => {
       const nextScale = clamp(startScale.value * event.scale, 1, MAX_ZOOM);
-
-      // Lock scroll once the pinch passes the reset threshold.
-      if (scale.value <= RESET_THRESHOLD && nextScale > RESET_THRESHOLD) {
-        runOnJS(notifyZoom)(true);
-      }
-
       const next = zoomAroundPoint(
         startScale.value,
         startX.value,
