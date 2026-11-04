@@ -23,7 +23,7 @@ const app = `${JSON.stringify(
       slug: 'inkuru',
       version: '1.0.0',
       android: {
-        package: 'com.fncafeina.inkuru',
+        package: 'com.inkuru.app',
         backgroundColor: '#fafafa',
       },
       plugins: [['expo-splash-screen', { resizeMode: 'contain' }]],
@@ -51,7 +51,7 @@ const pkgOut = JSON.parse(nextPkg) as Record<string, unknown>;
 assert(appOut.expo.version === '2.3.4', 'expo.version debe cambiar');
 assert(appOut.expo.name === 'Inkuru', 'expo.name debe quedar intacto');
 assert(
-  nextApp.includes('"package": "com.fncafeina.inkuru"'),
+  nextApp.includes('"package": "com.inkuru.app"'),
   'claves anidadas deben quedar intactas',
 );
 assert(
