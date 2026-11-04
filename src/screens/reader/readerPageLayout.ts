@@ -6,6 +6,8 @@ export type SourceSize = { width: number; height: number };
 // Measured page proportions survive row recycling: a remounted row starts at
 // its real height instead of the estimate, so rows never resize under the
 // reader and getItemLayout keeps the last measured heights.
+// Capped oldest-first: an evicted page falls back to the estimate for one row.
+const RATIO_CACHE_LIMIT = 500;
 const ratioCache = new Map<string, number>();
 
 export function knownPageRatio(uri: string): number {
@@ -15,6 +17,14 @@ export function knownPageRatio(uri: string): number {
 export function rememberPageRatio(uri: string, size: SourceSize): void {
   if (size.width > 0 && size.height > 0) {
     ratioCache.set(uri, size.width / size.height);
+
+    if (ratioCache.size > RATIO_CACHE_LIMIT) {
+      const oldest = ratioCache.keys().next().value;
+
+      if (oldest !== undefined) {
+        ratioCache.delete(oldest);
+      }
+    }
   }
 }
 

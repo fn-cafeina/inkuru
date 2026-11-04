@@ -115,4 +115,22 @@ assertEqual(
   'un tamaño inválido no se cachea',
 );
 
+// The cache is capped oldest-first.
+for (let index = 0; index < 500; index += 1) {
+  rememberPageRatio(`page://${index}`, { width: 1442, height: 2100 });
+}
+
+rememberPageRatio('page://500', { width: 1442, height: 2100 });
+
+assertEqual(
+  knownPageRatio('page://0'),
+  READER_PAGE_ASPECT_RATIO,
+  'la página más antigua se evicta del caché',
+);
+assertEqual(
+  knownPageRatio('page://500'),
+  1442 / 2100,
+  'la página más reciente se conserva',
+);
+
 console.log('reader geometry ok');
