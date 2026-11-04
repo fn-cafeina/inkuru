@@ -32,6 +32,8 @@ bun run android
 | `bun run check:discover` | Discover feed self-check |
 | `bun run check:reader` | Chapter ranges and reader geometry self-check |
 | `bun run check:downloads` | Download, storage and cache self-check |
+| `bun run check:release` | Release script self-check |
+| `bun run release` | Bump, tag and push a release |
 
 CI runs all of the above plus `expo-doctor` on every push and pull
 request.
@@ -40,12 +42,26 @@ request.
 
 Releases are cut from tags and built on GitHub Actions.
 
-1. Bump `version` in `app.json` and `package.json` to the same value.
-2. Commit and tag: `git tag v1.0.1 && git push origin v1.0.1`.
-3. The release workflow runs the checks, fails unless the tag matches
-   both versions, builds a signed APK with `eas build --local`, and
-   publishes a GitHub Release with the APK attached. Notes are
-   generated from the commits since the previous tag.
+```bash
+bun run release 1.0.1
+```
+
+The script refuses to run unless the working tree is clean, you are on
+`main`, the version differs from the current one, both version files
+agree and the tag `vX.Y.Z` does not exist yet. It then bumps `version`
+in `app.json` and `package.json`, commits with `chore(release): vX.Y.Z`,
+tags and pushes both. Add `--dry-run` to see the plan without touching
+anything.
+
+The release workflow runs the checks, fails unless the tag matches
+both versions, builds a signed APK with `eas build --local`, and
+publishes a GitHub Release with the APK attached. Notes are generated
+from the commits since the previous tag. CI stays the quality gate: the
+tag push runs it either way, so the script only guarantees the two
+versions stay in sync.
+
+Manual fallback: bump both files by hand, commit, tag `vX.Y.Z`, then
+`git push origin main --follow-tags`.
 
 Builds run on the GitHub runner and use no EAS build minutes. The
 Android keystore is stored and managed by EAS, so the only secret the
