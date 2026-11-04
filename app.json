@@ -13,7 +13,8 @@
       },
       "backgroundColor": "#fafafa",
       "softwareKeyboardLayoutMode": "pan",
-      "predictiveBackGestureEnabled": true
+      "predictiveBackGestureEnabled": true,
+      "package": "com.fncafeina.inkuru"
     },
     "plugins": [
       [
@@ -27,6 +28,12 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f26925df-d5c8-43ae-9043-2d7895e88355"
+      }
+    },
+    "owner": "cafeina"
   }
 }
