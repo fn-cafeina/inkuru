@@ -1,12 +1,15 @@
-import { ScrollView } from 'react-native';
+import { ScrollView, Switch, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppPressable } from '../../../components/AppPressable';
 import { ReaderPreferenceSections } from '../../../components/ReaderPreferenceSections';
+import { SettingSection } from '../../../components/SettingSection';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
 } from '../../../storage/readerSettings';
+import { useColors } from '../../../theme/colors';
 import { ReaderSheet } from './ReaderSheet';
 
 export function ReaderSettingsSheet({
@@ -14,19 +17,23 @@ export function ReaderSettingsSheet({
   mode,
   scale,
   quality,
+  keepAwake,
   onClose,
   onSelectMode,
   onSelectScale,
   onSelectQuality,
+  onSelectKeepAwake,
 }: {
   visible: boolean;
   mode: ReaderMode;
   scale: ReaderScale;
   quality: ReaderQuality;
+  keepAwake: boolean;
   onClose: () => void;
   onSelectMode: (mode: ReaderMode) => void;
   onSelectScale: (scale: ReaderScale) => void;
   onSelectQuality: (quality: ReaderQuality) => void;
+  onSelectKeepAwake: (keepAwake: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
 
@@ -50,7 +57,48 @@ export function ReaderSettingsSheet({
           onSelectQuality={onSelectQuality}
           firstSectionClassName="mt-2"
         />
+        <SettingSection title="Pantalla">
+          <SwitchRow
+            label="Mantener encendida"
+            value={keepAwake}
+            onValueChange={onSelectKeepAwake}
+          />
+        </SettingSection>
       </ScrollView>
     </ReaderSheet>
+  );
+}
+
+function SwitchRow({
+  label,
+  value,
+  onValueChange,
+}: {
+  label: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+}) {
+  const colors = useColors();
+
+  return (
+    <AppPressable
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: value }}
+      onPress={() => onValueChange(!value)}
+      className="min-h-14 flex-row items-center px-4"
+    >
+      <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
+        {label}
+      </Text>
+      <Switch
+        accessible={false}
+        pointerEvents="none"
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: colors.iconInactive, true: colors.accent }}
+        thumbColor="#ffffff"
+      />
+    </AppPressable>
   );
 }

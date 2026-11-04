@@ -61,9 +61,11 @@ export default function ReaderScreen({ navigation, route }: Props) {
     scale,
     quality,
     loaded: preferencesLoaded,
+    keepAwake,
     selectMode,
     selectScale,
     selectQuality,
+    selectKeepAwake,
   } = useReaderPreferences();
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -241,10 +243,12 @@ export default function ReaderScreen({ navigation, route }: Props) {
           mode={mode}
           scale={scale}
           quality={quality}
+          keepAwake={keepAwake}
           onClose={() => setSettingsOpen(false)}
           onSelectMode={selectMode}
           onSelectScale={selectScale}
           onSelectQuality={selectQuality}
+          onSelectKeepAwake={selectKeepAwake}
         />
       </View>
     </View>

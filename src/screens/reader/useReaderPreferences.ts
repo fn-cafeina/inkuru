@@ -17,6 +17,7 @@ export function useReaderPreferences() {
     selectMode,
     selectScale,
     selectQuality,
+    selectKeepAwake,
   } = useReaderSettings();
 
   useEffect(() => {
@@ -45,9 +46,11 @@ export function useReaderPreferences() {
     mode,
     scale,
     quality,
+    keepAwake,
     loaded,
     selectMode,
     selectScale,
     selectQuality,
+    selectKeepAwake,
   };
 }
