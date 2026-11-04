@@ -11,7 +11,7 @@ export type LibraryEntry = {
 
 const LIBRARY_KEY = 'library:entries';
 
-export async function loadLibrary(): Promise<LibraryEntry[]> {
+async function loadLibrary(): Promise<LibraryEntry[]> {
   const result = await loadLibraryResult();
 
   return result.entries;
