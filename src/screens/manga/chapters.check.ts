@@ -3,6 +3,7 @@ import {
   chunkChapters,
   displayChapters,
   getChapterState,
+  rangeIndexForChapter,
 } from './chapters';
 import type { MangaChapter } from '../../source/zonatmo';
 
@@ -61,6 +62,22 @@ assertEqual(ranges[2]?.chapters.length, 20, 'el último rango lleva el resto');
 assertEqual(ranges[0]?.label, '1-50', 'etiqueta del primer rango');
 assertEqual(ranges[1]?.label, '51-100', 'etiqueta del rango medio');
 assertEqual(ranges[2]?.label, '101-120', 'etiqueta del último rango');
+
+assertEqual(
+  rangeIndexForChapter(ranges, chapter(51).path),
+  1,
+  'el capítulo 51 cae en el rango medio',
+);
+assertEqual(
+  rangeIndexForChapter(ranges, undefined),
+  0,
+  'sin progreso se muestra el primer rango',
+);
+assertEqual(
+  rangeIndexForChapter(ranges, '/missing'),
+  0,
+  'un capítulo fuera de la lista vuelve al primer rango',
+);
 
 const read = new Set(['/view_uploads/1']);
 

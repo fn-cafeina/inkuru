@@ -50,6 +50,22 @@ export function chunkChapters(chapters: MangaChapter[]): ChapterRange[] {
   return ranges;
 }
 
+/** Index of the range holding the chapter, or 0 when it is unknown. */
+export function rangeIndexForChapter(
+  ranges: ChapterRange[],
+  chapterPath: string | undefined,
+): number {
+  if (!chapterPath) {
+    return 0;
+  }
+
+  const found = ranges.findIndex((range) =>
+    range.chapters.some((chapter) => chapter.path === chapterPath),
+  );
+
+  return Math.max(found, 0);
+}
+
 function rangeLabel(chapters: MangaChapter[], start: number): string {
   const first = chapterNumber(chapters[0]?.title);
   const last = chapterNumber(chapters[chapters.length - 1]?.title);
