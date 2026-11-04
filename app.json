@@ -14,6 +14,19 @@
       "backgroundColor": "#fafafa",
       "softwareKeyboardLayoutMode": "pan",
       "predictiveBackGestureEnabled": true
-    }
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#E6F4FE",
+          "dark": {
+            "backgroundColor": "#09090b"
+          }
+        }
+      ]
+    ]
   }
 }
