@@ -157,36 +157,48 @@ async function sweepOnce() {
   }
 }
 
-export async function readCache<T>(
+/** Remove one entry and its index line; safe to call inside the queue lock. */
+async function deleteEntry(key: string): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(storageKey(key));
+    const entries = await loadIndex();
+    index = entries.filter((entry) => entry.key !== key);
+  } catch {
+    // Ignore: stale entries are pruned later.
+  }
+}
+
+export function readCache<T>(
   key: string,
   validate: (value: unknown) => value is T,
 ): Promise<{ value: T; savedAt: number } | null> {
-  // Invalidation is queued; wait so a read cannot resurrect what a delete removed.
-  await withLock(QUEUE_KEY, async () => undefined);
+  // Reading and any removal run as one queued task: a write queued behind the
+  // read must not be deleted by a removal decided from the older value.
+  return withLock(QUEUE_KEY, async () => {
+    const raw = await AsyncStorage.getItem(storageKey(key)).catch(() => null);
 
-  const raw = await AsyncStorage.getItem(storageKey(key)).catch(() => null);
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-
-    if (
-      !isStoredEntry(parsed) ||
-      Date.now() - parsed.savedAt > MAX_AGE_MS ||
-      !validate(parsed.value)
-    ) {
-      void removeCache(key);
+    if (!raw) {
       return null;
     }
 
-    return { value: parsed.value, savedAt: parsed.savedAt };
-  } catch {
-    void removeCache(key);
-    return null;
-  }
+    try {
+      const parsed: unknown = JSON.parse(raw);
+
+      if (
+        !isStoredEntry(parsed) ||
+        Date.now() - parsed.savedAt > MAX_AGE_MS ||
+        !validate(parsed.value)
+      ) {
+        await deleteEntry(key);
+        return null;
+      }
+
+      return { value: parsed.value, savedAt: parsed.savedAt };
+    } catch {
+      await deleteEntry(key);
+      return null;
+    }
+  });
 }
 
 export function writeCache(key: string, value: unknown): void {
@@ -207,13 +219,5 @@ export function writeCache(key: string, value: unknown): void {
 }
 
 export function removeCache(key: string): Promise<void> {
-  return withLock(QUEUE_KEY, async () => {
-    try {
-      await AsyncStorage.removeItem(storageKey(key));
-      const entries = await loadIndex();
-      index = entries.filter((entry) => entry.key !== key);
-    } catch {
-      // Ignore: stale entries are pruned later.
-    }
-  });
+  return withLock(QUEUE_KEY, () => deleteEntry(key));
 }
