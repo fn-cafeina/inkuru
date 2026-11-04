@@ -1,6 +1,8 @@
+import type { ReactNode } from 'react';
 import { useState, useSyncExternalStore } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 
+import { AppPressable } from '../../components/AppPressable';
 import { Button } from '../../components/Button';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
@@ -20,14 +22,13 @@ export default function SettingsScreen() {
   const [downloading, setDownloading] = useState(false);
   const [installFailed, setInstallFailed] = useState(false);
 
-  const status =
-    update.available !== null
+  const status = update.checking
+    ? 'Comprobando…'
+    : update.available !== null
       ? `${update.available.tag} disponible`
-      : update.checking
-        ? 'Comprobando…'
-        : update.failed
-          ? 'Sin comprobar ahora mismo'
-          : 'Estás en la última versión';
+      : update.failed
+        ? 'Sin comprobar'
+        : 'Al día';
 
   async function install(): Promise<void> {
     const release = update.available;
@@ -56,48 +57,51 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-4 pb-8"
       >
-        <SettingSection title="Aplicación" className="mt-0">
+        <SettingSection title="Aplicación" className="mt-2">
           <InfoRow label="Versión" value={currentVersion()} />
-          <InfoRow label="Actualizaciones" value={status} divider />
         </SettingSection>
 
-        {update.available !== null ? (
-          <SettingSection title="Actualización disponible">
-            <View className="gap-3 px-4 py-4">
-              <Text className="text-base text-zinc-700 dark:text-zinc-300">
+        <SettingSection title="Actualizaciones">
+          <InfoRow
+            label="Estado"
+            value={status}
+            disabled={update.checking}
+            trailing={
+              update.checking ? (
+                <ActivityIndicator size="small" color={colors.iconInactive} />
+              ) : undefined
+            }
+            onPress={() => void checkForUpdate(true)}
+          />
+          {update.available !== null ? (
+            <View
+              className="gap-3 px-4 py-4"
+              style={{ backgroundColor: colors.accentContainer }}
+            >
+              <Text
+                className="text-base font-medium"
+                style={{ color: colors.onAccentContainer }}
+              >
                 {`Inkuru ${update.available.tag} está lista para instalar.`}
               </Text>
-              <Button size="lg" disabled={downloading} onPress={() => void install()}>
+              <Button
+                size="lg"
+                disabled={downloading}
+                onPress={() => void install()}
+              >
                 {downloading ? 'Descargando…' : 'Actualizar'}
               </Button>
               {installFailed ? (
-                <Text className="text-sm text-red-600 dark:text-red-400">
-                  No se pudo descargar. Revisa la conexión e inténtalo otra vez.
-                </Text>
-              ) : null}
-            </View>
-          </SettingSection>
-        ) : (
-          <SettingSection title="Comprobación" className="mt-4">
-            <View className="items-start gap-3 px-4 py-4">
-              {update.checking ? (
-                <ActivityIndicator color={colors.iconInactive} />
-              ) : (
-                <Button
-                  variant="secondary"
-                  onPress={() => void checkForUpdate(true)}
+                <Text
+                  className="text-sm"
+                  style={{ color: colors.onAccentContainer }}
                 >
-                  Comprobar ahora
-                </Button>
-              )}
-              {update.failed ? (
-                <Text className="text-sm text-zinc-500 dark:text-zinc-400">
-                  No se pudo comprobar si hay una versión nueva.
+                  No se pudo descargar. Inténtalo otra vez.
                 </Text>
               ) : null}
             </View>
-          </SettingSection>
-        )}
+          ) : null}
+        </SettingSection>
       </ScrollView>
     </Screen>
   );
@@ -106,24 +110,39 @@ export default function SettingsScreen() {
 function InfoRow({
   label,
   value,
-  divider = false,
+  trailing,
+  disabled = false,
+  onPress,
 }: {
   label: string;
   value: string;
-  divider?: boolean;
+  trailing?: ReactNode;
+  disabled?: boolean;
+  onPress?: () => void;
 }) {
-  return (
-    <View className="min-h-14 flex-row items-center justify-between px-4 py-2">
-      {divider ? (
-        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-zinc-800" />
-      ) : null}
-      <Text className="text-base text-zinc-500 dark:text-zinc-400">{label}</Text>
-      <Text
-        accessibilityLabel={`${label}: ${value}`}
-        className="ml-4 text-base text-zinc-900 dark:text-zinc-100"
-      >
-        {value}
+  const className = 'min-h-14 flex-row items-center px-4';
+  const content = (
+    <>
+      <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
+        {label}
       </Text>
-    </View>
+      <Text className="text-sm text-zinc-500 dark:text-zinc-400">{value}</Text>
+      {trailing ? <View className="ml-2">{trailing}</View> : null}
+    </>
+  );
+
+  if (onPress === undefined) {
+    return <View className={className}>{content}</View>;
+  }
+
+  return (
+    <AppPressable
+      accessibilityLabel={`${label}: ${value}`}
+      disabled={disabled}
+      onPress={onPress}
+      className={className}
+    >
+      {content}
+    </AppPressable>
   );
 }
