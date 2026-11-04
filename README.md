@@ -36,6 +36,23 @@ bun run android
 CI runs all of the above plus `expo-doctor` on every push and pull
 request.
 
+## Releases
+
+Releases are cut from tags and built on GitHub Actions.
+
+1. Bump `version` in `app.json` and `package.json` to the same value.
+2. Commit and tag: `git tag v1.0.1 && git push origin v1.0.1`.
+3. The release workflow runs the checks, fails unless the tag matches
+   both versions, builds a signed APK with `eas build --local`, and
+   publishes a GitHub Release with the APK attached. Notes are
+   generated from the commits since the previous tag.
+
+Builds run on the GitHub runner and use no EAS build minutes. The
+Android keystore is stored and managed by EAS, so the only secret the
+workflow needs is the `EXPO_TOKEN` repository secret. The `production`
+build profile in `eas.json` restricts the APK to the `arm64-v8a` and
+`armeabi-v7a` architectures.
+
 ## Structure
 
 - `src/screens/`: one folder per screen, `discover`, `library`,
