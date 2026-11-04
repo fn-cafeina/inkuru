@@ -124,6 +124,8 @@ export default function LibraryScreen() {
 
             // Invalidate any in-flight load so it cannot restore the entry.
             loadTicket.current += 1;
+            // The invalidated load returns without clearing the flag.
+            setChecking(false);
 
             const next = entries.filter((item) => item.path !== entry.path);
 
