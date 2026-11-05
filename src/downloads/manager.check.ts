@@ -98,14 +98,14 @@ await manager.initializeDownloads();
 
 assert(
   manager.getDownloadState(CHAPTER)?.status === 'done',
-  'el índice válido se carga',
+  'the valid index loads',
 );
 assert(
   manager.getDownloadState(MISSING) === undefined,
-  'una entrada sin ficheros se descarta',
+  'an entry without files is discarded',
 );
-assert(indexed().join() === CHAPTER, 'el índice queda solo con la descarga real');
-assert(!fake.exists(`${ROOT}/sin-marcador`), 'la carpeta huérfana se barre');
+assert(indexed().join() === CHAPTER, 'the index keeps only the real download');
+assert(!fake.exists(`${ROOT}/sin-marcador`), 'the orphan folder is swept');
 
 // An already-downloaded chapter never reaches the network.
 await manager.enqueueDownload({
@@ -115,8 +115,8 @@ await manager.enqueueDownload({
   mangaTitle: 'Manga',
 });
 
-assert(fetchCalls === 0, 'no se descarga lo que ya está descargado');
-assert(manager.getDownloadState(CHAPTER)?.status === 'done', 'sigue descargado');
+assert(fetchCalls === 0, 'what is already downloaded is not fetched again');
+assert(manager.getDownloadState(CHAPTER)?.status === 'done', 'still downloaded');
 
 // A delete that cannot remove the files must keep memory, files and index in sync.
 fake.failDeletes.add(`${directory}/reader.json`);
@@ -126,17 +126,17 @@ await manager.deleteDownload(CHAPTER);
 
 assert(
   manager.getDownloadState(CHAPTER)?.status === 'done',
-  'un borrado fallido no deja el capítulo como no descargado',
+  'a failed delete does not mark the chapter as not downloaded',
 );
-assert(indexed().join() === CHAPTER, 'el índice conserva el capítulo que sigue en disco');
-assert(fake.exists(`${directory}/reader.json`), 'el marcador sobrevive al borrado fallido');
+assert(indexed().join() === CHAPTER, 'the index keeps the chapter still on disk');
+assert(fake.exists(`${directory}/reader.json`), 'the marker survives the failed delete');
 
 fake.failDeletes.clear();
 
 await manager.deleteDownload(CHAPTER);
 
-assert(manager.getDownloadState(CHAPTER) === undefined, 'el borrado completo limpia el estado');
-assert(indexed().length === 0, 'el borrado completo limpia el índice');
-assert(!fake.exists(directory), 'el borrado completo elimina los ficheros');
+assert(manager.getDownloadState(CHAPTER) === undefined, 'a full delete clears the state');
+assert(indexed().length === 0, 'a full delete clears the index');
+assert(!fake.exists(directory), 'a full delete removes the files');
 
 console.log('download manager ok');

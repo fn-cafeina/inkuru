@@ -8,7 +8,7 @@ function assert(condition: unknown, message: string): asserts condition {
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {
-    throw new Error(`${label}: esperado ${String(expected)}, recibido ${String(actual)}`);
+    throw new Error(`${label}: expected ${String(expected)}, received ${String(actual)}`);
   }
 }
 

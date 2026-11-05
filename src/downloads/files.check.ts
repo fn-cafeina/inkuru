@@ -68,13 +68,13 @@ function seed(chapterPath: string) {
 
 const dirA = seed(chapterA);
 
-assert(hasDownloadFiles(chapterA), 'un marcador válido cuenta como descargado');
-assert(!hasDownloadFiles(chapterB), 'otro capítulo no hereda los ficheros');
+assert(hasDownloadFiles(chapterA), 'a valid marker counts as downloaded');
+assert(!hasDownloadFiles(chapterB), 'another chapter does not inherit the files');
 
 const wrapper = await readDownloadFile(chapterA);
 
-assert(wrapper?.record.chapterPath === chapterA, 'se lee el contenedor del capítulo');
-assert(wrapper?.data.pages[0] === `${dirA}/001.webp`, 'las páginas son locales');
+assert(wrapper?.record.chapterPath === chapterA, 'the chapter wrapper reads back');
+assert(wrapper?.data.pages[0] === `${dirA}/001.webp`, 'the pages are local');
 
 // Another chapter's marker in the base slot: the new download must not reuse it.
 fake.write(
@@ -84,19 +84,19 @@ fake.write(
 
 const collisionSlot = prepareChapterDirectory(chapterB);
 
-assert(collisionSlot.uri === dirOf(chapterB, 2), 'slot ocupado pasa al siguiente sufijo');
-assert(hasDownloadFiles(chapterA), 'la carpeta del otro capítulo sigue intacta');
+assert(collisionSlot.uri === dirOf(chapterB, 2), 'an occupied slot moves to the next suffix');
+assert(hasDownloadFiles(chapterA), 'the other chapter folder stays intact');
 
 // Unreadable marker: never reused, never silently deleted.
 fake.write(`${dirOf(chapterC)}/reader.json`, '{roto');
 
-assert((await readDownloadFile(chapterC)) === null, 'marcador ilegible no se lee');
-assert(!hasDownloadFiles(chapterC), 'marcador ilegible no cuenta como descargado');
+assert((await readDownloadFile(chapterC)) === null, 'an unreadable marker does not read');
+assert(!hasDownloadFiles(chapterC), 'an unreadable marker does not count as downloaded');
 assert(
   deleteChapterFiles(chapterC) === false,
-  'marcador ilegible bloquea el borrado ciego',
+  'an unreadable marker blocks a blind delete',
 );
-assert(fake.exists(`${dirOf(chapterC)}/reader.json`), 'el marcador ilegible se conserva');
+assert(fake.exists(`${dirOf(chapterC)}/reader.json`), 'the unreadable marker is kept');
 
 // A valid download missing from the index is recovered; leftovers are swept.
 const recovered = seed(chapterD);
@@ -107,17 +107,17 @@ const recoveredRecords = await reconcileDirectories(new Set([hashKey(chapterA)])
 
 assert(
   recoveredRecords.some((item) => item.chapterPath === chapterD),
-  'una descarga completa sin índice se recupera',
+  'a full download missing from the index is recovered',
 );
-assert(fake.exists(recovered), 'la carpeta recuperada se conserva');
-assert(!fake.exists(`${ROOT}/sin-marcador`), 'una carpeta sin marcador se barre');
-assert(hasDownloadFiles(chapterA), 'la descarga conocida sobrevive a la reconciliación');
+assert(fake.exists(recovered), 'the recovered folder is kept');
+assert(!fake.exists(`${ROOT}/sin-marcador`), 'a folder without a marker is swept');
+assert(hasDownloadFiles(chapterA), 'the known download survives reconciliation');
 
 // Re-using a directory this chapter already owns wipes it, and the wipe must
 // leave an existing directory behind: the native download needs the parent.
 const owned = prepareChapterDirectory(chapterD);
 
-assert(fake.exists(recovered), 'la carpeta propia se recrea tras el vaciado');
+assert(fake.exists(recovered), 'the owned folder is recreated after the wipe');
 
 const page = new File(owned, '001.webp');
 
@@ -128,13 +128,13 @@ await downloadPage(
 );
 assert(
   fake.read(page.uri) === 'page:https://cdn.example/1.webp',
-  'la página se descarga en la carpeta recreada',
+  'the page downloads into the recreated folder',
 );
 
 // Deleting only touches directories this chapter owns.
-assert(deleteChapterFiles(chapterA), 'se borran los ficheros del capítulo');
-assert(!hasDownloadFiles(chapterA), 'el capítulo borrado ya no cuenta');
-assert(!fake.exists(dirA), 'la carpeta del capítulo desaparece');
+assert(deleteChapterFiles(chapterA), 'the chapter files are deleted');
+assert(!hasDownloadFiles(chapterA), 'the deleted chapter no longer counts');
+assert(!fake.exists(dirA), 'the chapter folder disappears');
 
 // The marker is written last, through a temp file, so a half write never parses.
 const directory = prepareChapterDirectory(chapterA);
@@ -147,8 +147,8 @@ await writeDownloadFile(directory, {
 
 assert(
   fake.read(`${directory.uri}/reader.json`)?.startsWith('{"version":1') === true,
-  'el marcador se escribe completo',
+  'the marker is written whole',
 );
-assert(!fake.exists(`${directory.uri}/reader.json.tmp`), 'no queda el temporal');
+assert(!fake.exists(`${directory.uri}/reader.json.tmp`), 'no temp file remains');
 
 console.log('download files ok');

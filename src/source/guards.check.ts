@@ -16,39 +16,39 @@ const reader = {
   chapterIndex: 0,
 };
 
-assert(isReaderData(reader), 'lector válido debe aceptarse');
+assert(isReaderData(reader), 'a valid reader is accepted');
 assert(
   isReaderData({ ...reader, chapterIndex: -1 }),
-  'índice -1 (sin selección) debe aceptarse',
+  'index -1 (no selection) is accepted',
 );
 
 assert(
   !isReaderData({ ...reader, pages: [] }),
-  'lector sin páginas debe rechazarse',
+  'a reader without pages is rejected',
 );
 assert(
   !isReaderData({ ...reader, chapterIndex: -2 }),
-  'índice negativo fuera de rango debe rechazarse',
+  'a negative out-of-range index is rejected',
 );
 assert(
   !isReaderData({ ...reader, chapterIndex: 1 }),
-  'índice mayor que la lista de capítulos debe rechazarse',
+  'an index past the chapter list is rejected',
 );
 assert(
   !isReaderData({ ...reader, chapterIndex: 0.5 }),
-  'índice no entero debe rechazarse',
+  'a non-integer index is rejected',
 );
 assert(
   !isReaderData({ ...reader, pages: [42] }),
-  'página no textual debe rechazarse',
+  'a non-text page is rejected',
 );
 assert(
   !isReaderData({ ...reader, chapters: [{ title: 1, path: chapter.path }] }),
-  'capítulo con título no textual debe rechazarse',
+  'a chapter with a non-text title is rejected',
 );
 assert(
   !isReaderData({ ...reader, title: undefined }),
-  'sin título debe rechazarse',
+  'a missing title is rejected',
 );
 
 assert(
@@ -60,7 +60,7 @@ assert(
     status: 'Ongoing',
     chapters: [chapter],
   }),
-  'detalle válido debe aceptarse',
+  'a valid detail is accepted',
 );
 assert(
   !isMangaDetail({
@@ -71,7 +71,7 @@ assert(
     status: 7,
     chapters: [chapter],
   }),
-  'estado no textual debe rechazarse',
+  'a non-text status is rejected',
 );
 
 const item = {
@@ -82,15 +82,15 @@ const item = {
 
 assert(
   isCatalogPage({ items: [item], hasMore: true }),
-  'catálogo válido debe aceptarse',
+  'a valid catalog is accepted',
 );
 assert(
   !isCatalogPage({ items: [{ ...item, cover: 42 }], hasMore: true }),
-  'catálogo con portada no textual debe rechazarse',
+  'a catalog with a non-text cover is rejected',
 );
 assert(
   !isCatalogPage({ items: [item] }),
-  'catálogo sin hasMore debe rechazarse',
+  'a catalog without hasMore is rejected',
 );
 
 console.log('cache guards ok');

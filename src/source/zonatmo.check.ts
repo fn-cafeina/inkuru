@@ -12,7 +12,7 @@ function assert(condition: unknown, message: string): asserts condition {
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {
-    throw new Error(`${label}: esperado ${String(expected)}, recibido ${String(actual)}`);
+    throw new Error(`${label}: expected ${String(expected)}, received ${String(actual)}`);
   }
 }
 
@@ -20,7 +20,7 @@ function item<T>(values: readonly T[], index: number): T {
   const value = values[index];
 
   if (value === undefined) {
-    throw new Error(`Índice ${index} fuera de rango`);
+    throw new Error(`index ${index} out of range`);
   }
 
   return value;
@@ -40,73 +40,73 @@ function expectThrow(fn: () => void, label: string): void {
 
 const manga = parseManga(MANGA_FIXTURE);
 
-assertEqual(manga.title, 'ONE PUNCH-MAN', 'título del manga');
+assertEqual(manga.title, 'ONE PUNCH-MAN', 'manga title');
 assertEqual(
   manga.cover,
   'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
-  'portada del manga',
+  'manga cover',
 );
-assertEqual(manga.tags.join('|'), 'Acción|Aventura', 'tags del manga');
-assertEqual(manga.status, 'Ongoing', 'estado');
-assert(manga.synopsis.includes('Ciudad-Z'), 'sinopsis decodificada');
-assertEqual(manga.chapters.length, 2, 'capítulos del manga');
+assertEqual(manga.tags.join('|'), 'Acción|Aventura', 'manga tags');
+assertEqual(manga.status, 'Ongoing', 'status');
+assert(manga.synopsis.includes('Ciudad-Z'), 'synopsis decoded');
+assertEqual(manga.chapters.length, 2, 'manga chapters');
 assertEqual(
   item(manga.chapters, 0).path,
   '/view_uploads/1090001',
-  'primer capítulo',
+  'first chapter path',
 );
-assertEqual(item(manga.chapters, 0).title, 'Capítulo 248', 'título del primer capítulo');
+assertEqual(item(manga.chapters, 0).title, 'Capítulo 248', 'first chapter title');
 
 const reader = parseReader(READER_FIXTURE);
 
-assertEqual(reader.title, 'Cap. 247 — Actual', 'título del lector');
-assertEqual(reader.mangaTitle, 'ONE PUNCH-MAN', 'manga del lector');
-assertEqual(reader.chapters.length, 3, 'capítulos del lector');
-assertEqual(reader.chapterIndex, 1, 'índice del capítulo actual');
+assertEqual(reader.title, 'Cap. 247 — Actual', 'reader title');
+assertEqual(reader.mangaTitle, 'ONE PUNCH-MAN', 'reader manga title');
+assertEqual(reader.chapters.length, 3, 'reader chapters');
+assertEqual(reader.chapterIndex, 1, 'current chapter index');
 assertEqual(
   item(reader.chapters, reader.chapterIndex).title,
   'Cap. 247 — Actual',
-  'capítulo actual del lector',
+  'current reader chapter',
 );
 assertEqual(
   item(reader.chapters, 0).path,
   '/view_uploads/1090001',
-  'capítulos ordenados del más nuevo al más antiguo',
+  'chapters ordered newest first',
 );
-assertEqual(reader.pages.length, 2, 'páginas del lector');
+assertEqual(reader.pages.length, 2, 'reader pages');
 assertEqual(
   item(reader.pages, 0),
   'https://storage2.zonatmo.org/chapters/1090001/1.webp',
-  'primera página',
+  'first page',
 );
 assertEqual(
   reader.prev?.path,
   '/view_uploads/1069384',
-  'capítulo anterior',
+  'previous chapter path',
 );
-assertEqual(reader.prev?.title, 'Cap. 246 — Anterior', 'título anterior');
+assertEqual(reader.prev?.title, 'Cap. 246 — Anterior', 'previous chapter title');
 assertEqual(
   reader.next?.path,
   '/view_uploads/1090001',
-  'capítulo siguiente',
+  'next chapter path',
 );
-assertEqual(reader.next?.title, 'Cap. 248 — Siguiente', 'título siguiente');
+assertEqual(reader.next?.title, 'Cap. 248 — Siguiente', 'next chapter title');
 
 const search = parseSearch(SEARCH_FIXTURE);
 
-assertEqual(search.length, 1, 'resultados de búsqueda');
-assertEqual(item(search, 0).title, 'ONE PUNCH-MAN', 'título de búsqueda');
+assertEqual(search.length, 1, 'search results');
+assertEqual(item(search, 0).title, 'ONE PUNCH-MAN', 'search title');
 assertEqual(
   item(search, 0).cover,
   'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
-  'portada de búsqueda',
+  'search cover',
 );
 assertEqual(
   item(search, 0).path,
   '/library/manga/8232/one-punch-man',
-  'ruta de búsqueda',
+  'search path',
 );
-assertEqual(item(search, 0).lastChapter, undefined, 'búsqueda sin último capítulo');
+assertEqual(item(search, 0).lastChapter, undefined, 'search without last chapter');
 const upgraded = parseSearch(
   JSON.stringify([
     {
@@ -120,10 +120,10 @@ const upgraded = parseSearch(
 assertEqual(
   item(upgraded, 0).cover,
   'https://cdn.example/x.jpg',
-  'una portada http se sirve por https',
+  'an http cover is served over https',
 );
 
-assertEqual(parseSearch('[]').length, 0, 'búsqueda vacía');
+assertEqual(parseSearch('[]').length, 0, 'empty search');
 assertEqual(
   parseSearch(
     JSON.stringify([
@@ -131,53 +131,53 @@ assertEqual(
     ]),
   ).length,
   0,
-  'resultado sin portada se descarta',
+  'a result without a cover is discarded',
 );
 expectThrow(
   () => parseSearch('nope'),
-  'JSON inválido de búsqueda debe lanzar error',
+  'invalid search JSON must throw',
 );
 expectThrow(
   () => parseSearch('{}'),
-  'búsqueda sin array debe lanzar error',
+  'search without an array must throw',
 );
 
 const catalog = parseCatalog(CATALOG_FIXTURE);
 
-assertEqual(catalog.items.length, 2, 'mangas del catálogo');
-assertEqual(item(catalog.items, 0).title, 'ONE PUNCH-MAN', 'título del catálogo');
+assertEqual(catalog.items.length, 2, 'catalog mangas');
+assertEqual(item(catalog.items, 0).title, 'ONE PUNCH-MAN', 'catalog title');
 assertEqual(
   item(catalog.items, 0).cover,
   'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
-  'portada del catálogo',
+  'catalog cover',
 );
 assertEqual(
   item(catalog.items, 0).path,
   '/library/manga/8232/one-punch-man',
-  'ruta del catálogo',
+  'catalog path',
 );
 assertEqual(
   item(catalog.items, 0).lastChapter,
   '279 caps',
-  'capítulos del catálogo',
+  'catalog last chapter',
 );
 assertEqual(
   item(catalog.items, 1).title,
   'Smyrna & Capri',
-  'entidades HTML del catálogo',
+  'catalog html entities',
 );
-assertEqual(catalog.hasMore, true, 'catálogo con siguiente página');
+assertEqual(catalog.hasMore, true, 'catalog with a next page');
 
 // The parser must accept single-quoted attributes, which are valid HTML.
 const singleQuoted = parseCatalog(
   CATALOG_FIXTURE.replace(/src="([^"]*covers[^"]*)"/g, "src='$1'"),
 );
 
-assertEqual(singleQuoted.items.length, 2, 'catálogo con comillas simples');
+assertEqual(singleQuoted.items.length, 2, 'catalog with single quotes');
 assertEqual(
   item(singleQuoted.items, 0).cover,
   'https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2',
-  'portada del catálogo con comillas simples',
+  'cover with single quotes',
 );
 
 // A card whose class attribute uses single quotes must still be found.
@@ -185,18 +185,18 @@ const singleQuotedClass = parseCatalog(
   CATALOG_FIXTURE.replace(/class="element /g, "class='element "),
 );
 
-assertEqual(singleQuotedClass.items.length, 2, 'clase de tarjeta con comillas simples');
+assertEqual(singleQuotedClass.items.length, 2, 'card class with single quotes');
 
 // Text helpers read class attributes too, so the same card must keep its title.
 const singleQuotedTitle = parseCatalog(
   CATALOG_FIXTURE.replace(/class="text-truncate"/g, "class='text-truncate'"),
 );
 
-assertEqual(singleQuotedTitle.items.length, 2, 'título con comillas simples');
+assertEqual(singleQuotedTitle.items.length, 2, 'title with single quotes');
 assertEqual(
   item(singleQuotedTitle.items, 0).title,
   'ONE PUNCH-MAN',
-  'texto con comillas simples',
+  'text with single quotes',
 );
 
 const singleQuotedDetail = parseManga(
@@ -206,7 +206,7 @@ const singleQuotedDetail = parseManga(
   ),
 );
 
-assertEqual(singleQuotedDetail.title, 'ONE PUNCH-MAN', 'detalle con comillas simples');
+assertEqual(singleQuotedDetail.title, 'ONE PUNCH-MAN', 'detail with single quotes');
 
 // Attribute order inside the paginator must not decide hasMore.
 const reorderedPaginator = parseCatalog(
@@ -216,12 +216,12 @@ const reorderedPaginator = parseCatalog(
   ),
 );
 
-assertEqual(reorderedPaginator.hasMore, true, 'paginador con rel primero');
+assertEqual(reorderedPaginator.hasMore, true, 'paginator with rel first');
 
 const lastCatalog = parseCatalog(CATALOG_FIXTURE.replace(' rel="next"', ''));
 
-assertEqual(lastCatalog.items.length, 2, 'última página con mangas');
-assertEqual(lastCatalog.hasMore, false, 'última página sin siguiente');
+assertEqual(lastCatalog.items.length, 2, 'last page with mangas');
+assertEqual(lastCatalog.hasMore, false, 'last page without a next');
 
 // A rel="next" that is not a paginator link must not count as more pages.
 const headRelNext = parseCatalog(
@@ -229,24 +229,24 @@ const headRelNext = parseCatalog(
     '<head><link rel="next" href="/biblioteca?page=3"></head>',
 );
 
-assertEqual(headRelNext.hasMore, false, 'rel="next" fuera del paginador');
+assertEqual(headRelNext.hasMore, false, 'rel="next" outside the paginator');
 
 const emptyCatalog = parseCatalog(CATALOG_EMPTY_FIXTURE);
 
-assertEqual(emptyCatalog.items.length, 0, 'catálogo vacío');
-assertEqual(emptyCatalog.hasMore, false, 'catálogo vacío sin siguiente página');
+assertEqual(emptyCatalog.items.length, 0, 'empty catalog');
+assertEqual(emptyCatalog.hasMore, false, 'empty catalog without a next page');
 expectThrow(
   () => parseCatalog('<main><p>sin datos</p></main>'),
-  'HTML inválido del catálogo debe lanzar error',
+  'invalid catalog HTML must throw',
 );
 
 expectThrow(
   () => parseManga('<main><p>sin datos</p></main>'),
-  'HTML inválido del detalle debe lanzar error',
+  'invalid detail HTML must throw',
 );
 expectThrow(
   () => parseReader('<div id="reader-wrap"></div>'),
-  'HTML inválido del lector debe lanzar error',
+  'invalid reader HTML must throw',
 );
 
 console.log('parsers ok');

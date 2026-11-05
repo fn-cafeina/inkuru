@@ -9,29 +9,29 @@ import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {
-    throw new Error(`${label}: esperado ${String(expected)}, recibido ${String(actual)}`);
+    throw new Error(`${label}: expected ${String(expected)}, received ${String(actual)}`);
   }
 }
 
-assertEqual(clamp(5, 0, 10), 5, 'un valor dentro del rango pasa');
-assertEqual(clamp(-1, 0, 10), 0, 'el mínimo recorta');
-assertEqual(clamp(11, 0, 10), 10, 'el máximo recorta');
+assertEqual(clamp(5, 0, 10), 5, 'a value inside the range passes');
+assertEqual(clamp(-1, 0, 10), 0, 'the minimum clamps');
+assertEqual(clamp(11, 0, 10), 10, 'the maximum clamps');
 
 const noOverflow = translationBounds(100, 100, 200, 200, 1);
 
-assertEqual(noOverflow.maxX, 0, 'sin desbordar no hay desplazamiento X');
-assertEqual(noOverflow.maxY, 0, 'sin desbordar no hay desplazamiento Y');
+assertEqual(noOverflow.maxX, 0, 'no overflow means no X shift');
+assertEqual(noOverflow.maxY, 0, 'no overflow means no Y shift');
 
 const zoomed = translationBounds(200, 100, 100, 100, 2);
 
-assertEqual(zoomed.maxX, 150, 'X permite la mitad del desbordamiento');
-assertEqual(zoomed.maxY, 50, 'Y permite la mitad del desbordamiento');
+assertEqual(zoomed.maxX, 150, 'X allows half the overflow');
+assertEqual(zoomed.maxY, 50, 'Y allows half the overflow');
 
 // The content point under the focal point must stay under it after zooming.
 const panned = zoomAroundPoint(1, 0, 0, 50, 20, 50, 20, 2);
 
-assertEqual(panned.x, -50, 'el punto focal se mantiene en X');
-assertEqual(panned.y, -20, 'el punto focal se mantiene en Y');
+assertEqual(panned.x, -50, 'the focal point holds in X');
+assertEqual(panned.y, -20, 'the focal point holds in Y');
 
 const continuous = pageBox({
   ratio: 0.5,
@@ -41,8 +41,8 @@ const continuous = pageBox({
   paged: false,
 });
 
-assertEqual(continuous.baseWidth, 200, 'continuo siempre usa el ancho completo');
-assertEqual(continuous.baseHeight, 400, 'continuo respeta la proporción');
+assertEqual(continuous.baseWidth, 200, 'continuous always uses the full width');
+assertEqual(continuous.baseHeight, 400, 'continuous respects the ratio');
 
 const tallPage = pageBox({
   ratio: 0.5,
@@ -52,8 +52,8 @@ const tallPage = pageBox({
   paged: true,
 });
 
-assertEqual(tallPage.baseWidth, 50, 'paginado ajusta la altura');
-assertEqual(tallPage.baseHeight, 100, 'paginado ajusta a la pantalla');
+assertEqual(tallPage.baseWidth, 50, 'paged adjusts to the height');
+assertEqual(tallPage.baseHeight, 100, 'paged fits the screen');
 
 const widePage = pageBox({
   ratio: 3,
@@ -63,8 +63,8 @@ const widePage = pageBox({
   paged: true,
 });
 
-assertEqual(widePage.baseWidth, 200, 'una página ancha ocupa el ancho');
-assertEqual(widePage.baseHeight, 200 / 3, 'una página ancha respeta la proporción');
+assertEqual(widePage.baseWidth, 200, 'a wide page takes the width');
+assertEqual(widePage.baseHeight, 200 / 3, 'a wide page respects the ratio');
 
 const fitWidth = pageBox({
   ratio: 3,
@@ -74,29 +74,29 @@ const fitWidth = pageBox({
   paged: true,
 });
 
-assertEqual(fitWidth.baseWidth, 200, 'fit-width ignora la altura en paginado');
+assertEqual(fitWidth.baseWidth, 200, 'fit-width ignores the height when paged');
 
 // pageLayoutAt: real measured heights with an estimate fallback.
 const noHeights = pageLayoutAt([], 3, 100);
 
-assertEqual(noHeights.offset, 300, 'sin mediciones usa el fallback');
-assertEqual(noHeights.length, 100, 'sin mediciones usa el fallback de alto');
+assertEqual(noHeights.offset, 300, 'without measurements the fallback is used');
+assertEqual(noHeights.length, 100, 'without measurements the height fallback is used');
 
 const sparse = pageLayoutAt([120, 90], 3, 100);
 
-assertEqual(sparse.offset, 310, 'suma mediciones y fallback para el resto');
-assertEqual(sparse.length, 100, 'un índice sin medir usa el fallback');
+assertEqual(sparse.offset, 310, 'measurements and fallback sum for the rest');
+assertEqual(sparse.length, 100, 'an unmeasured index uses the fallback');
 
 const measured = pageLayoutAt([120, 90, 80, 200], 3, 100);
 
-assertEqual(measured.offset, 290, 'suma solo las mediciones reales');
-assertEqual(measured.length, 200, 'usa la altura real medida');
+assertEqual(measured.offset, 290, 'only the real measurements sum');
+assertEqual(measured.length, 200, 'the real measured height is used');
 
 // ratio cache: a measured page keeps its proportion across row remounts.
 assertEqual(
   knownPageRatio('page-1.jpg'),
   READER_PAGE_ASPECT_RATIO,
-  'una página sin medir usa la proporción estimada',
+  'an unmeasured page uses the estimated ratio',
 );
 
 rememberPageRatio('page-1.jpg', { width: 800, height: 1200 });
@@ -104,7 +104,7 @@ rememberPageRatio('page-1.jpg', { width: 800, height: 1200 });
 assertEqual(
   knownPageRatio('page-1.jpg'),
   800 / 1200,
-  'una página medida conserva su proporción',
+  'a measured page keeps its ratio',
 );
 
 rememberPageRatio('page-2.jpg', { width: 0, height: 0 });
@@ -112,7 +112,7 @@ rememberPageRatio('page-2.jpg', { width: 0, height: 0 });
 assertEqual(
   knownPageRatio('page-2.jpg'),
   READER_PAGE_ASPECT_RATIO,
-  'un tamaño inválido no se cachea',
+  'an invalid size is not cached',
 );
 
 // The cache is capped oldest-first.
@@ -125,12 +125,12 @@ rememberPageRatio('page://500', { width: 1442, height: 2100 });
 assertEqual(
   knownPageRatio('page://0'),
   READER_PAGE_ASPECT_RATIO,
-  'la página más antigua se evicta del caché',
+  'the oldest page is evicted from the cache',
 );
 assertEqual(
   knownPageRatio('page://500'),
   1442 / 2100,
-  'la página más reciente se conserva',
+  'the newest page is kept',
 );
 
 console.log('reader geometry ok');

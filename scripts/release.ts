@@ -9,14 +9,14 @@ function parse(text: string, file: string): Json {
   try {
     return JSON.parse(text) as Json;
   } catch (err) {
-    throw new Error(`${file} no es JSON válido: ${String(err)}`);
+    throw new Error(`${file} is not valid JSON: ${String(err)}`);
   }
 }
 
 function expoObject(appJson: string): Json {
   const expo = parse(appJson, 'app.json').expo;
   if (typeof expo !== 'object' || expo === null) {
-    throw new Error('app.json sin objeto "expo"');
+    throw new Error('app.json has no "expo" object');
   }
   return expo as Json;
 }
@@ -39,12 +39,12 @@ export function bumpVersions(
   version: string,
 ): [string, string] {
   if (!SEMVER.test(version)) {
-    throw new Error(`versión inválida: ${version} (formato X.Y.Z)`);
+    throw new Error(`invalid version: ${version} (expected X.Y.Z)`);
   }
   const app = parse(appJson, 'app.json');
   const expo = app.expo;
   if (typeof expo !== 'object' || expo === null) {
-    throw new Error('app.json sin objeto "expo"');
+    throw new Error('app.json has no "expo" object');
   }
   const pkg = parse(pkgJson, 'package.json');
   (expo as Json).version = version;
@@ -61,7 +61,7 @@ function git(args: string[]): string {
     throw new Error(`git ${args.join(' ')}: ${res.error.message}`);
   }
   if (res.status !== 0) {
-    throw new Error(`git ${args.join(' ')} falló:\n${res.stderr.trim()}`);
+    throw new Error(`git ${args.join(' ')} failed:\n${res.stderr.trim()}`);
   }
   return res.stdout;
 }
@@ -81,23 +81,23 @@ function assertReady(
   const other = pkgVersion(pkgText);
   if (before !== other) {
     throw new Error(
-      `versiones desincronizadas: app.json ${before} vs package.json ${other}`,
+      `versions out of sync: app.json ${before} vs package.json ${other}`,
     );
   }
   if (before === version) {
-    throw new Error(`ya estás en ${version}`);
+    throw new Error(`already at ${version}`);
   }
   if (git(['rev-parse', '--abbrev-ref', 'HEAD']).trim() !== 'main') {
-    throw new Error('la release sale de main, no de otra rama');
+    throw new Error('releases are cut from main, not another branch');
   }
   if (git(['status', '--porcelain']).trim() !== '') {
-    throw new Error('working tree sucio: commiteá o descartá antes de releasear');
+    throw new Error('working tree dirty: commit or discard before releasing');
   }
   if (gitQuiet(['rev-parse', '-q', '--verify', `refs/tags/${tag}`])) {
-    throw new Error(`el tag ${tag} ya existe en local`);
+    throw new Error(`tag ${tag} already exists locally`);
   }
   if (git(['ls-remote', '--tags', 'origin', `refs/tags/${tag}`]).trim() !== '') {
-    throw new Error(`el tag ${tag} ya existe en origin`);
+    throw new Error(`tag ${tag} already exists on origin`);
   }
 }
 
@@ -110,7 +110,7 @@ function main(): void {
 
   try {
     if (!version) {
-      throw new Error('falta la versión: bun run release X.Y.Z [--dry-run]');
+      throw new Error('missing version: bun run release X.Y.Z [--dry-run]');
     }
     const tag = `v${version}`;
     const appText = readFileSync('app.json', 'utf8');
@@ -119,7 +119,7 @@ function main(): void {
     assertReady(appText, pkgText, version, tag);
 
     if (dryRun) {
-      console.log(`Dry run para ${tag}, nada se toca:`);
+      console.log(`Dry run for ${tag}, nothing is touched:`);
       console.log(`  1. app.json expo.version -> ${version}`);
       console.log(`  2. package.json version -> ${version}`);
       console.log(`  3. git commit -m "chore(release): ${tag}"`);
@@ -130,7 +130,7 @@ function main(): void {
 
     writeFileSync('app.json', nextApp);
     writeFileSync('package.json', nextPkg);
-    done.push(`versiones escritas en ${version}`);
+    done.push(`versions written at ${version}`);
     git(['add', 'app.json', 'package.json']);
     git(['commit', '-m', `chore(release): ${tag}`]);
     committed = true;
@@ -138,24 +138,24 @@ function main(): void {
     git(['tag', '-a', tag, '-m', tag]);
     done.push(`tag ${tag}`);
     git(['push', 'origin', 'main', '--follow-tags']);
-    done.push('push a origin/main');
+    done.push('push to origin/main');
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error(`\nRelease falló: ${msg}`);
+    console.error(`\nRelease failed: ${msg}`);
     if (done.length > 0) {
-      console.error('Completado:');
+      console.error('Completed:');
       for (const step of done) {
         console.error(`  - ${step}`);
       }
       console.error(
         committed
-          ? `Descartar: git tag -d v${version}; git reset --hard HEAD~1`
-          : 'Descartar: git checkout -- app.json package.json',
+          ? `Discard: git tag -d v${version}; git reset --hard HEAD~1`
+          : 'Discard: git checkout -- app.json package.json',
       );
     }
     process.exit(1);
   }
-  console.log(`Listo: v${version} publicado. Actions arma la release.`);
+  console.log(`Done: v${version} published. Actions builds the release.`);
 }
 
 if (import.meta.main) {

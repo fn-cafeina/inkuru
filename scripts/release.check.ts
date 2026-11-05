@@ -48,38 +48,38 @@ const [nextApp, nextPkg] = bumpVersions(app, pkg, '2.3.4');
 const appOut = JSON.parse(nextApp) as { expo: Record<string, unknown> };
 const pkgOut = JSON.parse(nextPkg) as Record<string, unknown>;
 
-assert(appOut.expo.version === '2.3.4', 'expo.version debe cambiar');
-assert(appOut.expo.name === 'Inkuru', 'expo.name debe quedar intacto');
+assert(appOut.expo.version === '2.3.4', 'expo.version changes');
+assert(appOut.expo.name === 'Inkuru', 'expo.name stays intact');
 assert(
   nextApp.includes('"package": "com.inkuru.app"'),
-  'claves anidadas deben quedar intactas',
+  'nested keys stay intact',
 );
 assert(
   nextApp.includes('\n  "expo": {'),
-  'app.json debe reescribirse con indentación de 2 espacios',
+  'app.json is rewritten with 2-space indentation',
 );
-assert(nextApp.endsWith('\n'), 'app.json debe terminar en salto de línea');
-assert(pkgOut.version === '2.3.4', 'package.json version debe cambiar');
-assert(pkgOut.private === true, 'package.json private debe quedar intacto');
+assert(nextApp.endsWith('\n'), 'app.json ends with a newline');
+assert(pkgOut.version === '2.3.4', 'package.json version changes');
+assert(pkgOut.private === true, 'package.json private stays intact');
 assert(
   nextPkg.endsWith('\n'),
-  'package.json debe terminar en salto de línea',
+  'package.json ends with a newline',
 );
 
 const [again] = bumpVersions(nextApp, nextPkg, '9.9.9');
 assert(
   again.includes('"version": "9.9.9"'),
-  'un segundo bumpeo debe pisar el valor anterior',
+  'a second bump overwrites the previous value',
 );
 
-didThrow(() => bumpVersions(app, pkg, '1.0'), 'semver incompleto debe fallar');
+didThrow(() => bumpVersions(app, pkg, '1.0'), 'an incomplete semver fails');
 didThrow(
   () => bumpVersions(app, pkg, '1.0.1-beta.1'),
-  'prerelease debe fallar',
+  'a prerelease fails',
 );
-didThrow(() => bumpVersions(app, pkg, 'v1.0.1'), 'prefijo v debe fallar');
-didThrow(() => bumpVersions('{}', pkg, '1.2.3'), 'sin expo debe fallar');
-didThrow(() => bumpVersions('{oops', pkg, '1.2.3'), 'JSON roto debe fallar');
-didThrow(() => bumpVersions(app, '{oops', '1.2.3'), 'JSON roto en package.json debe fallar');
+didThrow(() => bumpVersions(app, pkg, 'v1.0.1'), 'a v prefix fails');
+didThrow(() => bumpVersions('{}', pkg, '1.2.3'), 'no expo fails');
+didThrow(() => bumpVersions('{oops', pkg, '1.2.3'), 'broken JSON fails');
+didThrow(() => bumpVersions(app, '{oops', '1.2.3'), 'broken package.json fails');
 
 console.log('release bump ok');

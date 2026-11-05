@@ -22,7 +22,7 @@ export async function installApk(apk: File): Promise<void> {
   const packageName = Constants.expoConfig?.android?.package;
 
   if (!packageName) {
-    throw new Error('paquete android sin configurar');
+    throw new Error('android package not configured');
   }
 
   // Directory URIs may or may not carry a trailing slash; the relative path
@@ -30,7 +30,7 @@ export async function installApk(apk: File): Promise<void> {
   const cacheRoot = Paths.cache.uri.replace(/\/+$/, '');
 
   if (!apk.uri.startsWith(`${cacheRoot}/`)) {
-    throw new Error('apk descargado fuera de la caché');
+    throw new Error('apk downloaded outside the cache');
   }
 
   const relative = apk.uri.slice(cacheRoot.length + 1);

@@ -96,7 +96,7 @@ async function fetchText(
   const response = await fetch(absoluteUrl(path), { signal });
 
   if (!response.ok) {
-    throw new Error(`ZonaTMO respondió HTTP ${response.status}`);
+    throw new Error(`ZonaTMO returned HTTP ${response.status}`);
   }
 
   return response.text();
@@ -112,7 +112,7 @@ export function parseManga(html: string): MangaDetail {
   const cover = coverSource ? absoluteUrl(coverSource) : undefined;
 
   if (!title || !cover) {
-    throw new Error('Formato inesperado en el detalle de ZonaTMO');
+    throw new Error('unexpected ZonaTMO detail format');
   }
 
   const tags = extractBlocks(html, 'a', 'badge-primary')
@@ -142,7 +142,7 @@ export function parseReader(html: string): ReaderData {
     .map(absoluteUrl);
 
   if (pages.length === 0) {
-    throw new Error('Formato inesperado en el lector de ZonaTMO');
+    throw new Error('unexpected ZonaTMO reader format');
   }
 
   const selectBlock = html.match(
@@ -182,7 +182,7 @@ export function parseSearch(text: string): MangaListItem[] {
   const data: unknown = JSON.parse(text);
 
   if (!Array.isArray(data)) {
-    throw new Error('Formato inesperado en la búsqueda de ZonaTMO');
+    throw new Error('unexpected ZonaTMO search format');
   }
 
   return data.map(parseSearchItem).filter(isDefined);
@@ -191,7 +191,7 @@ export function parseSearch(text: string): MangaListItem[] {
 // shortcut: regex tied to zonatmo's catalog markup, migrate to an HTML parser when selectors grow.
 export function parseCatalog(html: string): CatalogPage {
   if (!/\bid="library-results"/.test(html)) {
-    throw new Error('Formato inesperado en el catálogo de ZonaTMO');
+    throw new Error('unexpected ZonaTMO catalog format');
   }
 
   const items = (
