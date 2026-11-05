@@ -1,5 +1,10 @@
 import fixture from './__fixtures__/release.json';
-import { isNewerVersion, parseRelease, shouldCheck } from './release';
+import {
+  formatCheckedAt,
+  isNewerVersion,
+  parseRelease,
+  shouldCheck,
+} from './release';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -54,5 +59,16 @@ assert(shouldCheck(null, now), 'nunca comprobado debe comprobar');
 assert(!shouldCheck(now - hour, now), 'dentro de la ventana no vuelve a consultar');
 assert(shouldCheck(now - 6 * hour, now), 'ventana cumplida vuelve a consultar');
 assert(shouldCheck(now - 6 * hour - 1, now), 'borde de la ventana consulta');
+
+const minute = 60 * 1000;
+
+assertEqual(formatCheckedAt(now - 10_000, now), 'hace un momento', 'minuto reciente');
+assertEqual(formatCheckedAt(now - minute, now), 'hace 1 min', 'hace 1 min');
+assertEqual(formatCheckedAt(now - 45 * minute, now), 'hace 45 min', 'hace 45 min');
+assertEqual(formatCheckedAt(now - hour, now), 'hace 1 h', 'hace 1 h');
+assertEqual(formatCheckedAt(now - 5 * hour, now), 'hace 5 h', 'hace 5 h');
+assertEqual(formatCheckedAt(now - 24 * hour, now), 'hace 1 d', 'hace 1 d');
+assertEqual(formatCheckedAt(now - 72 * hour, now), 'hace 3 d', 'hace 3 d');
+assertEqual(formatCheckedAt(now + minute, now), 'hace un momento', 'futuro no negativo');
 
 console.log('release ok');

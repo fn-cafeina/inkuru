@@ -71,6 +71,27 @@ export function shouldCheck(checkedAt: number | null, now: number): boolean {
   return checkedAt === null || now - checkedAt >= CHECK_INTERVAL_MS;
 }
 
+/** Age of the last check as plain Spanish, relative to `now`. */
+export function formatCheckedAt(checkedAt: number, now: number): string {
+  const minutes = Math.floor(Math.max(0, now - checkedAt) / 60_000);
+
+  if (minutes < 1) {
+    return 'hace un momento';
+  }
+
+  if (minutes < 60) {
+    return `hace ${minutes} min`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) {
+    return `hace ${hours} h`;
+  }
+
+  return `hace ${Math.floor(hours / 24)} d`;
+}
+
 /** Numeric segments of a `v1.2.3` tag, or null when it is not comparable. */
 function versionSegments(value: string): number[] | null {
   const parts = value.trim().replace(/^v/i, '').split('.');

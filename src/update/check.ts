@@ -28,6 +28,8 @@ export type UpdateState = {
   failed: boolean;
   /** Release newer than the installed version, when one is known. */
   available: LatestRelease | null;
+  /** When the API last answered, null when the app has never checked. */
+  checkedAt: number | null;
 };
 
 const EMPTY_STORED: StoredState = {
@@ -39,7 +41,12 @@ const EMPTY_STORED: StoredState = {
 };
 
 let stored: StoredState | null = null;
-let state: UpdateState = { checking: false, failed: false, available: null };
+let state: UpdateState = {
+  checking: false,
+  failed: false,
+  available: null,
+  checkedAt: null,
+};
 const listeners = new Set<() => void>();
 
 export function subscribeUpdates(listener: () => void): () => void {
@@ -115,12 +122,20 @@ export async function checkForUpdate(force = false): Promise<UpdateState> {
 function commit(next: StoredState): void {
   stored = next;
   void AsyncStorage.setItem(STATE_KEY, JSON.stringify(next)).catch(() => undefined);
-  publish({ checking: false, failed: false, available: availableFrom(next) }, next);
+  // publish() replaces checkedAt with the stored anchor.
+  publish(
+    { checking: false, failed: false, available: availableFrom(next), checkedAt: null },
+    next,
+  );
 }
 
 function publish(next: UpdateState, nextStored: StoredState): void {
   const known = availableFrom(nextStored);
-  state = { ...next, available: known };
+  state = {
+    ...next,
+    available: known,
+    checkedAt: nextStored.checkedAt > 0 ? nextStored.checkedAt : null,
+  };
 
   for (const listener of listeners) {
     listener();
