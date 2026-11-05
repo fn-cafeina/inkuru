@@ -60,6 +60,8 @@ jobs:
         env:
           EAS_LOCAL_BUILD_ARTIFACTS_DIR: ${{ github.workspace }}/build
         run: bunx eas-cli@27.4.1 build --platform android --profile production --local --non-interactive
+      - name: Name APK
+        run: mv build/*.apk "build/inkuru-${GITHUB_REF_NAME}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: inkuru-${{ github.ref_name }}
