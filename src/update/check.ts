@@ -41,6 +41,7 @@ const EMPTY_STORED: StoredState = {
 };
 
 let stored: StoredState | null = null;
+let inFlight: Promise<UpdateState> | null = null;
 let state: UpdateState = {
   checking: false,
   failed: false,
@@ -69,6 +70,8 @@ export function currentVersion(): string {
  * Refresh the latest release, at most once per throttle window unless forced.
  * A 304 keeps the stored release and refreshes the anchor without spending
  * rate limit; a 404 means the repository has no releases yet.
+ * Concurrent calls share one request, so the mount check and a tap cannot
+ * race.
  */
 export async function checkForUpdate(force = false): Promise<UpdateState> {
   const previous = await loadStored();
@@ -80,8 +83,25 @@ export async function checkForUpdate(force = false): Promise<UpdateState> {
     return state;
   }
 
+  if (inFlight !== null) {
+    return inFlight;
+  }
+
   publish({ ...state, checking: true, failed: false }, previous);
 
+  const request = doCheck(previous, now).finally(() => {
+    inFlight = null;
+  });
+
+  inFlight = request;
+
+  return request;
+}
+
+async function doCheck(
+  previous: StoredState,
+  now: number,
+): Promise<UpdateState> {
   try {
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github+json',

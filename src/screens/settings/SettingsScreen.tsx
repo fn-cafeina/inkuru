@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import type { DownloadProgress } from 'expo-file-system';
 
 import { AppPressable } from '../../components/AppPressable';
 import { Button } from '../../components/Button';
@@ -16,37 +17,85 @@ import {
   subscribeUpdates,
 } from '../../update/check';
 import type { UpdateState } from '../../update/check';
-import { downloadApk, installApk } from '../../update/install';
+import { downloadApk, installApk, removeApk } from '../../update/install';
 import { formatCheckedAt } from '../../update/release';
+
+type Phase = 'idle' | 'download' | 'install';
+
+const HINT_TICK_MS = 30_000;
+const DOWNLOAD_FAILED = 'No se pudo descargar. Inténtalo otra vez.';
+const INSTALL_FAILED = 'No se pudo abrir el instalador. Inténtalo otra vez.';
 
 export default function SettingsScreen() {
   const colors = useColors();
   const update = useSyncExternalStore(subscribeUpdates, getUpdateState);
-  const [downloading, setDownloading] = useState(false);
-  const [installFailed, setInstallFailed] = useState(false);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [progress, setProgress] = useState<number | null>(null);
+  const [installError, setInstallError] = useState<string | null>(null);
+  // Ticks while the screen is open so the "last checked" hint stays honest.
+  const [now, setNow] = useState(() => Date.now());
+  const abort = useRef<AbortController | null>(null);
 
   // Publishes the stored last-check time on open; the throttle keeps it free.
   useEffect(() => {
     void checkForUpdate();
+    const timer = setInterval(() => setNow(Date.now()), HINT_TICK_MS);
+
+    return () => {
+      clearInterval(timer);
+      abort.current?.abort();
+    };
   }, []);
+
+  function onDownloadProgress(data: DownloadProgress): void {
+    setProgress(
+      data.totalBytes > 0
+        ? Math.floor((data.bytesWritten / data.totalBytes) * 100)
+        : null,
+    );
+  }
+
+  function cancel(): void {
+    abort.current?.abort();
+  }
 
   async function install(): Promise<void> {
     const release = update.available;
 
-    if (release === null || downloading) {
+    if (release === null || phase !== 'idle') {
       return;
     }
 
-    setDownloading(true);
-    setInstallFailed(false);
+    const controller = new AbortController();
+
+    abort.current = controller;
+    setPhase('download');
+    setProgress(null);
+    setInstallError(null);
+    let step: 'download' | 'install' = 'download';
 
     try {
-      const apk = await downloadApk(release.apkUrl);
+      const apk = await downloadApk(
+        release.apkUrl,
+        controller.signal,
+        onDownloadProgress,
+      );
+
+      step = 'install';
       await installApk(apk);
     } catch {
-      setInstallFailed(true);
+      if (step === 'download') {
+        // Failed or cancelled mid-download: drop the partial APK.
+        removeApk();
+      }
+
+      if (!controller.signal.aborted) {
+        setInstallError(step === 'download' ? DOWNLOAD_FAILED : INSTALL_FAILED);
+      }
     } finally {
-      setDownloading(false);
+      abort.current = null;
+      setPhase('idle');
+      setProgress(null);
     }
   }
 
@@ -60,7 +109,7 @@ export default function SettingsScreen() {
         <SettingSection title="Actualizaciones" className="mt-2">
           <InfoRow
             label="Estado"
-            hint={statusHint(update)}
+            hint={statusHint(update, now)}
             value={statusValue(update)}
             valueColor={update.failed ? colors.notification : undefined}
             disabled={update.checking}
@@ -82,16 +131,26 @@ export default function SettingsScreen() {
               >
                 {`Inkuru ${update.available.tag} está lista para instalar.`}
               </Text>
-              <Button
-                size="lg"
-                disabled={downloading}
-                onPress={() => void install()}
-              >
-                {downloading ? 'Descargando...' : 'Actualizar'}
-              </Button>
-              {installFailed ? (
+              <View className="flex-row items-center gap-3">
+                <View className="flex-1">
+                  <Button
+                    size="lg"
+                    disabled={phase !== 'idle'}
+                    onPress={() => void install()}
+                  >{
+                    actionLabel(phase, progress)
+                  }
+                  </Button>
+                </View>
+                {phase === 'download' ? (
+                  <Button size="lg" variant="secondary" onPress={cancel}>
+                    Cancelar
+                  </Button>
+                ) : null}
+              </View>
+              {installError !== null ? (
                 <Text className="text-sm" style={{ color: colors.notification }}>
-                  No se pudo descargar. Inténtalo otra vez.
+                  {installError}
                 </Text>
               ) : null}
             </View>
@@ -104,6 +163,18 @@ export default function SettingsScreen() {
       </ScrollView>
     </Screen>
   );
+}
+
+function actionLabel(phase: Phase, progress: number | null): string {
+  if (phase === 'install') {
+    return 'Instalando...';
+  }
+
+  if (phase === 'download') {
+    return progress === null ? 'Descargando...' : `Descargando ${String(progress)}%`;
+  }
+
+  return 'Actualizar';
 }
 
 function statusValue(update: UpdateState): string {
@@ -122,7 +193,7 @@ function statusValue(update: UpdateState): string {
   return 'Al día';
 }
 
-function statusHint(update: UpdateState): string | null {
+function statusHint(update: UpdateState, now: number): string | null {
   if (update.failed) {
     return 'Toca para reintentar la comprobación';
   }
@@ -135,7 +206,7 @@ function statusHint(update: UpdateState): string | null {
     return 'Toca para comprobar actualizaciones';
   }
 
-  return `Última comprobación: ${formatCheckedAt(update.checkedAt, Date.now())}`;
+  return `Última comprobación: ${formatCheckedAt(update.checkedAt, now)}`;
 }
 
 function InfoRow({
