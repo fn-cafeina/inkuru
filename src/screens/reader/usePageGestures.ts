@@ -184,7 +184,11 @@ export function usePageGestures({
 
   const doubleTap = useTapGesture({
     numberOfTaps: 2,
-    maxDelay: 250,
+    // Exclusivity means the single tap waits this long before advancing, so the
+    // window is as short as a double tap can still fit in.
+    // shortcut: counting taps in one gesture would drop the wait to zero; two
+    // taps in 180ms is rare enough not to justify rewriting the gesture graph.
+    maxDelay: 180,
     maxDistance: 12,
     onDeactivate: (event) => {
       if (event.canceled) {
@@ -232,7 +236,7 @@ export function usePageGestures({
 
   const singleTap = useTapGesture({
     numberOfTaps: 1,
-    maxDelay: 250,
+    maxDelay: 180,
     maxDistance: 12,
     onDeactivate: (event) => {
       if (!event.canceled) {

@@ -5,16 +5,24 @@ import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { useColors } from '../../../theme/colors';
-import { SHEET_HEIGHT } from '../../../theme/spacing';
+
+/** Sheet heights as a share of the window. A chapter list needs more room
+ * than four preference rows, so the sheet does not get to pick one height. */
+export const SHEET_HEIGHT = {
+  compact: '50%',
+  tall: '85%',
+} as const;
 
 /** Scrim, sliding sheet and header shared by the reader's bottom sheets. */
 export function ReaderSheet({
   title,
   onClose,
+  height = SHEET_HEIGHT.compact,
   children,
 }: {
   title: string;
   onClose: () => void;
+  height?: (typeof SHEET_HEIGHT)[keyof typeof SHEET_HEIGHT];
   children: ReactNode;
 }) {
   const colors = useColors();
@@ -36,7 +44,7 @@ export function ReaderSheet({
       <Animated.View
         entering={SlideInDown.duration(200)}
         className="rounded-t-2xl"
-        style={{ backgroundColor: colors.surface, height: SHEET_HEIGHT }}
+        style={{ backgroundColor: colors.surface, height }}
       >
         <View className="min-h-14 flex-row items-center justify-between px-4">
           <Text
