@@ -48,8 +48,14 @@ function colorFor(
     return colors.notification;
   }
 
-  if (status === 'queued' || status === 'done') {
+  // Queued and done used to share the accent colour, so the only difference was
+  // the glyph; across fifty rows that reads as "all downloaded".
+  if (status === 'done') {
     return colors.accent;
+  }
+
+  if (status === 'queued') {
+    return colors.textMuted;
   }
 
   return colors.iconInactive;
@@ -77,7 +83,7 @@ export function ChapterDownloadButton({
       accessibilityLabel={labelFor(status, title)}
       hitSlop={4}
       onPress={onPress}
-      className="min-h-11 min-w-11 items-center justify-center rounded-full"
+      className="min-h-12 min-w-12 items-center justify-center rounded-full"
     >
       {status === 'downloading' ? (
         <View className="items-center">

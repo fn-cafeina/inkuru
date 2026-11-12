@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Animated, ScrollView, View } from 'react-native';
+import { useReducedMotion } from 'react-native-reanimated';
 
+import { reader } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import {
   GRID_CARD_PADDING,
@@ -53,16 +55,24 @@ function subscribePulse() {
 }
 
 export function Skeleton({ className, style, tone = 'auto' }: Props) {
-  useEffect(subscribePulse, []);
+  const reduced = useReducedMotion();
+
+  useEffect(() => (reduced ? undefined : subscribePulse()), [reduced]);
 
   return (
     <Animated.View
       accessible={false}
       importantForAccessibility="no-hide-descendants"
       className={`${
-        tone === 'dark' ? 'bg-zinc-700' : 'bg-zinc-300 dark:bg-zinc-700'
+        tone === 'dark' ? '' : 'bg-zinc-300 dark:bg-zinc-700'
       } ${className ?? ''}`}
-      style={[{ opacity }, style]}
+      // A pulsing zinc-700 over the reader's near-black canvas is invisible, so
+      // the dark tone gets its own lighter block.
+      style={[
+        { opacity },
+        tone === 'dark' ? { backgroundColor: reader.border } : null,
+        style,
+      ]}
     />
   );
 }

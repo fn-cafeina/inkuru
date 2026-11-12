@@ -28,7 +28,7 @@ export function OptionChip({
           ? { backgroundColor: colors.accentContainer, borderColor: 'transparent' }
           : { borderColor: colors.border }
       }
-      className="min-h-10 items-center justify-center rounded-full border px-3.5"
+      className="min-h-12 items-center justify-center rounded-full border px-3.5"
     >
       <Text
         className={selected ? 'text-sm font-semibold' : 'text-sm'}

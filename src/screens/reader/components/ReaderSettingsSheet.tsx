@@ -91,11 +91,12 @@ function SwitchRow({
       <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
         {label}
       </Text>
+      {/* The row owns the gesture and the a11y role, so the switch is
+          decoration only: no handler, or it would be pressed twice. */}
       <Switch
         accessible={false}
         pointerEvents="none"
         value={value}
-        onValueChange={onValueChange}
         trackColor={{ false: colors.iconInactive, true: colors.accent }}
         thumbColor="#ffffff"
       />
