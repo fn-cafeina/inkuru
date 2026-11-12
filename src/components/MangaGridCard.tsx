@@ -1,18 +1,14 @@
 import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
-import { Feather } from '@expo/vector-icons';
 
 import { COVER_ASPECT_RATIO } from '../theme/layout';
 import { AppPressable } from './AppPressable';
-import { useColors } from '../theme/colors';
 
 type Props = {
   title: string;
   cover: string;
   subtitle?: string;
   width: number;
-  /** Reveals a remove button; long press alone is undiscoverable. */
-  onRemove?: () => void;
   onPress: () => void;
 };
 
@@ -21,11 +17,8 @@ export function MangaGridCard({
   cover,
   subtitle,
   width,
-  onRemove,
   onPress,
 }: Props) {
-  const colors = useColors();
-
   return (
     <View style={{ width }} className="mb-3">
       <AppPressable
@@ -62,19 +55,6 @@ export function MangaGridCard({
           </Text>
         ) : null}
       </AppPressable>
-      {onRemove ? (
-        <AppPressable
-          accessibilityLabel={`Quitar ${title} de la biblioteca`}
-          hitSlop={4}
-          onPress={onRemove}
-          className="mt-1 min-h-12 flex-row items-center justify-center rounded-full border border-zinc-200 dark:border-zinc-800"
-        >
-          <Feather name="x" size={14} color={colors.iconInactive} />
-          <Text className="ml-1.5 text-xs text-zinc-600 dark:text-zinc-300">
-            Quitar
-          </Text>
-        </AppPressable>
-      ) : null}
     </View>
   );
 }

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   TextInput,
   useWindowDimensions,
@@ -22,7 +21,7 @@ import { MangaGridCard } from '../../components/MangaGridCard';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import type { TabNavigation } from '../../navigation/types';
-import { loadLibraryResult, removeFromLibrary } from '../../storage/library';
+import { loadLibraryResult } from '../../storage/library';
 import type { LibraryEntry } from '../../storage/library';
 import { loadProgressMany } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
@@ -47,9 +46,6 @@ export default function LibraryScreen() {
   const [loaded, setLoaded] = useState(cachedEntries !== null);
   const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
-  // Removing from a 3-column grid: long press alone is undiscoverable, and a
-  // delete button under every card is noise. One toggle reveals them all.
-  const [editing, setEditing] = useState(false);
   const mounted = useRef(true);
   const loadTicket = useRef(0);
   const cardWidth = mangaCardWidth(width);
@@ -122,63 +118,9 @@ export default function LibraryScreen() {
     void load(true);
   };
 
-  const confirmRemove = (entry: LibraryEntry) => {
-    Alert.alert('Quitar de la biblioteca', entry.title, [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Quitar',
-        style: 'destructive',
-        onPress: () => {
-          void removeFromLibrary(entry.path).then((ok) => {
-            if (!ok) {
-              Alert.alert('No se pudo quitar', 'Inténtalo de nuevo.');
-              return;
-            }
-
-            // Invalidate any in-flight load so it cannot restore the entry.
-            loadTicket.current += 1;
-            // The invalidated load returns without clearing the flag.
-            setChecking(false);
-
-            const next = entries.filter((item) => item.path !== entry.path);
-            const nextProgress = { ...progress };
-
-            delete nextProgress[entry.path];
-            cachedEntries = next;
-            cachedProgress = nextProgress;
-            setEntries(next);
-            setProgress(nextProgress);
-          });
-        },
-      },
-    ]);
-  };
-
   return (
     <Screen>
-      <PageTitle
-        action={
-          entries.length > 0 && !failed ? (
-            <AppPressable
-              accessibilityLabel={
-                editing ? 'Terminar de editar' : 'Editar biblioteca'
-              }
-              accessibilityState={{ selected: editing }}
-              onPress={() => setEditing((value) => !value)}
-              hitSlop={8}
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
-            >
-              <Feather
-                name={editing ? 'check' : 'edit-2'}
-                size={18}
-                color={editing ? colors.accent : colors.iconInactive}
-              />
-            </AppPressable>
-          ) : undefined
-        }
-      >
-        Biblioteca
-      </PageTitle>
+      <PageTitle>Biblioteca</PageTitle>
 
       {entries.length > 4 ? (
         <LibrarySearch query={query} onChange={setQuery} />
@@ -226,7 +168,6 @@ export default function LibraryScreen() {
                   title: item.title,
                 })
               }
-              onRemove={editing ? () => confirmRemove(item) : undefined}
             />
           )}
           showsVerticalScrollIndicator={false}
