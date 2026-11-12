@@ -2,6 +2,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 
 import {
   getDownloadState,
+  getDownloadSummary,
   getVersion,
   initializeDownloads,
   subscribe,
@@ -17,6 +18,16 @@ export function useDownloadVersion(): number {
   useDownloadsReady();
 
   return useSyncExternalStore(subscribe, getVersion, getVersion);
+}
+
+export function useDownloadSummary() {
+  useDownloadsReady();
+
+  return useSyncExternalStore(
+    subscribe,
+    getDownloadSummary,
+    getDownloadSummary,
+  );
 }
 
 export function useIsChapterDownloaded(chapterPath: string): boolean {

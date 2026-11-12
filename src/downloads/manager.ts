@@ -16,62 +16,21 @@ import {
 import { loadDownloadIndex, removeRecord, upsertRecord } from './metadata';
 import { chapterDirNames } from './paths';
 import { createRunTracker } from './runState';
+import {
+  getDownloadState,
+  getDownloadSummary,
+  getVersion,
+  notify,
+  store,
+  subscribe,
+} from './store';
 import { withTimeout } from './timeout';
-import type {
-  DownloadInput,
-  DownloadRecord,
-  DownloadState,
-} from './types';
+import type { DownloadInput, DownloadRecord } from './types';
+
+export { subscribe, getVersion, getDownloadState, getDownloadSummary };
 
 const MAX_PARALLEL_PAGES = 3;
-
-const states = new Map<string, DownloadState>();
-const records = new Map<string, DownloadRecord>();
-const controllers = new Map<string, AbortController>();
 const runs = createRunTracker();
-const queue: DownloadInput[] = [];
-const listeners = new Set<() => void>();
-
-let version = 0;
-let running = false;
-let initialized = false;
-let initializing: Promise<void> | null = null;
-
-function notify() {
-  version += 1;
-
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-export function subscribe(listener: () => void) {
-  listeners.add(listener);
-
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-export function getVersion() {
-  return version;
-}
-
-export function getDownloadState(
-  chapterPath: string,
-): DownloadState | undefined {
-  const state = states.get(chapterPath);
-
-  if (state) {
-    return state;
-  }
-
-  const record = records.get(chapterPath);
-
-  return record
-    ? { status: 'done', page: record.pageCount, total: record.pageCount }
-    : undefined;
-}
 
 export async function loadDownloadedReader(
   chapterPath: string,
@@ -83,9 +42,9 @@ export async function loadDownloadedReader(
 
 export async function enqueueDownload(input: DownloadInput) {
   const chapterPath = input.chapterPath;
-  const current = states.get(chapterPath);
+  const current = store.states.get(chapterPath);
 
-  if (records.has(chapterPath)) {
+  if (store.records.has(chapterPath)) {
     return;
   }
 
@@ -93,69 +52,69 @@ export async function enqueueDownload(input: DownloadInput) {
     return;
   }
 
-  states.set(chapterPath, { status: 'queued', page: 0, total: 0 });
+  store.states.set(chapterPath, { status: 'queued', page: 0, total: 0 });
   notify();
 
   // The index may still be loading, so wait before deciding the chapter is new.
   await initializeDownloads();
 
   // Cancelling or deleting while the index loaded must win.
-  if (states.get(chapterPath)?.status !== 'queued') {
+  if (store.states.get(chapterPath)?.status !== 'queued') {
     return;
   }
 
-  if (records.has(chapterPath)) {
-    states.delete(chapterPath);
+  if (store.records.has(chapterPath)) {
+    store.states.delete(chapterPath);
     notify();
     return;
   }
 
-  queue.push(input);
+  store.queue.push(input);
   void pump();
 }
 
 export function cancelDownload(chapterPath: string) {
-  const state = states.get(chapterPath);
+  const state = store.states.get(chapterPath);
 
   if (!state) {
     return;
   }
 
   if (state.status === 'queued') {
-    const index = queue.findIndex((item) => item.chapterPath === chapterPath);
+    const index = store.queue.findIndex((item) => item.chapterPath === chapterPath);
 
     if (index >= 0) {
-      queue.splice(index, 1);
+      store.queue.splice(index, 1);
     }
 
-    states.delete(chapterPath);
+    store.states.delete(chapterPath);
     notify();
     return;
   }
 
   if (state.status === 'downloading') {
     runs.cancel(chapterPath);
-    controllers.get(chapterPath)?.abort();
-    states.delete(chapterPath);
+    store.controllers.get(chapterPath)?.abort();
+    store.states.delete(chapterPath);
     notify();
   }
 }
 
 export async function deleteDownload(chapterPath: string) {
-  const controller = controllers.get(chapterPath);
+  const controller = store.controllers.get(chapterPath);
 
   if (controller) {
     runs.cancel(chapterPath);
     controller.abort();
   }
 
-  const index = queue.findIndex((item) => item.chapterPath === chapterPath);
+  const index = store.queue.findIndex((item) => item.chapterPath === chapterPath);
 
   if (index >= 0) {
-    queue.splice(index, 1);
+    store.queue.splice(index, 1);
   }
 
-  states.delete(chapterPath);
+  store.states.delete(chapterPath);
   const deleted = deleteChapterFiles(chapterPath);
   forgetRemoteCache(readerCacheKey(chapterPath));
   void forgetPageProgress(chapterPath);
@@ -168,35 +127,35 @@ export async function deleteDownload(chapterPath: string) {
     return;
   }
 
-  records.delete(chapterPath);
+  store.records.delete(chapterPath);
   notify();
 
   await initializeDownloads();
 
   // Initialization may have recovered the index entry before the files were
   // gone, so remove it again after the scan.
-  records.delete(chapterPath);
+  store.records.delete(chapterPath);
   await removeRecord(chapterPath);
   notify();
 }
 
 export function initializeDownloads(): Promise<void> {
-  if (initialized) {
+  if (store.initialized) {
     return Promise.resolve();
   }
 
-  if (initializing) {
-    return initializing;
+  if (store.initializing) {
+    return store.initializing;
   }
 
-  initializing = (async () => {
+  store.initializing = (async () => {
     try {
       const stored = await loadDownloadIndex();
       const valid: DownloadRecord[] = [];
 
       for (const record of stored) {
         if (hasDownloadFiles(record.chapterPath)) {
-          records.set(record.chapterPath, record);
+          store.records.set(record.chapterPath, record);
           valid.push(record);
         } else {
           await removeRecord(record.chapterPath);
@@ -209,30 +168,30 @@ export function initializeDownloads(): Promise<void> {
       const recovered = await reconcileDirectories(knownDirs).catch(() => []);
 
       for (const record of recovered) {
-        records.set(record.chapterPath, record);
+        store.records.set(record.chapterPath, record);
         await upsertRecord(record);
       }
     } catch {
       // Downloads remain usable per chapter even if the index is unreadable.
     } finally {
-      initialized = true;
+      store.initialized = true;
       notify();
     }
   })();
 
-  return initializing;
+  return store.initializing;
 }
 
 async function pump() {
-  if (running) {
+  if (store.running) {
     return;
   }
 
-  running = true;
+  store.running = true;
 
   try {
-    while (queue.length > 0) {
-      const input = queue.shift();
+    while (store.queue.length > 0) {
+      const input = store.queue.shift();
 
       if (!input) {
         break;
@@ -241,7 +200,7 @@ async function pump() {
       await runDownload(input);
     }
   } finally {
-    running = false;
+    store.running = false;
   }
 }
 
@@ -249,8 +208,8 @@ async function runDownload(input: DownloadInput) {
   const chapterPath = input.chapterPath;
   const generation = runs.start(chapterPath);
   const controller = new AbortController();
-  controllers.set(chapterPath, controller);
-  states.set(chapterPath, { status: 'downloading', page: 0, total: 0 });
+  store.controllers.set(chapterPath, controller);
+  store.states.set(chapterPath, { status: 'downloading', page: 0, total: 0 });
   notify();
 
   try {
@@ -272,7 +231,7 @@ async function runDownload(input: DownloadInput) {
     let completed = 0;
     let cursor = 0;
 
-    states.set(chapterPath, { status: 'downloading', page: 0, total });
+    store.states.set(chapterPath, { status: 'downloading', page: 0, total });
     notify();
 
     const worker = async () => {
@@ -298,7 +257,7 @@ async function runDownload(input: DownloadInput) {
 
         localPages[index] = file.uri;
         completed += 1;
-        states.set(chapterPath, {
+        store.states.set(chapterPath, {
           status: 'downloading',
           page: completed,
           total,
@@ -347,38 +306,55 @@ async function runDownload(input: DownloadInput) {
       return;
     }
 
-    records.set(chapterPath, record);
-    states.delete(chapterPath);
+    store.records.set(chapterPath, record);
+    store.states.delete(chapterPath);
     forgetRemoteCache(readerCacheKey(chapterPath));
     notify();
   } catch (error) {
-    const wasCancelled = runs.consumeCancel(chapterPath);
-
-    if (!runs.isCurrent(chapterPath, generation)) {
-      if (wasCancelled) {
-        deleteChapterFiles(chapterPath);
-      }
-
-      return;
-    }
-
-    // Log real failures (fetch, write, JSON) so "failed" is diagnosable.
-    console.warn(`[downloads] ${chapterPath}:`, error);
-
-    deleteChapterFiles(chapterPath);
-
-    if (wasCancelled) {
-      states.delete(chapterPath);
-    } else {
-      states.set(chapterPath, { status: 'failed', page: 0, total: 0 });
-    }
-
-    notify();
+    settleFailed(chapterPath, generation, error);
   } finally {
-    if (controllers.get(chapterPath) === controller) {
-      controllers.delete(chapterPath);
+    releaseDownload(chapterPath, generation, controller);
+  }
+}
+
+/** Failure and cancellation both land here: a stale run only cleans up files. */
+function settleFailed(
+  chapterPath: string,
+  generation: number,
+  error: unknown,
+): void {
+  const wasCancelled = runs.consumeCancel(chapterPath);
+
+  if (!runs.isCurrent(chapterPath, generation)) {
+    if (wasCancelled) {
+      deleteChapterFiles(chapterPath);
     }
 
-    runs.finish(chapterPath, generation);
+    return;
   }
+
+  // Log real failures (fetch, write, JSON) so "failed" is diagnosable.
+  console.warn(`[downloads] ${chapterPath}:`, error);
+
+  deleteChapterFiles(chapterPath);
+
+  if (wasCancelled) {
+    store.states.delete(chapterPath);
+  } else {
+    store.states.set(chapterPath, { status: 'failed', page: 0, total: 0 });
+  }
+
+  notify();
+}
+
+function releaseDownload(
+  chapterPath: string,
+  generation: number,
+  controller: AbortController,
+): void {
+  if (store.controllers.get(chapterPath) === controller) {
+    store.controllers.delete(chapterPath);
+  }
+
+  runs.finish(chapterPath, generation);
 }
