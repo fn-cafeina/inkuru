@@ -14,6 +14,7 @@ import { ReaderSkeleton } from './components/ReaderSkeleton';
 import { ReaderPages } from './pages/ReaderPages';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { useFocusEffect } from '@react-navigation/native';
+import { readerConsumesBack } from './readerBack';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
 import { readerCacheKey } from '../../storage/cacheKeys';
@@ -153,17 +154,19 @@ export default function ReaderScreen({ navigation, route }: Props) {
           return true;
         }
 
-        if (chromeVisible) {
-          setChromeVisible(false);
-          return true;
+        // While the first chapter loads there is no chrome to hide, so the
+        // press must fall through instead of being swallowed.
+        if (!readerConsumesBack({ sheetOpen: false, chromeVisible, ready })) {
+          return false;
         }
 
-        return false;
+        setChromeVisible(false);
+        return true;
       },
     );
 
     return () => subscription.remove();
-  }, [chromeVisible, pickerOpen, settingsOpen]);
+  }, [chromeVisible, pickerOpen, ready, settingsOpen]);
 
   const goBack = () => goBackOrTabs(navigation);
 
