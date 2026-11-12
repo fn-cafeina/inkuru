@@ -4,11 +4,12 @@ import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 
-import { palette, useColors } from '../theme/colors';
+import { reader, useColors } from '../theme/colors';
 import { APP_BAR_GAP } from '../theme/spacing';
 import { AppPressable } from './AppPressable';
 
@@ -29,13 +30,16 @@ export function ScreenHeader({
   tone?: 'auto' | 'dark';
 }) {
   const colors = useColors();
-  const textColor = tone === 'dark' ? palette.dark.text : colors.text;
-  const mutedColor = tone === 'dark' ? palette.dark.textMuted : colors.textMuted;
+  const textColor = tone === 'dark' ? reader.text : colors.text;
+  const mutedColor = tone === 'dark' ? reader.textMuted : colors.textMuted;
+  const reduced = useReducedMotion();
   const titleOpacity = useSharedValue(titleVisible ? 1 : 0);
 
   useEffect(() => {
-    titleOpacity.value = withTiming(titleVisible ? 1 : 0, { duration: 150 });
-  }, [titleOpacity, titleVisible]);
+    titleOpacity.value = withTiming(titleVisible ? 1 : 0, {
+      duration: reduced ? 0 : 150,
+    });
+  }, [reduced, titleOpacity, titleVisible]);
 
   const titleStyle = useAnimatedStyle(() => ({
     opacity: titleOpacity.value,

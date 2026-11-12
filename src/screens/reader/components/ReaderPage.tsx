@@ -6,7 +6,7 @@ import Animated from 'react-native-reanimated';
 import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
-import { palette } from '../../../theme/colors';
+import { reader } from '../../../theme/colors';
 import { AppPressable } from '../../../components/AppPressable';
 import { knownPageRatio, pageBox, rememberPageRatio } from '../readerPageLayout';
 import type { SourceSize } from '../readerPageLayout';
@@ -93,8 +93,8 @@ export function ReaderPage({
 
   return (
     <View
-      className="bg-zinc-950"
       style={{
+        backgroundColor: reader.background,
         width: viewportWidth,
         height: viewportHeight,
         overflow: 'hidden',
@@ -117,7 +117,7 @@ export function ReaderPage({
           }
           className="items-center justify-center px-4"
         >
-          <Text className="text-center text-xs text-zinc-300">
+          <Text className="text-center text-xs" style={{ color: reader.text }}>
             No se pudo cargar. Toca para reintentar.
           </Text>
         </AppPressable>
@@ -137,9 +137,10 @@ export function ReaderPage({
                   accessible={false}
                   importantForAccessibility="no-hide-descendants"
                   pointerEvents="none"
-                  className="absolute inset-0 items-center justify-center bg-zinc-900"
+                  className="absolute inset-0 items-center justify-center"
+                  style={{ backgroundColor: reader.surface }}
                 >
-                  <ActivityIndicator color={palette.dark.textMuted} />
+                  <ActivityIndicator color={reader.textMuted} />
                 </View>
               )}
               <Animated.View

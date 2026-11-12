@@ -27,6 +27,7 @@ import type { MangaChapter, ReaderData } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import type { RootStackParamList } from '../../navigation/types';
 import { goBackOrTabs } from '../../navigation/back';
+import { reader } from '../../theme/colors';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
@@ -168,7 +169,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
 
   return (
     // The reader fills the whole window behind both system bars.
-    <View className="flex-1 bg-zinc-950">
+    <View className="flex-1" style={{ backgroundColor: reader.background }}>
       <StatusBar hidden />
       <NavigationBar hidden />
       <View

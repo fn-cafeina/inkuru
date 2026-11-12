@@ -1,10 +1,14 @@
 import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { ScreenHeader } from '../../../components/ScreenHeader';
-import { palette, useColors } from '../../../theme/colors';
+import { reader } from '../../../theme/colors';
 
 type Props = {
   title: string;
@@ -29,7 +33,9 @@ export function ReaderChrome({
   onOpenSettings,
   onRetry,
 }: Props) {
-  const colors = useColors();
+  const reduced = useReducedMotion();
+  const fade = reduced ? undefined : FadeIn.duration(150);
+  const fadeOut = reduced ? undefined : FadeOut.duration(150);
 
   return (
     <>
@@ -43,10 +49,14 @@ export function ReaderChrome({
             accessibilityLabel="No se pudo actualizar. Reintentar"
             hitSlop={4}
             onPress={onRetry}
-            className="min-h-10 flex-row items-center rounded-full bg-zinc-900 px-4 dark:bg-zinc-100"
+            className="min-h-12 flex-row items-center rounded-full px-4"
+            style={{ backgroundColor: reader.text }}
           >
-            <Feather name="refresh-cw" size={14} color={colors.background} />
-            <Text className="ml-2 text-xs text-white dark:text-zinc-900">
+            <Feather name="refresh-cw" size={14} color={reader.background} />
+            <Text
+              className="ml-2 text-xs"
+              style={{ color: reader.background }}
+            >
               No se pudo actualizar. Reintentar
             </Text>
           </AppPressable>
@@ -55,10 +65,10 @@ export function ReaderChrome({
 
       {visible ? (
         <Animated.View
-          entering={FadeIn.duration(150)}
-          exiting={FadeOut.duration(150)}
-          className="absolute left-0 right-0 top-0 bg-zinc-950"
-          style={{ paddingTop: topInset }}
+          entering={fade}
+          exiting={fadeOut}
+          className="absolute left-0 right-0 top-0"
+          style={{ paddingTop: topInset, backgroundColor: reader.background }}
         >
           <ScreenHeader
             title={title}
@@ -70,16 +80,18 @@ export function ReaderChrome({
                 <AppPressable
                   accessibilityLabel="Lista de capítulos"
                   onPress={onOpenPicker}
-                  className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
+                  className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border"
+                  style={{ borderColor: reader.border }}
                 >
-                  <Feather name="list" size={18} color={palette.dark.text} />
+                  <Feather name="list" size={18} color={reader.text} />
                 </AppPressable>
                 <AppPressable
                   accessibilityLabel="Ajustes de lectura"
                   onPress={onOpenSettings}
-                  className="min-h-12 min-w-12 items-center justify-center rounded-full border border-zinc-800"
+                  className="min-h-12 min-w-12 items-center justify-center rounded-full border"
+                  style={{ borderColor: reader.border }}
                 >
-                  <Feather name="settings" size={18} color={palette.dark.text} />
+                  <Feather name="settings" size={18} color={reader.text} />
                 </AppPressable>
               </View>
             }

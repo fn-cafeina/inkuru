@@ -1,9 +1,13 @@
 import { ScrollView, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  useReducedMotion,
+} from 'react-native-reanimated';
 
 import type { MangaChapter } from '../../../source/zonatmo';
 import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
+import { reader } from '../../../theme/colors';
 
 type Props = {
   next?: MangaChapter;
@@ -25,11 +29,12 @@ export function ReaderTransition({
   onOpenNext,
   onToggleChrome,
 }: Props) {
+  const reduced = useReducedMotion();
+
   return (
     <Animated.View
-      entering={FadeInDown.duration(250)}
-      style={{ width, height }}
-      className="bg-zinc-950"
+      entering={reduced ? undefined : FadeInDown.duration(250)}
+      style={{ width, height, backgroundColor: reader.background }}
     >
       <AppPressable
         accessible={false}
@@ -43,16 +48,25 @@ export function ReaderTransition({
           contentContainerClassName="flex-grow items-center justify-center px-4"
           contentContainerStyle={{ paddingBottom: bottomInset + 24 }}
         >
-          <Text className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
+          <Text
+            className="text-xs font-semibold uppercase tracking-widest"
+            style={{ color: reader.textMuted }}
+          >
             Fin del capítulo
           </Text>
 
           {next ? (
             <>
-              <Text className="mt-6 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+              <Text
+                className="mt-6 text-xs font-semibold uppercase tracking-widest"
+                style={{ color: reader.textMuted }}
+              >
                 Siguiente
               </Text>
-              <Text className="mt-3 text-center text-base text-zinc-300">
+              <Text
+                className="mt-3 text-center text-base"
+                style={{ color: reader.text }}
+              >
                 {next.title}
               </Text>
               <View className="mt-6 self-stretch">
@@ -66,7 +80,10 @@ export function ReaderTransition({
               </View>
             </>
           ) : (
-            <Text className="mt-6 text-center text-sm text-zinc-400">
+            <Text
+              className="mt-6 text-center text-sm"
+              style={{ color: reader.textMuted }}
+            >
               {chapterIndex < 0
                 ? 'No hay capítulo siguiente.'
                 : 'Último capítulo.'}
