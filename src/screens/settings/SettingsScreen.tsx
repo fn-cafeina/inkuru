@@ -10,6 +10,8 @@ import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import { SettingSection } from '../../components/SettingSection';
 import { useColors } from '../../theme/colors';
+import { getDownloadSummary } from '../../downloads/manager';
+import { useDownloadVersion } from '../../hooks/useDownloads';
 import {
   checkForUpdate,
   currentVersion,
@@ -29,6 +31,7 @@ const INSTALL_FAILED = 'No se pudo abrir el instalador. Inténtalo otra vez.';
 export default function SettingsScreen() {
   const colors = useColors();
   const update = useSyncExternalStore(subscribeUpdates, getUpdateState);
+  useDownloadVersion();
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState<number | null>(null);
   const [installError, setInstallError] = useState<string | null>(null);
@@ -126,6 +129,7 @@ export default function SettingsScreen() {
               style={{ backgroundColor: colors.accentContainer }}
             >
               <Text
+                accessibilityLiveRegion="polite"
                 className="text-base font-medium"
                 style={{ color: colors.onAccentContainer }}
               >
@@ -135,11 +139,10 @@ export default function SettingsScreen() {
                 <View className="flex-1">
                   <Button
                     size="lg"
-                    disabled={phase !== 'idle'}
+                    busy={phase !== 'idle'}
                     onPress={() => void install()}
-                  >{
-                    actionLabel(phase, progress)
-                  }
+                  >
+                    {actionLabel(phase, progress)}
                   </Button>
                 </View>
                 {phase === 'download' ? (
@@ -149,7 +152,11 @@ export default function SettingsScreen() {
                 ) : null}
               </View>
               {installError !== null ? (
-                <Text className="text-sm" style={{ color: colors.notification }}>
+                <Text
+                  accessibilityLiveRegion="polite"
+                  className="text-sm"
+                  style={{ color: colors.notification }}
+                >
                   {installError}
                 </Text>
               ) : null}
@@ -158,11 +165,29 @@ export default function SettingsScreen() {
         </SettingSection>
 
         <SettingSection title="Aplicación">
-          <InfoRow label="Versión" value={currentVersion()} />
+          <InfoRow label="Versión" value={currentVersion()} divider />
+          <InfoRow
+            label="Descargas"
+            hint="Capítulos guardados en el dispositivo"
+            value={downloadSummaryLabel(getDownloadSummary())}
+            divider
+          />
         </SettingSection>
       </ScrollView>
     </Screen>
   );
+}
+
+function downloadSummaryLabel(
+  summary: ReturnType<typeof getDownloadSummary>,
+): string {
+  if (summary.done === 0 && summary.active === 0) {
+    return 'Ninguna';
+  }
+
+  const done = `${summary.done} guardado${summary.done === 1 ? '' : 's'}`;
+
+  return summary.active > 0 ? `${done}, ${summary.active} en curso` : done;
 }
 
 function actionLabel(phase: Phase, progress: number | null): string {
@@ -215,6 +240,7 @@ function InfoRow({
   value,
   valueColor,
   trailing,
+  divider = false,
   disabled = false,
   onPress,
 }: {
@@ -223,6 +249,8 @@ function InfoRow({
   hint?: string | null;
   valueColor?: string;
   trailing?: ReactNode;
+  /** Hairline above the row, matching the settings lists. */
+  divider?: boolean;
   disabled?: boolean;
   onPress?: () => void;
 }) {
@@ -231,6 +259,9 @@ function InfoRow({
   const className = 'min-h-14 flex-row items-center px-4';
   const content = (
     <>
+      {divider ? (
+        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-zinc-800" />
+      ) : null}
       <View className="flex-1 pr-3">
         <Text className="text-base text-zinc-900 dark:text-zinc-100">
           {label}

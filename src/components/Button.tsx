@@ -1,7 +1,7 @@
 import { Text } from 'react-native';
 
 import { AppPressable } from './AppPressable';
-import { palette, useColors } from '../theme/colors';
+import { reader, useColors } from '../theme/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'lg';
@@ -18,11 +18,43 @@ const SIZES: Record<Size, string> = {
   lg: 'min-h-14 px-4',
 };
 
+/** Primary reads on accent, the other variants on the page background. */
+function textColorFor(
+  variant: Variant,
+  onDark: boolean,
+  colors: ReturnType<typeof useColors>,
+): string {
+  if (variant === 'primary') {
+    return colors.onAccent;
+  }
+
+  if (onDark) {
+    return variant === 'secondary' ? reader.text : reader.textMuted;
+  }
+
+  return variant === 'secondary' ? colors.text : colors.textMuted;
+}
+
+function containerStyleFor(
+  variant: Variant,
+  onDark: boolean,
+  colors: ReturnType<typeof useColors>,
+) {
+  if (variant === 'primary') {
+    return { backgroundColor: colors.accent };
+  }
+
+  return variant === 'secondary'
+    ? { borderColor: onDark ? reader.border : colors.border }
+    : undefined;
+}
+
 export function Button({
   variant = 'primary',
   size = 'sm',
   tone = 'auto',
   disabled = false,
+  busy = false,
   onPress,
   children,
 }: {
@@ -30,32 +62,23 @@ export function Button({
   size?: Size;
   tone?: Tone;
   disabled?: boolean;
+  /**
+   * Not pressable, but still fully legible: a disabled look on a label that
+   * carries live progress ("Descargando 47%") hides the only feedback there is.
+   */
+  busy?: boolean;
   onPress: () => void;
   children: string;
 }) {
   const colors = useColors();
   const onDark = tone === 'dark';
-  const textColor =
-    variant === 'primary'
-      ? colors.onAccent
-      : onDark
-        ? variant === 'secondary'
-          ? palette.dark.text
-          : palette.dark.textMuted
-        : variant === 'secondary'
-          ? colors.text
-          : colors.textMuted;
-  const containerStyle =
-    variant === 'primary'
-      ? { backgroundColor: colors.accent }
-      : variant === 'secondary'
-        ? { borderColor: onDark ? '#3f3f46' : colors.border }
-        : undefined;
+  const textColor = textColorFor(variant, onDark, colors);
+  const containerStyle = containerStyleFor(variant, onDark, colors);
 
   return (
     <AppPressable
-      accessibilityState={{ disabled }}
-      disabled={disabled}
+      accessibilityState={{ disabled: disabled || busy }}
+      disabled={disabled || busy}
       onPress={onPress}
       style={containerStyle}
       className={`items-center justify-center rounded-full ${
