@@ -42,6 +42,20 @@ function isFresh(savedAt: number | null | undefined, freshMs?: number) {
   );
 }
 
+/**
+ * Runs a disk read once the JS thread is idle.
+ *
+ * Opening a screen queues the read behind its push; on a cache with many
+ * entries the index rebuild spends ~90ms reading and parsing them, which lands
+ * exactly while the user may want to leave again. The memory cache answers
+ * instantly, so the disk copy can wait for a frame with nothing else to do.
+ */
+function onIdle(task: () => void): () => void {
+  const handle = requestIdleCallback(task, { timeout: 1000 });
+
+  return () => cancelIdleCallback(handle);
+}
+
 function initialState<T>(
   cacheKey: string | undefined,
   freshMs?: number,
@@ -150,11 +164,34 @@ export function useRemoteData<T>(
   useEffect(() => {
     let cancelled = false;
 
-    const start = async () => {
-      const key = cacheKey;
-      const inMemory = readRemoteCache<T>(key);
+    const key = cacheKey;
+    const inMemory = readRemoteCache<T>(key);
 
-      if (key !== undefined && validate && !inMemory) {
+    if (inMemory && isFresh(inMemory.savedAt, freshMs)) {
+      return;
+    }
+
+    // Everything left touches disk (the cache index rebuild reads every
+    // entry) or the network. Both can wait for an idle frame: the skeleton is
+    // already on screen, so nothing visible changes and the back button stays
+    // responsive while the user may already want to leave.
+    const cancelIdle = onIdle(() => {
+      void start();
+    });
+
+    return () => {
+      cancelled = true;
+      cancelIdle();
+      requestRef.current += 1;
+      controllerRef.current?.abort();
+    };
+
+    async function start() {
+      if (cancelled) {
+        return;
+      }
+
+      if (key !== undefined && validate) {
         const stored = await readCache(key, validate);
 
         if (cancelled) {
@@ -178,22 +215,12 @@ export function useRemoteData<T>(
             return;
           }
         }
-      } else if (inMemory && isFresh(inMemory.savedAt, freshMs)) {
-        return;
       }
 
       if (!cancelled) {
         void run('initial');
       }
-    };
-
-    void start();
-
-    return () => {
-      cancelled = true;
-      requestRef.current += 1;
-      controllerRef.current?.abort();
-    };
+    }
   }, [run, cacheKey, freshMs, validate]);
 
   const reload = useCallback(() => {
