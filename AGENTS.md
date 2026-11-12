@@ -10,12 +10,7 @@
 - `bun run start`: dev server
 - `bun run typecheck`: `tsc --noEmit`
 - `bun run lint`: ESLint
-- `bun run check:parser`: source parser self-check
-- `bun run check:discover`: discover feed self-check
-- `bun run check:reader`: chapter ranges and reader geometry self-check
-- `bun run check:downloads`: download, storage and cache self-check
-- `bun run check:release`: release script self-check
-- `bun run check:update`: update version compare self-check
+- `bun run check`: run every `*.check.ts` self-check
 - `bun run release <version>`: bump, tag and push a release
 - `npx expo-doctor@1.21.5`: dependency health check; CI runs it, run it
   after adding or upgrading dependencies
@@ -67,8 +62,7 @@
 - No test framework. Self-checks are plain scripts `*.check.ts` run directly
   with `bun <file>`, using hand-rolled `assert` that throws on failure.
 - New non-trivial logic (parser, reducer, file handling, math) needs one
-  `*.check.ts` next to the code, wired into its `check:*` script in
-  `package.json`.
+  `*.check.ts` next to the code; the runner discovers it automatically.
 - Do not add `*.test.ts` files or a test runner; nothing executes them.
 - Fixtures live in `__fixtures__/` next to their module.
 
