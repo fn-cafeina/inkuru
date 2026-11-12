@@ -17,7 +17,7 @@
       "permissions": [
         "REQUEST_INSTALL_PACKAGES"
       ],
-      "predictiveBackGestureEnabled": true,
+      "predictiveBackGestureEnabled": false,
       "package": "com.inkuru.app"
     },
     "plugins": [
