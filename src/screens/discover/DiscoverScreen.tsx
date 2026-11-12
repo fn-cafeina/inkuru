@@ -3,6 +3,8 @@ import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
   RefreshControl,
   TextInput,
   useWindowDimensions,
@@ -43,38 +45,43 @@ export default function DiscoverScreen() {
 
   return (
     <Screen>
-      <PageTitle>Explorar</PageTitle>
-      <View className="px-4 pb-3">
-        <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-zinc-900">
-          <View className="pl-3 pr-1">
-            <Feather name="search" size={18} color={colors.iconInactive} />
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'android' ? 'height' : 'padding'}
+      >
+        <PageTitle>Explorar</PageTitle>
+        <View className="px-4 pb-3">
+          <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-zinc-900">
+            <View className="pl-3 pr-1">
+              <Feather name="search" size={18} color={colors.iconInactive} />
+            </View>
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              onSubmitEditing={() => setTerm(input.trim())}
+              accessibilityLabel="Buscar manga"
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              placeholder="Título del manga"
+              placeholderTextColor={colors.iconInactive}
+              className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
+            />
+            {input ? (
+              <AppPressable
+                accessibilityLabel="Limpiar búsqueda"
+                onPress={clear}
+                hitSlop={8}
+                className="min-h-12 min-w-12 items-center justify-center rounded-full"
+              >
+                <Feather name="x" size={16} color={colors.iconInactive} />
+              </AppPressable>
+            ) : null}
           </View>
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            onSubmitEditing={() => setTerm(input.trim())}
-            accessibilityLabel="Buscar manga"
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            placeholder="Título del manga"
-            placeholderTextColor={colors.iconInactive}
-            className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
-          />
-          {input ? (
-            <AppPressable
-              accessibilityLabel="Limpiar búsqueda"
-              onPress={clear}
-              hitSlop={8}
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
-            >
-              <Feather name="x" size={16} color={colors.iconInactive} />
-            </AppPressable>
-          ) : null}
         </View>
-      </View>
 
-      <DiscoverResults term={term} onClear={clear} />
+        <DiscoverResults term={term} onClear={clear} />
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
@@ -109,6 +116,8 @@ function DiscoverFallback({
     );
   }
 
+  // An empty catalog is not a failure, so there is nothing to retry; only a
+  // failed request gets a retry button.
   return (
     <EmptyState
       title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
@@ -116,9 +125,11 @@ function DiscoverFallback({
         term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
       }
       action={
-        <Button variant="secondary" onPress={term ? onClear : onRetry}>
-          {term ? 'Ver catálogo' : 'Reintentar'}
-        </Button>
+        term ? (
+          <Button variant="secondary" onPress={onClear}>
+            Ver catálogo
+          </Button>
+        ) : undefined
       }
     />
   );
