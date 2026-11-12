@@ -2,7 +2,6 @@ import type {
   DownloadInput,
   DownloadRecord,
   DownloadState,
-  DownloadSummary,
 } from './types';
 
 /**
@@ -56,17 +55,4 @@ export function getDownloadState(
   return record
     ? { status: 'done', page: record.pageCount, total: record.pageCount }
     : undefined;
-}
-
-/** Chapters on disk plus the ones still queued or downloading. */
-export function getDownloadSummary(): DownloadSummary {
-  let active = 0;
-
-  for (const state of store.states.values()) {
-    if (state.status === 'queued' || state.status === 'downloading') {
-      active += 1;
-    }
-  }
-
-  return { done: store.records.size, active };
 }

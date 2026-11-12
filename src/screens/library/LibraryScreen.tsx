@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Text,
   TextInput,
   useWindowDimensions,
   View,
@@ -23,8 +22,6 @@ import { MangaGridCard } from '../../components/MangaGridCard';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import type { TabNavigation } from '../../navigation/types';
-import { getDownloadState, getDownloadSummary } from '../../downloads/manager';
-import { useDownloadVersion } from '../../hooks/useDownloads';
 import { loadLibraryResult, removeFromLibrary } from '../../storage/library';
 import type { LibraryEntry } from '../../storage/library';
 import { loadProgressMany } from '../../storage/readerProgress';
@@ -57,9 +54,6 @@ export default function LibraryScreen() {
   const loadTicket = useRef(0);
   const cardWidth = mangaCardWidth(width);
   const [query, setQuery] = useState('');
-  // Badges and the summary line both read the download manager, which is
-  // outside React state.
-  useDownloadVersion();
   const visible = useMemo(() => {
     const ordered = orderLibrary(entries, progress);
 
@@ -185,7 +179,6 @@ export default function LibraryScreen() {
       >
         Biblioteca
       </PageTitle>
-      <DownloadSummary />
 
       {entries.length > 4 ? (
         <LibrarySearch query={query} onChange={setQuery} />
@@ -233,7 +226,6 @@ export default function LibraryScreen() {
                   title: item.title,
                 })
               }
-              downloaded={getDownloadState(item.path)?.status === 'done'}
               onRemove={editing ? () => confirmRemove(item) : undefined}
             />
           )}
@@ -252,35 +244,6 @@ export default function LibraryScreen() {
         />
       )}
     </Screen>
-  );
-}
-
-/** One line for a background job that otherwise has no visible home. */
-function DownloadSummary() {
-  useDownloadVersion();
-  const { done, active } = getDownloadSummary();
-
-  if (done === 0 && active === 0) {
-    return null;
-  }
-
-  const parts = [];
-
-  if (active > 0) {
-    parts.push(`${active} descargando`);
-  }
-
-  if (done > 0) {
-    parts.push(`${done} ${done === 1 ? 'capítulo' : 'capítulos'} sin conexión`);
-  }
-
-  return (
-    <Text
-      accessibilityLiveRegion="polite"
-      className="px-4 pb-3 text-xs text-zinc-500 dark:text-zinc-400"
-    >
-      {parts.join(' · ')}
-    </Text>
   );
 }
 

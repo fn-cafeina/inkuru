@@ -10,8 +10,6 @@ import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import { SettingSection } from '../../components/SettingSection';
 import { useColors } from '../../theme/colors';
-import { getDownloadSummary } from '../../downloads/manager';
-import { useDownloadVersion } from '../../hooks/useDownloads';
 import {
   checkForUpdate,
   currentVersion,
@@ -31,7 +29,6 @@ const INSTALL_FAILED = 'No se pudo abrir el instalador. Inténtalo otra vez.';
 export default function SettingsScreen() {
   const colors = useColors();
   const update = useSyncExternalStore(subscribeUpdates, getUpdateState);
-  useDownloadVersion();
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState<number | null>(null);
   const [installError, setInstallError] = useState<string | null>(null);
@@ -165,29 +162,11 @@ export default function SettingsScreen() {
         </SettingSection>
 
         <SettingSection title="Aplicación">
-          <InfoRow label="Versión" value={currentVersion()} divider />
-          <InfoRow
-            label="Descargas"
-            hint="Capítulos guardados en el dispositivo"
-            value={downloadSummaryLabel(getDownloadSummary())}
-            divider
-          />
+          <InfoRow label="Versión" value={currentVersion()} />
         </SettingSection>
       </ScrollView>
     </Screen>
   );
-}
-
-function downloadSummaryLabel(
-  summary: ReturnType<typeof getDownloadSummary>,
-): string {
-  if (summary.done === 0 && summary.active === 0) {
-    return 'Ninguna';
-  }
-
-  const done = `${summary.done} guardado${summary.done === 1 ? '' : 's'}`;
-
-  return summary.active > 0 ? `${done}, ${summary.active} en curso` : done;
 }
 
 function actionLabel(phase: Phase, progress: number | null): string {

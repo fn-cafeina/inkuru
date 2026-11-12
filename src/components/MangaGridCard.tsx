@@ -11,8 +11,6 @@ type Props = {
   cover: string;
   subtitle?: string;
   width: number;
-  /** Chapter is on disk; shown as a badge so the download is discoverable. */
-  downloaded?: boolean;
   /** Reveals a remove button; long press alone is undiscoverable. */
   onRemove?: () => void;
   onPress: () => void;
@@ -23,7 +21,6 @@ export function MangaGridCard({
   cover,
   subtitle,
   width,
-  downloaded = false,
   onRemove,
   onPress,
 }: Props) {
@@ -49,15 +46,6 @@ export function MangaGridCard({
             transition={100}
             accessible={false}
           />
-          {downloaded ? (
-            <View
-              accessible={false}
-              className="absolute right-1.5 top-1.5 h-6 w-6 items-center justify-center rounded-full"
-              style={{ backgroundColor: colors.accent }}
-            >
-              <Feather name="save" size={12} color={colors.onAccent} />
-            </View>
-          ) : null}
         </View>
         <Text
           numberOfLines={2}

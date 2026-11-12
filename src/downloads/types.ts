@@ -20,12 +20,6 @@ export type DownloadRecord = DownloadInput & {
   completedAt: number;
 };
 
-/** Surfaced by the library line: chapters on disk, and chapters in flight. */
-export type DownloadSummary = {
-  done: number;
-  active: number;
-};
-
 export type DownloadFile = {
   version: 1;
   record: DownloadRecord;

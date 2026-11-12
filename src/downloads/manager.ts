@@ -18,7 +18,6 @@ import { chapterDirNames } from './paths';
 import { createRunTracker } from './runState';
 import {
   getDownloadState,
-  getDownloadSummary,
   getVersion,
   notify,
   store,
@@ -27,7 +26,7 @@ import {
 import { withTimeout } from './timeout';
 import type { DownloadInput, DownloadRecord } from './types';
 
-export { subscribe, getVersion, getDownloadState, getDownloadSummary };
+export { subscribe, getVersion, getDownloadState };
 
 const MAX_PARALLEL_PAGES = 3;
 const runs = createRunTracker();
