@@ -1,11 +1,22 @@
+import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 import { APP_BAR_GAP, APP_BAR_HEIGHT, SCREEN_PADDING } from '../theme/spacing';
 
-export function PageTitle({ children }: { children: string }) {
+/**
+ * Top bar of the tab screens. `action` keeps the optional trailing control in
+ * the same 56dp row instead of every screen building its own.
+ */
+export function PageTitle({
+  children,
+  action,
+}: {
+  children: string;
+  action?: ReactNode;
+}) {
   return (
     <View
-      className="justify-center"
+      className="flex-row items-center"
       style={{
         height: APP_BAR_HEIGHT,
         paddingHorizontal: SCREEN_PADDING,
@@ -14,10 +25,11 @@ export function PageTitle({ children }: { children: string }) {
     >
       <Text
         accessibilityRole="header"
-        className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
+        className="flex-1 text-xl font-semibold text-zinc-900 dark:text-zinc-50"
       >
         {children}
       </Text>
+      {action}
     </View>
   );
 }

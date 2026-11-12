@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Text,
+  TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import {
   useFocusEffect,
   useNavigation,
   useScrollToTop,
 } from '@react-navigation/native';
 
+import { AppPressable } from '../../components/AppPressable';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -19,12 +23,15 @@ import { MangaGridCard } from '../../components/MangaGridCard';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import type { TabNavigation } from '../../navigation/types';
+import { getDownloadState, getDownloadSummary } from '../../downloads/manager';
+import { useDownloadVersion } from '../../hooks/useDownloads';
 import { loadLibraryResult, removeFromLibrary } from '../../storage/library';
 import type { LibraryEntry } from '../../storage/library';
 import { loadProgressMany } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { useColors } from '../../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
+import { matchesQuery, orderLibrary } from './orderLibrary';
 
 let cachedEntries: LibraryEntry[] | null = null;
 let cachedProgress: Record<string, ReaderProgress> = {};
@@ -43,9 +50,21 @@ export default function LibraryScreen() {
   const [loaded, setLoaded] = useState(cachedEntries !== null);
   const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
+  // Removing from a 3-column grid: long press alone is undiscoverable, and a
+  // delete button under every card is noise. One toggle reveals them all.
+  const [editing, setEditing] = useState(false);
   const mounted = useRef(true);
   const loadTicket = useRef(0);
   const cardWidth = mangaCardWidth(width);
+  const [query, setQuery] = useState('');
+  // Badges and the summary line both read the download manager, which is
+  // outside React state.
+  useDownloadVersion();
+  const visible = useMemo(() => {
+    const ordered = orderLibrary(entries, progress);
+
+    return query.trim() ? ordered.filter((item) => matchesQuery(item.title, query)) : ordered;
+  }, [entries, progress, query]);
 
   useEffect(() => {
     mounted.current = true;
@@ -128,17 +147,13 @@ export default function LibraryScreen() {
             setChecking(false);
 
             const next = entries.filter((item) => item.path !== entry.path);
+            const nextProgress = { ...progress };
 
+            delete nextProgress[entry.path];
             cachedEntries = next;
+            cachedProgress = nextProgress;
             setEntries(next);
-            setProgress((current) => {
-              const nextProgress = { ...current };
-
-              delete nextProgress[entry.path];
-              cachedProgress = nextProgress;
-
-              return nextProgress;
-            });
+            setProgress(nextProgress);
           });
         },
       },
@@ -147,7 +162,34 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      <PageTitle>Biblioteca</PageTitle>
+      <PageTitle
+        action={
+          entries.length > 0 && !failed ? (
+            <AppPressable
+              accessibilityLabel={
+                editing ? 'Terminar de editar' : 'Editar biblioteca'
+              }
+              accessibilityState={{ selected: editing }}
+              onPress={() => setEditing((value) => !value)}
+              hitSlop={8}
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            >
+              <Feather
+                name={editing ? 'check' : 'edit-2'}
+                size={18}
+                color={editing ? colors.accent : colors.iconInactive}
+              />
+            </AppPressable>
+          ) : undefined
+        }
+      >
+        Biblioteca
+      </PageTitle>
+      <DownloadSummary />
+
+      {entries.length > 4 ? (
+        <LibrarySearch query={query} onChange={setQuery} />
+      ) : null}
 
       {failed ? (
         <ErrorState
@@ -174,7 +216,7 @@ export default function LibraryScreen() {
       ) : (
         <FlatList
           ref={listRef}
-          data={entries}
+          data={visible}
           keyExtractor={(item) => item.path}
           numColumns={3}
           columnWrapperStyle={{ gap: CARD_GAP }}
@@ -191,12 +233,95 @@ export default function LibraryScreen() {
                   title: item.title,
                 })
               }
-              onLongPress={() => confirmRemove(item)}
+              downloaded={getDownloadState(item.path)?.status === 'done'}
+              onRemove={editing ? () => confirmRemove(item) : undefined}
             />
           )}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <EmptyState
+              title={`Sin resultados para «${query}»`}
+              subtitle="Prueba con otro título."
+              action={
+                <Button variant="secondary" onPress={() => setQuery('')}>
+                  Ver biblioteca
+                </Button>
+              }
+            />
+          }
         />
       )}
     </Screen>
+  );
+}
+
+/** One line for a background job that otherwise has no visible home. */
+function DownloadSummary() {
+  useDownloadVersion();
+  const { done, active } = getDownloadSummary();
+
+  if (done === 0 && active === 0) {
+    return null;
+  }
+
+  const parts = [];
+
+  if (active > 0) {
+    parts.push(`${active} descargando`);
+  }
+
+  if (done > 0) {
+    parts.push(`${done} ${done === 1 ? 'capítulo' : 'capítulos'} sin conexión`);
+  }
+
+  return (
+    <Text
+      accessibilityLiveRegion="polite"
+      className="px-4 pb-3 text-xs text-zinc-500 dark:text-zinc-400"
+    >
+      {parts.join(' · ')}
+    </Text>
+  );
+}
+
+/** Only worth the row once the grid is longer than a screen or two. */
+function LibrarySearch({
+  query,
+  onChange,
+}: {
+  query: string;
+  onChange: (query: string) => void;
+}) {
+  const colors = useColors();
+
+  return (
+    <View className="mb-3 px-4">
+      <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-zinc-900">
+        <View className="pl-3 pr-1">
+          <Feather name="search" size={18} color={colors.iconInactive} />
+        </View>
+        <TextInput
+          value={query}
+          onChangeText={onChange}
+          accessibilityLabel="Buscar en la biblioteca"
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="search"
+          placeholder="Buscar en la biblioteca"
+          placeholderTextColor={colors.iconInactive}
+          className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
+        />
+        {query ? (
+          <AppPressable
+            accessibilityLabel="Limpiar búsqueda"
+            onPress={() => onChange('')}
+            hitSlop={8}
+            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+          >
+            <Feather name="x" size={16} color={colors.iconInactive} />
+          </AppPressable>
+        ) : null}
+      </View>
+    </View>
   );
 }
