@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -119,6 +119,9 @@ export default function MangaScreen({ navigation, route }: Props) {
     () => viewCache.get(path)?.range ?? null,
   );
   const [barTitleVisible, setBarTitleVisible] = useState(false);
+  // A colour change on a 20dp bookmark is a weak acknowledgement of a user
+  // action, so the row under the header says what happened.
+  const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -173,6 +176,9 @@ export default function MangaScreen({ navigation, route }: Props) {
     }
 
     setInLibrary(!inLibrary);
+    setSavedNotice(
+      inLibrary ? 'Quitado de la biblioteca' : 'Guardado en la biblioteca',
+    );
     rememberLocal(path, {
       progress,
       readChapters,
@@ -205,6 +211,16 @@ export default function MangaScreen({ navigation, route }: Props) {
     rememberView(path, { range: index, sort: sortOrder });
     setActiveRange(index);
   };
+  useEffect(() => {
+    if (savedNotice === null) {
+      return;
+    }
+
+    const timer = setTimeout(() => setSavedNotice(null), 2500);
+
+    return () => clearTimeout(timer);
+  }, [savedNotice]);
+
   const goBack = () => goBackOrTabs(navigation);
   const showRefreshError = hasError && data !== null;
 
@@ -268,6 +284,7 @@ export default function MangaScreen({ navigation, route }: Props) {
             })
           }
           onScrollPast={setBarTitleVisible}
+          notice={savedNotice}
         />
       ) : (
         <ErrorState message="Manga no disponible" onRetry={reload} />

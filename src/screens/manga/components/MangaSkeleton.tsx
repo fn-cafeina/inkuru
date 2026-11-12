@@ -3,10 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { ListDivider } from '../../../components/ListDivider';
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
-import {
-  MANGA_COVER_WIDTH,
-  SCREEN_PADDING,
-} from '../../../theme/spacing';
+import { SCREEN_PADDING } from '../../../theme/spacing';
 
 /** Honest detail placeholder: only blocks that always exist. */
 export function MangaSkeleton() {
@@ -20,11 +17,8 @@ export function MangaSkeleton() {
     >
       <View className="flex-row">
         <Skeleton
-          className="rounded-xl"
-          style={{
-            width: MANGA_COVER_WIDTH,
-            aspectRatio: COVER_ASPECT_RATIO,
-          }}
+          className="rounded-2xl"
+          style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
         />
         <View className="ml-4 flex-1">
           <Skeleton className="h-5 w-3/4 rounded" />
@@ -33,13 +27,13 @@ export function MangaSkeleton() {
         </View>
       </View>
 
-      <Skeleton className="mt-4 h-14 rounded-full" />
-
       <View className="mt-4 flex-row gap-1.5">
         <Skeleton className="h-6 w-16 rounded-full" />
         <Skeleton className="h-6 w-20 rounded-full" />
         <Skeleton className="h-6 w-14 rounded-full" />
       </View>
+
+      <Skeleton className="mt-4 h-14 rounded-full" />
 
       <View className="mt-6 flex-row items-center justify-between">
         <Skeleton className="h-3 w-28 rounded" />

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Alert, FlatList, RefreshControl, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import { ChapterRow } from '../../../components/ChapterRow';
 import { EmptyState } from '../../../components/EmptyState';
@@ -39,6 +40,8 @@ type Props = {
   onToggleSort: () => void;
   onOpen: (chapter: MangaChapter) => void;
   onScrollPast: (past: boolean) => void;
+  /** Transient acknowledgement of the library toggle. */
+  notice?: string | null;
 };
 
 export function MangaChapterList({
@@ -61,6 +64,7 @@ export function MangaChapterList({
   onToggleSort,
   onOpen,
   onScrollPast,
+  notice = null,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
   const readCount = useMemo(
@@ -141,6 +145,17 @@ export function MangaChapterList({
             onRead={onOpen}
             ready={ready}
           />
+          {notice ? (
+            <View className="mx-4 my-2 min-h-12 flex-row items-center rounded-full bg-zinc-100 px-4 dark:bg-zinc-900">
+              <Feather name="check" size={16} color={colors.accent} />
+              <Text
+                accessibilityLiveRegion="polite"
+                className="ml-2 text-sm text-zinc-700 dark:text-zinc-200"
+              >
+                {notice}
+              </Text>
+            </View>
+          ) : null}
           {refreshError ? (
             <RefreshNotice
               message="No se pudo actualizar"

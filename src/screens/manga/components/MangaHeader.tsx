@@ -2,26 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 
 import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
 import { OptionChip } from '../../../components/OptionChip';
 import { SectionTitle } from '../../../components/SectionTitle';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
-import { COVER_ASPECT_RATIO } from '../../../theme/layout';
-import { MANGA_COVER_WIDTH } from '../../../theme/spacing';
 import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
+import { MangaCoverInfo, mangaStatusLabel } from './MangaCoverInfo';
 import { TagRow } from './TagRow';
-
-const FACT_VALUES: Record<string, string> = {
-  Ongoing: 'En emisión',
-  Completed: 'Completa',
-  Cancelled: 'Cancelada',
-  Canceled: 'Cancelada',
-  Hiatus: 'En pausa',
-};
 
 type Props = {
   manga: MangaDetail;
@@ -61,15 +51,23 @@ export function MangaHeader({
       chipRowRef.current?.scrollTo({ x, animated: false });
     }
   }, [activeRange]);
-  const status = manga.status
-    ? FACT_VALUES[manga.status] ?? manga.status
-    : undefined;
+  const status = mangaStatusLabel(manga.status);
   const firstChapter = manga.chapters[manga.chapters.length - 1];
   const readChapter = resumeChapter ?? firstChapter;
 
   return (
     <View>
-      <MangaCoverInfo manga={manga} status={status} />
+      <MangaCoverInfo
+        cover={manga.cover}
+        title={manga.title}
+        status={status}
+      />
+
+      {manga.tags.length > 0 ? (
+        <View className="mt-4 px-4">
+          <TagRow tags={manga.tags} />
+        </View>
+      ) : null}
 
       {readChapter ? (
         <View className="mt-4 px-4">
@@ -88,12 +86,6 @@ export function MangaHeader({
 
       {readCount > 0 ? (
         <MangaProgress readCount={readCount} total={manga.chapters.length} />
-      ) : null}
-
-      {manga.tags.length > 0 ? (
-        <View className="mt-4 px-4">
-          <TagRow tags={manga.tags} />
-        </View>
       ) : null}
 
       {manga.synopsis ? <MangaSynopsis synopsis={manga.synopsis} /> : null}
@@ -168,56 +160,6 @@ export function MangaHeader({
   );
 }
 
-function MangaCoverInfo({
-  manga,
-  status,
-}: {
-  manga: MangaDetail;
-  status?: string;
-}) {
-  const colors = useColors();
-
-  return (
-    <View className="flex-row px-4">
-      <View
-        className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
-        style={{ width: MANGA_COVER_WIDTH, aspectRatio: COVER_ASPECT_RATIO }}
-      >
-        <Image
-          source={{ uri: manga.cover }}
-          style={{ width: '100%', height: '100%' }}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          recyclingKey={manga.cover}
-          transition={100}
-          accessible={false}
-        />
-      </View>
-      <View className="ml-4 flex-1">
-        <Text
-          numberOfLines={3}
-          className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
-        >
-          {manga.title}
-        </Text>
-        {status ? (
-          <View
-            className="mt-2 self-start rounded-full px-2.5 py-1"
-            style={{ backgroundColor: colors.accentContainer }}
-          >
-            <Text
-              className="text-xs font-semibold uppercase"
-              style={{ color: colors.onAccentContainer }}
-            >
-              {status}
-            </Text>
-          </View>
-        ) : null}
-      </View>
-    </View>
-  );
-}
-
 function MangaProgress({
   readCount,
   total,
@@ -238,7 +180,7 @@ function MangaProgress({
         />
       </View>
       <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
-        {`${readCount}/${total} capítulos leídos · ${progressPercent}%`}
+        {`${readCount} de ${total} capítulos leídos`}
       </Text>
     </View>
   );
