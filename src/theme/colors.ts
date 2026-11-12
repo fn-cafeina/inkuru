@@ -1,8 +1,10 @@
 import { useColorScheme } from 'react-native';
 
 // `accent` is the Gyro Zeppeli olive green. It is darkened in light mode for
-// text contrast and lightened in dark mode. `--color-accent-500` in global.css
-// mirrors the light value.
+// text contrast and lightened in dark mode.
+// `reader*` values are deliberately mode-independent: the reader is always
+// dark, like every image viewer, so a light theme does not flash a white
+// canvas behind the pages. Do not wrap them in useColorScheme.
 export const palette = {
   light: {
     background: '#fafafa',
@@ -34,6 +36,19 @@ export const palette = {
     onAccentContainer: '#d8eec6',
     notification: '#f87171',
   },
+} as const;
+
+/** Reader chrome, identical in both schemes (see the note above). */
+export const reader = {
+  background: '#09090b',
+  surface: '#18181b',
+  border: '#27272a',
+  text: '#f4f4f5',
+  textMuted: '#a1a1aa',
+  overlay: 'rgba(9, 9, 11, 0.7)',
+  track: 'rgba(255, 255, 255, 0.25)',
+  bar: 'rgba(255, 255, 255, 0.9)',
+  scrim: 'rgba(9, 9, 11, 0.5)',
 } as const;
 
 export function useColors() {
