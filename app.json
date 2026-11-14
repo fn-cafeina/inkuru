@@ -3,7 +3,7 @@
     "name": "Inkuru",
     "slug": "inkuru",
     "description": "Manga reader for Android",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
