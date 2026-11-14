@@ -5,11 +5,7 @@ import { useReducedMotion } from 'react-native-reanimated';
 
 import { reader } from '../theme/colors';
 import { COVER_ASPECT_RATIO } from '../theme/layout';
-import {
-  GRID_CARD_PADDING,
-  GRID_GAP,
-  SCREEN_PADDING,
-} from '../theme/spacing';
+import { GRID_GAP, SCREEN_PADDING } from '../theme/spacing';
 
 type Props = {
   className?: string;
@@ -18,8 +14,8 @@ type Props = {
 };
 
 // One pulse for every placeholder on screen: starting a loop per skeleton made
-// grids flicker out of phase.
-const opacity = new Animated.Value(0.7);
+// grids flicker out of phase. Amplitude and cadence follow rokimu.
+const opacity = new Animated.Value(0.3);
 let pulse: Animated.CompositeAnimation | null = null;
 let subscribers = 0;
 
@@ -30,13 +26,13 @@ function subscribePulse() {
     pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(opacity, {
-          toValue: 0.95,
-          duration: 600,
+          toValue: 0.7,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
-          toValue: 0.6,
-          duration: 600,
+          toValue: 0.3,
+          duration: 800,
           useNativeDriver: true,
         }),
       ]),
@@ -64,10 +60,10 @@ export function Skeleton({ className, style, tone = 'auto' }: Props) {
       accessible={false}
       importantForAccessibility="no-hide-descendants"
       className={`${
-        tone === 'dark' ? '' : 'bg-zinc-300 dark:bg-neutral-700'
+        tone === 'dark' ? '' : 'bg-zinc-300 dark:bg-neutral-800'
       } ${className ?? ''}`}
-      // A pulsing zinc-700 over the reader's near-black canvas is invisible, so
-      // the dark tone gets its own lighter block.
+      // A pulsing block over the reader's black canvas is invisible, so the
+      // dark tone gets its own lighter block.
       style={[
         { opacity },
         tone === 'dark' ? { backgroundColor: reader.border } : null,
@@ -91,18 +87,13 @@ export function MangaGridSkeleton({ cardWidth }: { cardWidth: number }) {
     >
       {Array.from({ length: 6 }, (_, index) => (
         <View key={index} style={{ width: cardWidth }}>
-          <View style={{ padding: GRID_CARD_PADDING }}>
-            <Skeleton
-              className="rounded-xl"
-              style={{
-                width: cardWidth - GRID_CARD_PADDING * 2,
-                aspectRatio: COVER_ASPECT_RATIO,
-              }}
-            />
-            <Skeleton className="mt-2 h-4 rounded" />
-            <Skeleton className="mt-1 h-4 w-2/3 rounded" />
-            <Skeleton className="mt-1 h-4 w-1/2 rounded" />
-          </View>
+          <Skeleton
+            className="rounded-xl"
+            style={{ width: cardWidth, aspectRatio: COVER_ASPECT_RATIO }}
+          />
+          <Skeleton className="mt-2 h-4 rounded" />
+          <Skeleton className="mt-1 h-4 w-2/3 rounded" />
+          <Skeleton className="mt-1 h-4 w-1/2 rounded" />
         </View>
       ))}
     </ScrollView>

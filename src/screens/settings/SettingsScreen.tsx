@@ -59,7 +59,7 @@ export default function SettingsScreen() {
         onScroll={handleScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{
-          paddingHorizontal: 16,
+          paddingHorizontal: 20,
           paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
         }}
       >

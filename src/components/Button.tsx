@@ -81,7 +81,7 @@ export function Button({
       disabled={disabled || busy}
       onPress={onPress}
       style={containerStyle}
-      className={`items-center justify-center rounded-full ${
+      className={`items-center justify-center rounded-xl ${
         variant === 'secondary' ? 'border' : ''
       } ${SIZES[size]} ${disabled ? 'opacity-40' : ''}`}
     >

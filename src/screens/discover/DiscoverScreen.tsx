@@ -17,7 +17,6 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -57,11 +56,14 @@ export default function DiscoverScreen() {
         behavior={Platform.OS === 'android' ? 'height' : 'padding'}
       >
         <PageTitle>Explorar</PageTitle>
-        <View className="px-4 pb-3">
-          <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-neutral-900">
-            <View className="pl-3 pr-1">
-              <Feather name="search" size={18} color={colors.iconInactive} />
-            </View>
+        <View className="px-5 pb-3">
+          <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 dark:border-neutral-800 dark:bg-neutral-900">
+            <Feather
+              name="search"
+              size={18}
+              color={colors.iconInactive}
+              style={{ marginRight: 8 }}
+            />
             <TextInput
               value={input}
               onChangeText={setInput}
@@ -72,17 +74,17 @@ export default function DiscoverScreen() {
               returnKeyType="search"
               placeholder="Título del manga"
               placeholderTextColor={colors.iconInactive}
-              className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
+              className="h-12 flex-1 text-base text-zinc-900 dark:text-zinc-50"
             />
             {input ? (
-              <AnimatedPressable
+              <Feather
+                name="x"
+                size={16}
+                color={colors.iconInactive}
                 accessibilityLabel="Limpiar búsqueda"
                 onPress={clear}
-                hitSlop={8}
-                className="min-h-12 min-w-12 items-center justify-center rounded-full"
-              >
-                <Feather name="x" size={16} color={colors.iconInactive} />
-              </AnimatedPressable>
+                style={{ padding: 8 }}
+              />
             ) : null}
           </View>
         </View>
@@ -209,7 +211,7 @@ function DiscoverResults({
       numColumns={3}
       columnWrapperStyle={{ gap: CARD_GAP }}
       contentContainerStyle={{
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
         paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
       }}
       onScroll={handleScroll}

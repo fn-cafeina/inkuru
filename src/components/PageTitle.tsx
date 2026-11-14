@@ -25,7 +25,7 @@ export function PageTitle({
     >
       <Text
         accessibilityRole="header"
-        className="flex-1 text-xl font-semibold text-zinc-900 dark:text-zinc-50"
+        className="flex-1 text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50"
       >
         {children}
       </Text>

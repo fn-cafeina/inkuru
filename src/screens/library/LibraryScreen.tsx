@@ -14,7 +14,6 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -162,7 +161,7 @@ export default function LibraryScreen() {
           numColumns={3}
           columnWrapperStyle={{ gap: CARD_GAP }}
           contentContainerStyle={{
-            paddingHorizontal: 16,
+            paddingHorizontal: 20,
             paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
           }}
           onScroll={handleScroll}
@@ -210,11 +209,14 @@ function LibrarySearch({
   const colors = useColors();
 
   return (
-    <View className="mb-3 px-4">
-      <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-neutral-900">
-        <View className="pl-3 pr-1">
-          <Feather name="search" size={18} color={colors.iconInactive} />
-        </View>
+    <View className="mb-3 px-5">
+      <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <Feather
+          name="search"
+          size={18}
+          color={colors.iconInactive}
+          style={{ marginRight: 8 }}
+        />
         <TextInput
           value={query}
           onChangeText={onChange}
@@ -224,17 +226,17 @@ function LibrarySearch({
           returnKeyType="search"
           placeholder="Buscar en la biblioteca"
           placeholderTextColor={colors.iconInactive}
-          className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
+          className="h-12 flex-1 text-base text-zinc-900 dark:text-zinc-50"
         />
         {query ? (
-          <AnimatedPressable
+          <Feather
+            name="x"
+            size={16}
+            color={colors.iconInactive}
             accessibilityLabel="Limpiar búsqueda"
             onPress={() => onChange('')}
-            hitSlop={8}
-            className="min-h-12 min-w-12 items-center justify-center rounded-full"
-          >
-            <Feather name="x" size={16} color={colors.iconInactive} />
-          </AnimatedPressable>
+            style={{ padding: 8 }}
+          />
         ) : null}
       </View>
     </View>

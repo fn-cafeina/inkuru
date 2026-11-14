@@ -25,7 +25,6 @@ export function MangaGridCard({
         accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
         hapticFeedback
         onPress={onPress}
-        className="rounded-2xl p-1"
       >
         <View
           className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-neutral-800"

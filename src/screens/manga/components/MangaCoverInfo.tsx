@@ -33,7 +33,7 @@ export function MangaCoverInfo({
   const colors = useColors();
 
   return (
-    <View className="flex-row px-4">
+    <View className="flex-row px-5">
       <View
         className="overflow-hidden rounded-2xl bg-zinc-200 dark:bg-neutral-800"
         style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
@@ -52,17 +52,17 @@ export function MangaCoverInfo({
         <Text
           accessibilityRole="header"
           numberOfLines={4}
-          className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
+          className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50"
         >
           {title}
         </Text>
         {status ? (
           <View
-            className="mt-2 self-start rounded-full px-2.5 py-1"
+            className="mt-2 self-start rounded-lg px-2.5 py-1"
             style={{ backgroundColor: colors.accentContainer }}
           >
             <Text
-              className="text-xs font-semibold uppercase"
+              className="text-[11px] font-bold uppercase tracking-wider"
               style={{ color: colors.onAccentContainer }}
             >
               {status}

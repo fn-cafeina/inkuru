@@ -64,13 +64,13 @@ export function MangaHeader({
       />
 
       {manga.tags.length > 0 ? (
-        <View className="mt-4 px-4">
+        <View className="mt-4 px-5">
           <TagRow tags={manga.tags} />
         </View>
       ) : null}
 
       {readChapter ? (
-        <View className="mt-4 px-4">
+        <View className="mt-4 px-5">
           <Button
             variant="primary"
             size="lg"
@@ -90,7 +90,7 @@ export function MangaHeader({
 
       {manga.synopsis ? <MangaSynopsis synopsis={manga.synopsis} /> : null}
 
-      <View className="mt-6 px-4">
+      <View className="mt-6 px-5">
         {ranges.length > 1 ? (
           <>
             <SectionTitle className="mb-2">Rangos</SectionTitle>
@@ -172,7 +172,7 @@ function MangaProgress({
     total > 0 ? Math.min(100, Math.round((readCount / total) * 100)) : 0;
 
   return (
-    <View className="mt-4 px-4">
+    <View className="mt-4 px-5">
       <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-neutral-800">
         <View
           className="h-full rounded-full"
@@ -194,10 +194,10 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
 
   return (
     <View>
-      <SectionTitle className="mb-3 mt-6 px-4">Sinopsis</SectionTitle>
+      <SectionTitle className="mb-3 mt-6 px-5">Sinopsis</SectionTitle>
       <Text
         numberOfLines={!expanded && longSynopsis ? 6 : undefined}
-        className="px-4 text-sm text-zinc-700 dark:text-zinc-300"
+        className="px-5 text-sm text-zinc-700 dark:text-zinc-300"
       >
         {synopsis}
       </Text>
@@ -205,7 +205,7 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
         <AnimatedPressable
           accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
           onPress={() => setExpanded((value) => !value)}
-          className="mt-1 min-h-12 justify-center px-4 self-start"
+          className="mt-1 min-h-12 justify-center px-5 self-start"
         >
           <Text
             className="text-sm font-medium"
