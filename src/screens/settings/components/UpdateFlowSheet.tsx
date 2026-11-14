@@ -16,8 +16,7 @@ import {
   getFlowState,
   grantPermissionAndDownload,
   subscribeFlow,
-} from '../../../update/flow';
-import type { UpdatePhase } from '../../../update/flow';
+} from '../../../update/flow';import type { UpdatePhase } from '../../../update/flow';
 import type { DownloadProgress } from '../../../update/install';
 
 /** The phases the sheet actually renders; idle and ready show nothing. */
@@ -219,7 +218,10 @@ function Actions({ phase }: { phase: VisiblePhase }): ReactElement | null {
             ? () => void confirmUpdate()
             : phase === 'permission'
               ? () => void grantPermissionAndDownload()
-              : () => void beginDownload()
+              // The error retry routes through confirmUpdate so a failure in
+              // the permission step goes back to the permission step instead
+              // of re-downloading into the same missing permission.
+              : () => void confirmUpdate()
         }
       />
     </View>
