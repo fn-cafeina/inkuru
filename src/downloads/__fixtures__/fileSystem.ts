@@ -14,6 +14,8 @@ export type FakeFileSystem = {
   failDeletes: Set<string>;
   /** URLs `File.downloadFileAsync` must reject. */
   failUrls: Set<string>;
+  /** Forced failures per URL; the download rejects while the count stays > 0. */
+  failTimes: Map<string, number>;
   /** Write a file, creating parent directories. */
   write(path: string, content: string): void;
   read(path: string): string | undefined;
@@ -110,6 +112,13 @@ class FakeFile {
     url: string,
     target: FakeFile,
   ): Promise<FakeFile> {
+    const forced = failTimes.get(url) ?? 0;
+
+    if (forced > 0) {
+      failTimes.set(url, forced - 1);
+      throw new Error(`download failed: ${url}`);
+    }
+
     if (failUrls.has(url)) {
       throw new Error(`download failed: ${url}`);
     }
@@ -179,6 +188,7 @@ const store = new Map<string, Node>([
 ]);
 const failDeletes = new Set<string>();
 const failUrls = new Set<string>();
+const failTimes = new Map<string, number>();
 
 function createParents(path: string): void {
   const segments = path.split('/').filter((segment) => segment.length > 0);
@@ -199,6 +209,7 @@ export function createFakeFileSystem(): FakeFileSystem {
     },
     failDeletes,
     failUrls,
+    failTimes,
     write(path, content) {
       createParents(path);
       store.set(normalize(path), { kind: 'file', content });

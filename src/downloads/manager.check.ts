@@ -9,6 +9,28 @@ function assert(condition: unknown, message: string): asserts condition {
   }
 }
 
+function assertEqual<T>(actual: T, expected: T, label: string): void {
+  if (actual !== expected) {
+    throw new Error(`${label}: expected ${String(expected)}, received ${String(actual)}`);
+  }
+}
+
+/** The queue is fire-and-forget; poll until the state the test expects lands. */
+async function waitFor(
+  predicate: () => boolean,
+  label: string,
+): Promise<void> {
+  const started = Date.now();
+
+  while (!predicate()) {
+    if (Date.now() - started > 5000) {
+      throw new Error(`timeout: ${label}`);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
 const fake = createFakeFileSystem();
 const storage = new Map<string, string>();
 
@@ -31,15 +53,20 @@ const asyncStorage = {
 };
 
 let fetchCalls = 0;
+let fetchImpl: (path: string, signal?: AbortSignal) => Promise<unknown> =
+  async () => {
+    throw new Error('unexpected network call');
+  };
 
 mock.module('expo-file-system', () => fake.module);
 mock.module('@react-native-async-storage/async-storage', () => ({
   default: asyncStorage,
 }));
 mock.module('../source/zonatmo', () => ({
-  fetchReader: async () => {
+  fetchReader: (path: string, signal?: AbortSignal) => {
     fetchCalls += 1;
-    throw new Error('unexpected network call');
+
+    return fetchImpl(path, signal);
   },
 }));
 
@@ -138,5 +165,104 @@ await manager.deleteDownload(CHAPTER);
 assert(manager.getDownloadState(CHAPTER) === undefined, 'a full delete clears the state');
 assert(indexed().length === 0, 'a full delete clears the index');
 assert(!fake.exists(directory), 'a full delete removes the files');
+
+// Happy path: fetch the chapter, download every page, write the marker and
+// index the download.
+const CHAPTER2 = '/view_uploads/9';
+const dir2 = `${ROOT}/${hashKey(CHAPTER2)}`;
+const pageUrls = [
+  'https://cdn.zonatmo.org/9/1.webp',
+  'https://cdn.zonatmo.org/9/2.webp',
+];
+
+fetchImpl = async (path) => {
+  assert(path === CHAPTER2, 'fetchReader asks for the queued chapter');
+
+  return {
+    title: 'Capítulo 9',
+    mangaTitle: 'Manga',
+    pages: pageUrls,
+    chapters: [{ title: 'Capítulo 9', path: CHAPTER2 }],
+    chapterIndex: 0,
+  };
+};
+
+await manager.enqueueDownload({
+  chapterPath: CHAPTER2,
+  chapterTitle: 'Capítulo 9',
+  mangaPath: '/library/manga/7/one',
+  mangaTitle: 'Manga',
+});
+
+await waitFor(
+  () => manager.getDownloadState(CHAPTER2)?.status === 'done',
+  'the download finishes',
+);
+
+assertEqual(fetchCalls, 1, 'the chapter is fetched exactly once');
+assertEqual(
+  fake.read(`${dir2}/001.webp`),
+  `page:${pageUrls[0]}`,
+  'page one lands in the hashed directory',
+);
+assertEqual(
+  fake.read(`${dir2}/002.webp`),
+  `page:${pageUrls[1]}`,
+  'page two lands in the hashed directory',
+);
+assert(indexed().includes(CHAPTER2), 'the finished download is indexed');
+
+const local = await manager.loadDownloadedReader(CHAPTER2);
+
+assert(local !== null, 'the stored chapter reads back');
+assertEqual(
+  local?.pages[0] ?? '',
+  `${dir2}/001.webp`,
+  'the stored pages point at the local files',
+);
+
+// A page that fails three times still completes the chapter: the first two
+// failures burn downloadPage's internal retry, the third needs a fresh
+// attempt from the run. A stall is the page's problem, not the run's.
+const CHAPTER3 = '/view_uploads/10';
+const dir3 = `${ROOT}/${hashKey(CHAPTER3)}`;
+const flaky = 'https://cdn.zonatmo.org/10/1.webp';
+
+fetchImpl = async (path) => {
+  assert(path === CHAPTER3, 'fetchReader asks for the queued chapter');
+
+  return {
+    title: 'Capítulo 10',
+    mangaTitle: 'Manga',
+    pages: [flaky, 'https://cdn.zonatmo.org/10/2.webp'],
+    chapters: [{ title: 'Capítulo 10', path: CHAPTER3 }],
+    chapterIndex: 0,
+  };
+};
+
+fake.failTimes.set(flaky, 3);
+
+await manager.enqueueDownload({
+  chapterPath: CHAPTER3,
+  chapterTitle: 'Capítulo 10',
+  mangaPath: '/library/manga/7/one',
+  mangaTitle: 'Manga',
+});
+
+await waitFor(
+  () => manager.getDownloadState(CHAPTER3)?.status === 'done',
+  'the flaky chapter finishes',
+);
+
+assertEqual(
+  fake.read(`${dir3}/001.webp`),
+  `page:${flaky}`,
+  'the flaky page lands after its retries',
+);
+assertEqual(
+  fake.failTimes.get(flaky),
+  0,
+  'all forced failures were consumed by retries',
+);
 
 console.log('download manager ok');

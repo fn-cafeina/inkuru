@@ -10,6 +10,7 @@ import {
   existingChapterDirs,
   pageExtension,
 } from './paths';
+import { withTimeout } from './timeout';
 
 const READER_FILE = 'reader.json';
 
@@ -57,6 +58,13 @@ function directoryOwner(
   }
 }
 
+// A page that stalls past this budget is retried on a fresh timer, so one
+// slow page never aborts the run's shared controller and the healthy pages.
+const PAGE_TIMEOUT_MS = 30_000;
+// A transient stall must not sink the chapter: a page earns this many
+// chances before the run fails.
+const PAGE_ATTEMPTS = 3;
+
 export async function downloadPage(
   url: string,
   destination: File,
@@ -80,6 +88,46 @@ export async function downloadPage(
       idempotent: true,
       signal,
     });
+  }
+}
+
+/**
+ * Downloads a page under the run's abort: each attempt owns a 30s timeout so
+ * a stalled page only burns itself, while cancelling or deleting the run
+ * still aborts every in-flight attempt at once.
+ */
+export async function downloadPageWithRetry(
+  url: string,
+  destination: File,
+  run: AbortController,
+): Promise<void> {
+  for (let attempt = 1; attempt <= PAGE_ATTEMPTS; attempt += 1) {
+    if (run.signal.aborted) {
+      throw new Error('aborted');
+    }
+
+    const page = new AbortController();
+    const onAbort = () => page.abort();
+
+    run.signal.addEventListener('abort', onAbort, { once: true });
+
+    try {
+      await withTimeout(page, PAGE_TIMEOUT_MS, () =>
+        downloadPage(url, destination, page.signal),
+      );
+
+      return;
+    } catch (error) {
+      if (run.signal.aborted) {
+        throw new Error('aborted');
+      }
+
+      if (attempt === PAGE_ATTEMPTS) {
+        throw error;
+      }
+    } finally {
+      run.signal.removeEventListener('abort', onAbort);
+    }
   }
 }
 

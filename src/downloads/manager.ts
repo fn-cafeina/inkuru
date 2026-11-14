@@ -5,7 +5,7 @@ import { forgetPageProgress } from '../storage/readerProgress';
 import type { ReaderData } from '../source/zonatmo';
 import {
   deleteChapterFiles,
-  downloadPage,
+  downloadPageWithRetry,
   hasDownloadFiles,
   pageFile,
   prepareChapterDirectory,
@@ -248,7 +248,7 @@ async function runDownload(input: DownloadInput) {
         }
 
         const file = pageFile(directory, index, url);
-        await withTimeout(controller, 30_000, () => downloadPage(url, file, controller.signal));
+        await downloadPageWithRetry(url, file, controller);
 
         if (!runs.canWrite(chapterPath, generation)) {
           throw new Error('stale');
