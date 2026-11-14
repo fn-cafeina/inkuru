@@ -23,17 +23,17 @@ export function MangaSkeleton() {
         <View className="ml-4 flex-1">
           <Skeleton className="h-5 w-3/4 rounded" />
           <Skeleton className="mt-1 h-5 w-1/2 rounded" />
-          <Skeleton className="mt-2 h-6 w-24 rounded-full" />
+          <Skeleton className="mt-2 h-6 w-24 rounded-lg" />
         </View>
       </View>
 
       <View className="mt-4 flex-row gap-1.5">
-        <Skeleton className="h-6 w-16 rounded-full" />
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-6 w-14 rounded-full" />
+        <Skeleton className="h-6 w-16 rounded-md" />
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-6 w-14 rounded-md" />
       </View>
 
-      <Skeleton className="mt-4 h-14 rounded-full" />
+      <Skeleton className="mt-4 h-14 rounded-xl" />
 
       <View className="mt-6 flex-row items-center justify-between">
         <Skeleton className="h-3 w-28 rounded" />

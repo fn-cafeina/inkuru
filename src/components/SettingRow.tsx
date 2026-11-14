@@ -78,6 +78,7 @@ export function SettingRow({
     <AnimatedPressable
       accessibilityRole={accessibilityRole}
       accessibilityState={accessibilityState}
+      hapticFeedback
       disabled={disabled}
       onPress={onPress}
       className="min-h-14 flex-row items-center px-4"
