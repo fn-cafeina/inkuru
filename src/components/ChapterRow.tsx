@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useColors } from '../theme/colors';
 
 type ChapterRowState = 'current' | 'read' | 'selected';
@@ -35,7 +35,7 @@ export function ChapterRow({
     state === 'current' ? ', leyendo' : state === 'read' ? ', leído' : '';
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={`${title}${stateLabel}`}
       accessibilityState={{ selected: highlighted }}
@@ -56,6 +56,6 @@ export function ChapterRow({
           <Feather name="check" size={18} color={colors.accent} />
         </View>
       ) : null}
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

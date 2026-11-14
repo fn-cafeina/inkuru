@@ -5,7 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../../components/AppPressable';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ErrorState } from '../../components/ErrorState';
 import { Screen } from '../../components/Screen';
 import { ScreenHeader } from '../../components/ScreenHeader';
@@ -231,7 +231,7 @@ export default function MangaScreen({ navigation, route }: Props) {
         titleVisible={barTitleVisible}
         onBack={goBack}
         action={
-          <AppPressable
+          <AnimatedPressable
             accessibilityLabel={
               inLibrary
                 ? 'Quitar de la biblioteca'
@@ -249,7 +249,7 @@ export default function MangaScreen({ navigation, route }: Props) {
               size={20}
               color={inLibrary ? colors.accent : colors.iconInactive}
             />
-          </AppPressable>
+          </AnimatedPressable>
         }
       />
 

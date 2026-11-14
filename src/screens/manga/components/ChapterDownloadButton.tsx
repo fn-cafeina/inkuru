@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { AppPressable } from '../../../components/AppPressable';
+import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import type { DownloadState, DownloadStatus } from '../../../downloads/types';
 import { useColors } from '../../../theme/colors';
 
@@ -78,7 +78,7 @@ export function ChapterDownloadButton({
       : 0;
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={labelFor(status, title)}
       hitSlop={4}
@@ -105,6 +105,6 @@ export function ChapterDownloadButton({
           color={colorFor(status, colors)}
         />
       )}
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

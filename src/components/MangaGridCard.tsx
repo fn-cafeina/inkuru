@@ -2,7 +2,7 @@ import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { COVER_ASPECT_RATIO } from '../theme/layout';
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 
 type Props = {
   title: string;
@@ -21,8 +21,9 @@ export function MangaGridCard({
 }: Props) {
   return (
     <View style={{ width }} className="mb-3">
-      <AppPressable
+      <AnimatedPressable
         accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
+        hapticFeedback
         onPress={onPress}
         className="rounded-2xl p-1"
       >
@@ -54,7 +55,7 @@ export function MangaGridCard({
             {subtitle}
           </Text>
         ) : null}
-      </AppPressable>
+      </AnimatedPressable>
     </View>
   );
 }

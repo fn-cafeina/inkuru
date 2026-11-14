@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useColors } from '../theme/colors';
 
 export function ChoiceRow({
@@ -19,7 +19,7 @@ export function ChoiceRow({
   const colors = useColors();
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityRole="radio"
       accessibilityLabel={label}
       accessibilityState={{ selected, disabled }}
@@ -52,6 +52,6 @@ export function ChoiceRow({
           />
         ) : null}
       </View>
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

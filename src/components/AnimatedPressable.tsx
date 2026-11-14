@@ -9,6 +9,7 @@ import type {
   ViewStyle,
 } from 'react-native';
 import { Pressable } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -23,6 +24,8 @@ type Props = Omit<ComponentPropsWithoutRef<typeof Pressable>, 'style'> & {
   style?: StyleProp<ViewStyle>;
   /** Ignores repeat presses within this window; guards double-tap bugs. */
   debounceMs?: number;
+  /** Optional light impact on press, matching rokimu's cards and settings. */
+  hapticFeedback?: boolean;
 };
 
 /** Pressable with rokimu's press feel: shrink and fade instead of a ripple. */
@@ -33,6 +36,7 @@ export function AnimatedPressable({
   onPressOut,
   onPress,
   debounceMs = DEFAULT_DEBOUNCE_MS,
+  hapticFeedback = false,
   ...rest
 }: Props) {
   const lastPressTimeRef = useRef(0);
@@ -46,9 +50,12 @@ export function AnimatedPressable({
       }
 
       lastPressTimeRef.current = now;
+      if (hapticFeedback) {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
       onPress?.(event);
     },
-    [onPress, debounceMs],
+    [onPress, debounceMs, hapticFeedback],
   );
 
   const opacity = useSharedValue(1);

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 import { Feather } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 
-import { AppPressable } from '../../../components/AppPressable';
+import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { useColors } from '../../../theme/colors';
 
 /** Sheet heights as a share of the window. A chapter list needs more room
@@ -34,10 +34,9 @@ export function ReaderSheet({
       className="absolute inset-0 justify-end"
       style={{ zIndex: 50 }}
     >
-      <AppPressable
+      <Pressable
         accessible={false}
         onPress={onClose}
-        pressFeedback={false}
         className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
       />
@@ -53,13 +52,13 @@ export function ReaderSheet({
           >
             {title}
           </Text>
-          <AppPressable
+          <AnimatedPressable
             accessibilityLabel="Cerrar"
             onPress={onClose}
             className="min-h-12 min-w-12 items-center justify-center rounded-full"
           >
             <Feather name="x" size={20} color={colors.textMuted} />
-          </AppPressable>
+          </AnimatedPressable>
         </View>
         {children}
       </Animated.View>

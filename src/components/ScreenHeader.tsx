@@ -11,7 +11,7 @@ import Animated, {
 
 import { reader, useColors } from '../theme/colors';
 import { APP_BAR_GAP } from '../theme/spacing';
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 
 export function ScreenHeader({
   title,
@@ -50,14 +50,14 @@ export function ScreenHeader({
       className="flex-row items-center px-2 py-1"
       style={{ marginBottom: APP_BAR_GAP }}
     >
-      <AppPressable
+      <AnimatedPressable
         onPress={onBack}
         accessibilityLabel="Volver"
         hitSlop={8}
         className="min-h-12 min-w-12 items-center justify-center rounded-full"
       >
         <Feather name="chevron-left" size={24} color={textColor} />
-      </AppPressable>
+      </AnimatedPressable>
       <Animated.View
         style={titleStyle}
         className="ml-1 flex-1"

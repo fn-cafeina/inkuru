@@ -1,6 +1,6 @@
 import { Text } from 'react-native';
 
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 import { reader, useColors } from '../theme/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
@@ -76,7 +76,7 @@ export function Button({
   const containerStyle = containerStyleFor(variant, onDark, colors);
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityState={{ disabled: disabled || busy }}
       disabled={disabled || busy}
       onPress={onPress}
@@ -88,6 +88,6 @@ export function Button({
       <Text className={LABELS[variant]} style={{ color: textColor }}>
         {children}
       </Text>
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

@@ -1,11 +1,10 @@
 import { useEffect, useSyncExternalStore, type ReactElement } from 'react';
-import { AppState, Text, View } from 'react-native';
+import { AppState, Pressable, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
 
 import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { AppPressable } from '../../../components/AppPressable';
 import { useColors } from '../../../theme/colors';
 import { getUpdateState } from '../../../update/check';
 import {
@@ -67,10 +66,9 @@ export function UpdateFlowSheet() {
       className="absolute inset-0 justify-end"
       style={{ zIndex: 50 }}
     >
-      <AppPressable
+      <Pressable
         accessible={false}
         onPress={dismissable ? closeUpdate : undefined}
-        pressFeedback={false}
         className="absolute inset-0"
         style={{ backgroundColor: colors.scrim }}
       />
@@ -87,13 +85,13 @@ export function UpdateFlowSheet() {
             {titleFor(phase)}
           </Text>
           {dismissable ? (
-            <AppPressable
+            <AnimatedPressable
               accessibilityLabel="Cerrar"
               onPress={closeUpdate}
               className="min-h-12 min-w-12 items-center justify-center rounded-full"
             >
               <Feather name="x" size={20} color={colors.textMuted} />
-            </AppPressable>
+            </AnimatedPressable>
           ) : null}
         </View>
         {phase === 'confirm' ? <ConfirmBody tag={tag} /> : null}

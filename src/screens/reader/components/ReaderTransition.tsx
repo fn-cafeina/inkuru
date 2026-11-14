@@ -1,11 +1,10 @@
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View, Pressable } from 'react-native';
 import Animated, {
   FadeInDown,
   useReducedMotion,
 } from 'react-native-reanimated';
 
 import type { MangaChapter } from '../../../source/zonatmo';
-import { AppPressable } from '../../../components/AppPressable';
 import { Button } from '../../../components/Button';
 import { reader } from '../../../theme/colors';
 
@@ -36,10 +35,9 @@ export function ReaderTransition({
       entering={reduced ? undefined : FadeInDown.duration(250)}
       style={{ width, height, backgroundColor: reader.background }}
     >
-      <AppPressable
+      <Pressable
         accessible={false}
         onPress={onToggleChrome}
-        pressFeedback={false}
         className="flex-1"
       >
         <ScrollView
@@ -90,7 +88,7 @@ export function ReaderTransition({
             </Text>
           )}
         </ScrollView>
-      </AppPressable>
+      </Pressable>
     </Animated.View>
   );
 }

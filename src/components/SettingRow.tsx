@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { useColors } from '../theme/colors';
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 
 /**
  * A settings row in the sober pattern: icon, title, and a subtitle that
@@ -75,7 +75,7 @@ export function SettingRow({
   }
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityRole={accessibilityRole}
       accessibilityState={accessibilityState}
       disabled={disabled}
@@ -83,6 +83,6 @@ export function SettingRow({
       className="min-h-14 flex-row items-center px-4"
     >
       {content}
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

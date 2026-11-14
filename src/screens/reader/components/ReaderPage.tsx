@@ -7,7 +7,7 @@ import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
 import { reader } from '../../../theme/colors';
-import { AppPressable } from '../../../components/AppPressable';
+import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { knownPageRatio, pageBox, rememberPageRatio } from '../readerPageLayout';
 import type { SourceSize } from '../readerPageLayout';
 import { usePageGestures } from '../usePageGestures';
@@ -103,7 +103,7 @@ export function ReaderPage({
       }}
     >
       {failed ? (
-        <AppPressable
+        <AnimatedPressable
           accessibilityLabel={`${label}, no se pudo cargar. Reintentar`}
           onPress={() => {
             setFailed(false);
@@ -120,7 +120,7 @@ export function ReaderPage({
           <Text className="text-center text-xs" style={{ color: reader.text }}>
             No se pudo cargar. Toca para reintentar.
           </Text>
-        </AppPressable>
+        </AnimatedPressable>
       ) : (
         <GestureDetector gesture={gesture}>
           <View

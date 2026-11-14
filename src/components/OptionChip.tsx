@@ -1,6 +1,6 @@
 import { Text } from 'react-native';
 
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useColors } from '../theme/colors';
 
 export function OptionChip({
@@ -17,7 +17,7 @@ export function OptionChip({
   const colors = useColors();
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityRole="radio"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected }}
@@ -36,6 +36,6 @@ export function OptionChip({
       >
         {label}
       </Text>
-    </AppPressable>
+    </AnimatedPressable>
   );
 }

@@ -14,7 +14,7 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../../components/AppPressable';
+import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
@@ -227,14 +227,14 @@ function LibrarySearch({
           className="min-h-12 flex-1 px-1 text-sm text-zinc-900 dark:text-zinc-100"
         />
         {query ? (
-          <AppPressable
+          <AnimatedPressable
             accessibilityLabel="Limpiar búsqueda"
             onPress={() => onChange('')}
             hitSlop={8}
             className="min-h-12 min-w-12 items-center justify-center rounded-full"
           >
             <Feather name="x" size={16} color={colors.iconInactive} />
-          </AppPressable>
+          </AnimatedPressable>
         ) : null}
       </View>
     </View>

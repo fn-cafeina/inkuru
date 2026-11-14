@@ -6,7 +6,7 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { AppPressable } from '../../../components/AppPressable';
+import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { ScreenHeader } from '../../../components/ScreenHeader';
 import { reader } from '../../../theme/colors';
 
@@ -45,7 +45,7 @@ export function ReaderChrome({
           className="absolute left-0 right-0 top-0 items-center"
           style={{ paddingTop: topInset + (visible ? 64 : 8) }}
         >
-          <AppPressable
+          <AnimatedPressable
             accessibilityLabel="No se pudo actualizar. Reintentar"
             hitSlop={4}
             onPress={onRetry}
@@ -59,7 +59,7 @@ export function ReaderChrome({
             >
               No se pudo actualizar. Reintentar
             </Text>
-          </AppPressable>
+          </AnimatedPressable>
         </View>
       ) : null}
 
@@ -77,22 +77,22 @@ export function ReaderChrome({
             onBack={onBack}
             action={
               <View className="flex-row items-center">
-                <AppPressable
+                <AnimatedPressable
                   accessibilityLabel="Lista de capítulos"
                   onPress={onOpenPicker}
                   className="mr-2 min-h-12 min-w-12 items-center justify-center rounded-full border"
                   style={{ borderColor: reader.border }}
                 >
                   <Feather name="list" size={18} color={reader.text} />
-                </AppPressable>
-                <AppPressable
+                </AnimatedPressable>
+                <AnimatedPressable
                   accessibilityLabel="Ajustes de lectura"
                   onPress={onOpenSettings}
                   className="min-h-12 min-w-12 items-center justify-center rounded-full border"
                   style={{ borderColor: reader.border }}
                 >
                   <Feather name="settings" size={18} color={reader.text} />
-                </AppPressable>
+                </AnimatedPressable>
               </View>
             }
           />

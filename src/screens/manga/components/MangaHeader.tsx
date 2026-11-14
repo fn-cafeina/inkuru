@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { AppPressable } from '../../../components/AppPressable';
+import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { Button } from '../../../components/Button';
 import { OptionChip } from '../../../components/OptionChip';
 import { SectionTitle } from '../../../components/SectionTitle';
@@ -137,7 +137,7 @@ export function MangaHeader({
               {manga.chapters.length}
             </Text>
           </View>
-          <AppPressable
+          <AnimatedPressable
             accessibilityLabel={
               sortOrder === 'asc'
                 ? 'Ordenar capítulos: más recientes primero'
@@ -153,7 +153,7 @@ export function MangaHeader({
               size={18}
               color={colors.text}
             />
-          </AppPressable>
+          </AnimatedPressable>
         </View>
       </View>
     </View>
@@ -202,7 +202,7 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
         {synopsis}
       </Text>
       {longSynopsis ? (
-        <AppPressable
+        <AnimatedPressable
           accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
           onPress={() => setExpanded((value) => !value)}
           className="mt-1 min-h-12 justify-center px-4 self-start"
@@ -213,7 +213,7 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
           >
             {expanded ? 'Ver menos' : 'Ver más'}
           </Text>
-        </AppPressable>
+        </AnimatedPressable>
       ) : null}
     </View>
   );

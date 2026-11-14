@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Text } from 'react-native';
 
-import { AppPressable } from './AppPressable';
+import { AnimatedPressable } from './AnimatedPressable';
 import { useColors } from '../theme/colors';
 
 export function RefreshNotice({
@@ -16,7 +16,7 @@ export function RefreshNotice({
   const colors = useColors();
 
   return (
-    <AppPressable
+    <AnimatedPressable
       accessibilityLabel={`${message}. Reintentar`}
       onPress={onRetry}
       className={`${className} min-h-12 flex-row items-center rounded-full border border-zinc-200 px-4 dark:border-zinc-800`}
@@ -28,6 +28,6 @@ export function RefreshNotice({
       >
         {message}
       </Text>
-    </AppPressable>
+    </AnimatedPressable>
   );
 }
