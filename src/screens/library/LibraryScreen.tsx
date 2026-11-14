@@ -12,6 +12,7 @@ import {
   useNavigation,
   useScrollToTop,
 } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../components/AppPressable';
 import { Button } from '../../components/Button';
@@ -20,6 +21,8 @@ import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
+import { useTabBarManager } from '../../hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
 import type { TabNavigation } from '../../navigation/types';
 import { loadLibraryResult } from '../../storage/library';
 import type { LibraryEntry } from '../../storage/library';
@@ -36,6 +39,8 @@ export default function LibraryScreen() {
   const navigation = useNavigation<TabNavigation<'Library'>>();
   const colors = useColors();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { handleScroll, reset } = useTabBarManager();
   const listRef = useRef<FlatList<LibraryEntry>>(null);
   useScrollToTop(listRef);
   const [entries, setEntries] = useState<LibraryEntry[]>(
@@ -110,8 +115,9 @@ export default function LibraryScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      reset();
       void load();
-    }, [load]),
+    }, [load, reset]),
   );
 
   const retry = () => {
@@ -155,7 +161,12 @@ export default function LibraryScreen() {
           keyExtractor={(item) => item.path}
           numColumns={3}
           columnWrapperStyle={{ gap: CARD_GAP }}
-          contentContainerClassName="px-4 pb-6"
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
+          }}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           renderItem={({ item }) => (
             <MangaGridCard
               title={item.title}

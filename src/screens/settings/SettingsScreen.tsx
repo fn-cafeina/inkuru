@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { DownloadProgress } from 'expo-file-system';
 
 import { AppPressable } from '../../components/AppPressable';
@@ -9,6 +17,8 @@ import { Button } from '../../components/Button';
 import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import { SettingSection } from '../../components/SettingSection';
+import { useTabBarManager } from '../../hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
 import { useColors } from '../../theme/colors';
 import {
   checkForUpdate,
@@ -28,6 +38,8 @@ const INSTALL_FAILED = 'No se pudo abrir el instalador. Inténtalo otra vez.';
 
 export default function SettingsScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { handleScroll, reset } = useTabBarManager();
   const update = useSyncExternalStore(subscribeUpdates, getUpdateState);
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState<number | null>(null);
@@ -46,6 +58,12 @@ export default function SettingsScreen() {
       abort.current?.abort();
     };
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      reset();
+    }, [reset]),
+  );
 
   function onDownloadProgress(data: DownloadProgress): void {
     setProgress(
@@ -104,7 +122,12 @@ export default function SettingsScreen() {
       <PageTitle>Ajustes</PageTitle>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="px-4 pb-8"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
+        }}
       >
         <SettingSection title="Actualizaciones" className="mt-2">
           <InfoRow

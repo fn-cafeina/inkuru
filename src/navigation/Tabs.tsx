@@ -1,59 +1,49 @@
-import { Feather } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {
+  createBottomTabNavigator,
+  type BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 
 import DiscoverScreen from '../screens/discover/DiscoverScreen';
 import LibraryScreen from '../screens/library/LibraryScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import { useColors } from '../theme/colors';
+import { FloatingTabBar } from './FloatingTabBar';
 import type { MainTabsParamList } from './types';
 
 const Tab = createBottomTabNavigator<MainTabsParamList>();
 
-type IconProps = { color: string; size: number };
-
-const LibraryIcon = ({ color, size }: IconProps) => (
-  <Feather name="book-open" size={size} color={color} />
-);
-
-const DiscoverIcon = ({ color, size }: IconProps) => (
-  <Feather name="compass" size={size} color={color} />
-);
-
-const SettingsIcon = ({ color, size }: IconProps) => (
-  <Feather name="settings" size={size} color={color} />
-);
+// The navigator calls `tabBar` as a plain function inside a context render
+// prop, where the hook dispatcher is not set; `FloatingTabBar` must render
+// as an element with its own fiber for its hooks to run.
+function TabBar(props: BottomTabBarProps) {
+  return <FloatingTabBar {...props} />;
+}
 
 export function MainTabs() {
   const colors = useColors();
 
   return (
     <Tab.Navigator
+      tabBar={TabBar}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.background },
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.iconInactive,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-        },
       }}
     >
       <Tab.Screen
         name="Library"
         component={LibraryScreen}
-        options={{ title: 'Biblioteca', tabBarIcon: LibraryIcon }}
+        options={{ title: 'Biblioteca' }}
       />
       <Tab.Screen
         name="Discover"
         component={DiscoverScreen}
-        options={{ title: 'Explorar', tabBarIcon: DiscoverIcon }}
+        options={{ title: 'Explorar' }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: 'Ajustes', tabBarIcon: SettingsIcon }}
+        options={{ title: 'Ajustes' }}
       />
     </Tab.Navigator>
   );

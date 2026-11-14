@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {
   ActivityIndicator,
@@ -10,7 +10,12 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useScrollToTop,
+} from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPressable } from '../../components/AppPressable';
 import { Button } from '../../components/Button';
@@ -21,6 +26,8 @@ import { PageTitle } from '../../components/PageTitle';
 import { RefreshNotice } from '../../components/RefreshNotice';
 import { Screen } from '../../components/Screen';
 import { MangaGridSkeleton } from '../../components/Skeleton';
+import { useTabBarManager } from '../../hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
 import type { TabNavigation } from '../../navigation/types';
 import type { MangaListItem } from '../../source/zonatmo';
 import { useColors } from '../../theme/colors';
@@ -146,6 +153,8 @@ function DiscoverResults({
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<MangaListItem>>(null);
   useScrollToTop(listRef);
+  const { handleScroll, reset } = useTabBarManager();
+  const insets = useSafeAreaInsets();
   const {
     items,
     itemsTerm,
@@ -166,7 +175,14 @@ function DiscoverResults({
 
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [term]);
+    reset();
+  }, [term, reset]);
+
+  useFocusEffect(
+    useCallback(() => {
+      reset();
+    }, [reset]),
+  );
 
   const openManga = (item: MangaListItem) =>
     navigation.navigate('Manga', { path: item.path, title: item.title });
@@ -192,7 +208,12 @@ function DiscoverResults({
       keyExtractor={(item) => item.path}
       numColumns={3}
       columnWrapperStyle={{ gap: CARD_GAP }}
-      contentContainerClassName="px-4 pb-2"
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
+      }}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       renderItem={({ item }) => (
         <MangaGridCard
           title={item.title}
