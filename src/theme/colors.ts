@@ -1,25 +1,8 @@
-import { useColorScheme } from 'react-native';
-
-// `accent` is the Gyro Zeppeli olive green. It is darkened in light mode for
-// text contrast and lightened in dark mode.
-// `reader*` values are deliberately mode-independent: the reader is always
-// dark, like every image viewer, so a light theme does not flash a white
-// canvas behind the pages. Do not wrap them in useColorScheme.
+// The app is dark-only: `useColors` always returns this palette.
+// `accent` is the Gyro Zeppeli olive green, lightened for dark backgrounds.
+// `reader` uses the same scale; the reader is always dark, like every
+// image viewer.
 export const palette = {
-  light: {
-    background: '#fafafa',
-    surface: '#ffffff',
-    border: '#e4e4e7',
-    text: '#18181b',
-    textMuted: '#52525b',
-    iconInactive: '#71717a',
-    scrim: 'rgba(0, 0, 0, 0.5)',
-    accent: '#4f7a3e',
-    onAccent: '#ffffff',
-    accentContainer: '#e4efdb',
-    onAccentContainer: '#2f4d24',
-    notification: '#dc2626',
-  },
   dark: {
     background: '#000000',
     surface: '#171717',
@@ -36,7 +19,7 @@ export const palette = {
   },
 } as const;
 
-/** Reader chrome, identical in both schemes (see the note above). */
+/** Reader chrome (see the note above). */
 export const reader = {
   background: '#000000',
   surface: '#171717',
@@ -50,5 +33,5 @@ export const reader = {
 } as const;
 
 export function useColors() {
-  return palette[useColorScheme() === 'dark' ? 'dark' : 'light'];
+  return palette.dark;
 }

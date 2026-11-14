@@ -88,7 +88,7 @@ export function ChapterDownloadButton({
       {status === 'downloading' ? (
         <View className="items-center">
           <ActivityIndicator size="small" color={colors.accent} />
-          <View className="mt-1 h-0.5 w-6 overflow-hidden rounded-full bg-zinc-300 dark:bg-neutral-700">
+          <View className="mt-1 h-0.5 w-6 overflow-hidden rounded-full bg-neutral-700">
             <View
               className="h-full rounded-full"
               style={{

@@ -32,7 +32,7 @@ export default function App() {
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <RootNavigator />
         <UpdateFlowSheet />
-        <StatusBar style="auto" />
+        <StatusBar style="light" />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

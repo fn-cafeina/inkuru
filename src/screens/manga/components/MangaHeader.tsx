@@ -133,7 +133,7 @@ export function MangaHeader({
         <View className="flex-row items-center">
           <View className="flex-1 flex-row items-center gap-2">
             <SectionTitle>Capítulos</SectionTitle>
-            <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+            <Text className="text-xs text-zinc-400">
               {manga.chapters.length}
             </Text>
           </View>
@@ -173,13 +173,13 @@ function MangaProgress({
 
   return (
     <View className="mt-4 px-5">
-      <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-neutral-800">
+      <View className="h-1.5 overflow-hidden rounded-full bg-neutral-800">
         <View
           className="h-full rounded-full"
           style={{ width: `${progressPercent}%`, backgroundColor: colors.accent }}
         />
       </View>
-      <Text className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+      <Text className="mt-1.5 text-xs text-zinc-400">
         {`${readCount} de ${total} capítulos leídos`}
       </Text>
     </View>
@@ -197,7 +197,7 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
       <SectionTitle className="mb-3 mt-6 px-5">Sinopsis</SectionTitle>
       <Text
         numberOfLines={!expanded && longSynopsis ? 6 : undefined}
-        className="px-5 text-sm text-zinc-700 dark:text-zinc-300"
+        className="px-5 text-sm text-zinc-300"
       >
         {synopsis}
       </Text>

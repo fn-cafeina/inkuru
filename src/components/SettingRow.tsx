@@ -43,7 +43,7 @@ export function SettingRow({
   const content = (
     <>
       {divider ? (
-        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-neutral-800" />
+        <View className="absolute left-4 right-0 top-0 h-px bg-neutral-800" />
       ) : null}
       {icon !== undefined ? (
         <Feather
@@ -54,12 +54,12 @@ export function SettingRow({
         />
       ) : null}
       <View className="flex-1 pr-3">
-        <Text className="text-base text-zinc-900 dark:text-zinc-100">
+        <Text className="text-base text-zinc-100">
           {title}
         </Text>
         {subtitle !== undefined ? (
           <Text
-            className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400"
+            className="mt-0.5 text-xs text-zinc-400"
             style={subtitleColor === undefined ? undefined : { color: subtitleColor }}
           >
             {subtitle}

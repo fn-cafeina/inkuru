@@ -12,7 +12,7 @@
         "foregroundImage": "./assets/foreground-icon.png",
         "backgroundColor": "#000000"
       },
-      "backgroundColor": "#fafafa",
+      "backgroundColor": "#000000",
       "softwareKeyboardLayoutMode": "pan",
       "permissions": [
         "REQUEST_INSTALL_PACKAGES"
@@ -26,13 +26,11 @@
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#000000",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "backgroundColor": "#000000"
         }
       ],
       "expo-font",
+      ["expo-navigation-bar", { "enforceContrast": false }],
       "expo-status-bar"
     ],
     "extra": {

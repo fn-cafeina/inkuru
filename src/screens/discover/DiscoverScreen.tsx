@@ -57,7 +57,7 @@ export default function DiscoverScreen() {
       >
         <PageTitle>Explorar</PageTitle>
         <View className="px-5 pb-3">
-          <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 dark:border-neutral-800 dark:bg-neutral-900">
+          <View className="h-12 flex-row items-center rounded-xl border border-neutral-800 bg-neutral-900 px-4">
             <Feather
               name="search"
               size={18}
@@ -74,7 +74,7 @@ export default function DiscoverScreen() {
               returnKeyType="search"
               placeholder="Título del manga"
               placeholderTextColor={colors.iconInactive}
-              className="h-12 flex-1 text-base text-zinc-900 dark:text-zinc-50"
+              className="h-12 flex-1 text-base text-zinc-50"
             />
             {input ? (
               <Feather

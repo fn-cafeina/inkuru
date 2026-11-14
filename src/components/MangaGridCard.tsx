@@ -27,7 +27,7 @@ export function MangaGridCard({
         onPress={onPress}
       >
         <View
-          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-neutral-800"
+          className="overflow-hidden rounded-xl bg-neutral-800"
           style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
         >
           <Image
@@ -42,14 +42,14 @@ export function MangaGridCard({
         </View>
         <Text
           numberOfLines={2}
-          className="mt-2 text-sm font-medium text-zinc-900 dark:text-zinc-100"
+          className="mt-2 text-sm font-medium text-zinc-100"
         >
           {title}
         </Text>
         {subtitle ? (
           <Text
             numberOfLines={1}
-            className="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
+            className="mt-1 text-xs text-zinc-400"
           >
             {subtitle}
           </Text>

@@ -2,8 +2,8 @@ import { ScrollView, Text, View } from 'react-native';
 
 function TagChip({ label }: { label: string }) {
   return (
-    <View className="rounded-md bg-zinc-100 px-2.5 py-1 dark:bg-white/10">
-      <Text className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 dark:text-white/80">
+    <View className="rounded-md bg-white/10 px-2.5 py-1">
+      <Text className="text-[10px] font-bold uppercase tracking-wider text-white/80">
         {label}
       </Text>
     </View>

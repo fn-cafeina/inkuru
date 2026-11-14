@@ -146,11 +146,11 @@ export function MangaChapterList({
             ready={ready}
           />
           {notice ? (
-            <View className="mx-5 my-2 min-h-12 flex-row items-center rounded-xl bg-zinc-100 px-4 dark:bg-neutral-900">
+            <View className="mx-5 my-2 min-h-12 flex-row items-center rounded-xl bg-neutral-900 px-4">
               <Feather name="check" size={16} color={colors.accent} />
               <Text
                 accessibilityLiveRegion="polite"
-                className="ml-2 text-sm text-zinc-700 dark:text-zinc-200"
+                className="ml-2 text-sm text-zinc-200"
               >
                 {notice}
               </Text>

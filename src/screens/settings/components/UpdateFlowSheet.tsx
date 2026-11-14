@@ -74,13 +74,13 @@ export function UpdateFlowSheet() {
       />
       <Animated.View
         entering={SlideInDown.duration(200)}
-        className="rounded-t-2xl bg-white px-5 pt-5 dark:bg-neutral-900"
+        className="rounded-t-2xl bg-neutral-900 px-5 pt-5"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
         <View className="mb-3 flex-row items-center justify-between">
           <Text
             accessibilityRole="header"
-            className="text-xl font-semibold text-zinc-900 dark:text-zinc-50"
+            className="text-xl font-semibold text-zinc-50"
           >
             {titleFor(phase)}
           </Text>
@@ -122,7 +122,7 @@ function titleFor(phase: VisiblePhase): string {
 
 function ConfirmBody({ tag }: { tag: string }): ReactElement {
   return (
-    <Text className="text-sm leading-5 text-zinc-500 dark:text-zinc-400">
+    <Text className="text-sm leading-5 text-zinc-400">
       {`Versión ${tag} disponible.`}
     </Text>
   );
@@ -131,10 +131,10 @@ function ConfirmBody({ tag }: { tag: string }): ReactElement {
 function PermissionBody(): ReactElement {
   return (
     <>
-      <Text className="text-sm leading-5 text-zinc-500 dark:text-zinc-400">
+      <Text className="text-sm leading-5 text-zinc-400">
         {'Para instalar actualizaciones, permití que Inkuru instale aplicaciones en los ajustes del sistema.'}
       </Text>
-      <Text className="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
+      <Text className="mt-2 text-xs text-zinc-500">
         {'Al volver, la descarga continúa sola.'}
       </Text>
     </>
@@ -150,7 +150,7 @@ function DownloadingBody({ progress }: { progress: DownloadProgress }): ReactEle
 
   return (
     <>
-      <View className="mt-1 h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-neutral-800">
+      <View className="mt-1 h-1 overflow-hidden rounded-full bg-neutral-800">
         <View
           className="h-full"
           style={{
@@ -161,7 +161,7 @@ function DownloadingBody({ progress }: { progress: DownloadProgress }): ReactEle
       </View>
       <Text
         accessibilityLiveRegion="polite"
-        className="mt-2 text-xs text-zinc-500 dark:text-zinc-400"
+        className="mt-2 text-xs text-zinc-400"
       >
         {pct !== null
           ? `${Math.round(pct * 100)}% · ${formatSize(progress.receivedBytes)}`
@@ -173,7 +173,7 @@ function DownloadingBody({ progress }: { progress: DownloadProgress }): ReactEle
 
 function InstallingBody(): ReactElement {
   return (
-    <Text className="text-sm leading-5 text-zinc-500 dark:text-zinc-400">
+    <Text className="text-sm leading-5 text-zinc-400">
       {'Abriendo el instalador del sistema…'}
     </Text>
   );
@@ -184,7 +184,7 @@ function ErrorBody({ failure }: { failure: string | null }): ReactElement {
     <Text
       accessibilityLiveRegion="polite"
       numberOfLines={4}
-      className="text-sm leading-5 text-zinc-500 dark:text-zinc-400"
+      className="text-sm leading-5 text-zinc-400"
     >
       {failure ?? 'Ocurrió un error inesperado.'}
     </Text>

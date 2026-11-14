@@ -1,10 +1,8 @@
 import {
   DarkTheme,
-  DefaultTheme,
   NavigationContainer,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'react-native';
 
 import MangaScreen from '../screens/manga/MangaScreen';
 import ReaderScreen from '../screens/reader/ReaderScreen';
@@ -15,9 +13,8 @@ import type { RootStackParamList } from './types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const scheme = useColorScheme();
   const colors = useColors();
-  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const base = DarkTheme;
 
   return (
     <NavigationContainer

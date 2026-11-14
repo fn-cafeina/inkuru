@@ -35,7 +35,7 @@ export function MangaCoverInfo({
   return (
     <View className="flex-row px-5">
       <View
-        className="overflow-hidden rounded-2xl bg-zinc-200 dark:bg-neutral-800"
+        className="overflow-hidden rounded-2xl bg-neutral-800"
         style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
       >
         <Image
@@ -52,7 +52,7 @@ export function MangaCoverInfo({
         <Text
           accessibilityRole="header"
           numberOfLines={4}
-          className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="text-2xl font-extrabold tracking-tight text-zinc-50"
         >
           {title}
         </Text>

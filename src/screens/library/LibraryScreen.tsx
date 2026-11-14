@@ -210,7 +210,7 @@ function LibrarySearch({
 
   return (
     <View className="mb-3 px-5">
-      <View className="h-12 flex-row items-center rounded-xl border border-zinc-200 bg-white px-4 dark:border-neutral-800 dark:bg-neutral-900">
+      <View className="h-12 flex-row items-center rounded-xl border border-neutral-800 bg-neutral-900 px-4">
         <Feather
           name="search"
           size={18}
@@ -226,7 +226,7 @@ function LibrarySearch({
           returnKeyType="search"
           placeholder="Buscar en la biblioteca"
           placeholderTextColor={colors.iconInactive}
-          className="h-12 flex-1 text-base text-zinc-900 dark:text-zinc-50"
+          className="h-12 flex-1 text-base text-zinc-50"
         />
         {query ? (
           <Feather

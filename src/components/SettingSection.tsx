@@ -19,7 +19,7 @@ export function SettingSection({
       <SectionTitle className="mb-2">{title}</SectionTitle>
       <View
         accessibilityRole={groupRole}
-        className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
+        className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
       >
         {children}
       </View>
