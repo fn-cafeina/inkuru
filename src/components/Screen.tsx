@@ -6,7 +6,7 @@ export function Screen({ children }: { children: ReactNode }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1 bg-zinc-50 dark:bg-zinc-950">
+    <View className="flex-1 bg-zinc-50 dark:bg-black">
       <View style={{ height: insets.top }} />
       {children}
     </View>

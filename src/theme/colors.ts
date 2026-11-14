@@ -13,7 +13,7 @@ export const palette = {
     text: '#18181b',
     textMuted: '#52525b',
     iconInactive: '#71717a',
-    scrim: 'rgba(9, 9, 11, 0.5)',
+    scrim: 'rgba(0, 0, 0, 0.5)',
     accent: '#4f7a3e',
     onAccent: '#ffffff',
     accentContainer: '#e4efdb',
@@ -21,13 +21,13 @@ export const palette = {
     notification: '#dc2626',
   },
   dark: {
-    background: '#09090b',
-    surface: '#18181b',
-    border: '#27272a',
-    text: '#f4f4f5',
-    textMuted: '#a1a1aa',
-    iconInactive: '#a1a1aa',
-    scrim: 'rgba(9, 9, 11, 0.5)',
+    background: '#000000',
+    surface: '#171717',
+    border: '#262626',
+    text: '#fafafa',
+    textMuted: '#a3a3a3',
+    iconInactive: '#a3a3a3',
+    scrim: 'rgba(0, 0, 0, 0.5)',
     accent: '#a6d97e',
     onAccent: '#12240a',
     accentContainer: '#2b4420',
@@ -38,15 +38,15 @@ export const palette = {
 
 /** Reader chrome, identical in both schemes (see the note above). */
 export const reader = {
-  background: '#09090b',
-  surface: '#18181b',
-  border: '#27272a',
-  text: '#f4f4f5',
-  textMuted: '#a1a1aa',
-  overlay: 'rgba(9, 9, 11, 0.7)',
+  background: '#000000',
+  surface: '#171717',
+  border: '#262626',
+  text: '#fafafa',
+  textMuted: '#a3a3a3',
+  overlay: 'rgba(0, 0, 0, 0.7)',
   track: 'rgba(255, 255, 255, 0.25)',
   bar: 'rgba(255, 255, 255, 0.9)',
-  scrim: 'rgba(9, 9, 11, 0.5)',
+  scrim: 'rgba(0, 0, 0, 0.5)',
 } as const;
 
 export function useColors() {

@@ -43,7 +43,7 @@ export function SettingRow({
   const content = (
     <>
       {divider ? (
-        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-zinc-800" />
+        <View className="absolute left-4 right-0 top-0 h-px bg-zinc-200 dark:bg-neutral-800" />
       ) : null}
       {icon !== undefined ? (
         <Feather

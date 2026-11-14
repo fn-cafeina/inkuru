@@ -19,7 +19,7 @@ export function RefreshNotice({
     <AnimatedPressable
       accessibilityLabel={`${message}. Reintentar`}
       onPress={onRetry}
-      className={`${className} min-h-12 flex-row items-center rounded-full border border-zinc-200 px-4 dark:border-zinc-800`}
+      className={`${className} min-h-12 flex-row items-center rounded-full border border-zinc-200 px-4 dark:border-neutral-800`}
     >
       <Feather name="refresh-cw" size={16} color={colors.textMuted} />
       <Text

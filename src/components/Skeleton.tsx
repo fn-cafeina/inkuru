@@ -64,7 +64,7 @@ export function Skeleton({ className, style, tone = 'auto' }: Props) {
       accessible={false}
       importantForAccessibility="no-hide-descendants"
       className={`${
-        tone === 'dark' ? '' : 'bg-zinc-300 dark:bg-zinc-700'
+        tone === 'dark' ? '' : 'bg-zinc-300 dark:bg-neutral-700'
       } ${className ?? ''}`}
       // A pulsing zinc-700 over the reader's near-black canvas is invisible, so
       // the dark tone gets its own lighter block.

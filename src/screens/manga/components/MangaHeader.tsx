@@ -173,7 +173,7 @@ function MangaProgress({
 
   return (
     <View className="mt-4 px-4">
-      <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+      <View className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-neutral-800">
         <View
           className="h-full rounded-full"
           style={{ width: `${progressPercent}%`, backgroundColor: colors.accent }}

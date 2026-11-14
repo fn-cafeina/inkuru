@@ -28,7 +28,7 @@ export function MangaGridCard({
         className="rounded-2xl p-1"
       >
         <View
-          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-zinc-800"
+          className="overflow-hidden rounded-xl bg-zinc-200 dark:bg-neutral-800"
           style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
         >
           <Image

@@ -35,7 +35,7 @@ export function MangaCoverInfo({
   return (
     <View className="flex-row px-4">
       <View
-        className="overflow-hidden rounded-2xl bg-zinc-200 dark:bg-zinc-800"
+        className="overflow-hidden rounded-2xl bg-zinc-200 dark:bg-neutral-800"
         style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
       >
         <Image

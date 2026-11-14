@@ -211,7 +211,7 @@ function LibrarySearch({
 
   return (
     <View className="mb-3 px-4">
-      <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-zinc-900">
+      <View className="min-h-12 flex-row items-center rounded-full bg-white px-1 dark:bg-neutral-900">
         <View className="pl-3 pr-1">
           <Feather name="search" size={18} color={colors.iconInactive} />
         </View>

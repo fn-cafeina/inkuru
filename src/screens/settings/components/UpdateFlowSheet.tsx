@@ -74,7 +74,7 @@ export function UpdateFlowSheet() {
       />
       <Animated.View
         entering={SlideInDown.duration(200)}
-        className="rounded-t-2xl bg-white px-5 pt-5 dark:bg-zinc-900"
+        className="rounded-t-2xl bg-white px-5 pt-5 dark:bg-neutral-900"
         style={{ paddingBottom: insets.bottom + 16 }}
       >
         <View className="mb-3 flex-row items-center justify-between">
@@ -150,7 +150,7 @@ function DownloadingBody({ progress }: { progress: DownloadProgress }): ReactEle
 
   return (
     <>
-      <View className="mt-1 h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+      <View className="mt-1 h-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-neutral-800">
         <View
           className="h-full"
           style={{

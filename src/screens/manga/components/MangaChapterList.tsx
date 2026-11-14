@@ -146,7 +146,7 @@ export function MangaChapterList({
             ready={ready}
           />
           {notice ? (
-            <View className="mx-4 my-2 min-h-12 flex-row items-center rounded-full bg-zinc-100 px-4 dark:bg-zinc-900">
+            <View className="mx-4 my-2 min-h-12 flex-row items-center rounded-full bg-zinc-100 px-4 dark:bg-neutral-900">
               <Feather name="check" size={16} color={colors.accent} />
               <Text
                 accessibilityLiveRegion="polite"
