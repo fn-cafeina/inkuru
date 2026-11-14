@@ -4,11 +4,14 @@ export type LatestRelease = {
 };
 
 /**
- * The GitHub API allows 60 unauthenticated requests per hour and does not
- * count conditional requests answered with 304, so a six-hour window keeps a
- * shared home network well below the limit even without the ETag.
+ * The GitHub API allows 60 unauthenticated requests per hour, and
+ * conditional requests answered with a 304 do not count. A one-hour window
+ * with the ETag stays far below the limit, even on a shared home network.
  */
-export const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
+export const CHECK_INTERVAL_MS = 60 * 60 * 1000;
+
+/** APKs under this size are not the CI build; never offer them. */
+const MIN_APK_BYTES = 5 * 1024 * 1024;
 
 /** Extract the installable APK from a GitHub release payload. */
 export function parseRelease(raw: unknown): LatestRelease | null {
@@ -34,7 +37,8 @@ export function parseRelease(raw: unknown): LatestRelease | null {
     if (
       typeof entry.name === 'string' &&
       entry.name.endsWith('.apk') &&
-      typeof entry.browser_download_url === 'string'
+      typeof entry.browser_download_url === 'string' &&
+      (typeof entry.size !== 'number' || entry.size > MIN_APK_BYTES)
     ) {
       return { tag, apkUrl: entry.browser_download_url };
     }
@@ -69,27 +73,6 @@ export function isNewerVersion(tag: string, current: string): boolean {
 /** Whether the throttle window has elapsed since the last API round trip. */
 export function shouldCheck(checkedAt: number | null, now: number): boolean {
   return checkedAt === null || now - checkedAt >= CHECK_INTERVAL_MS;
-}
-
-/** Age of the last check as plain Spanish, relative to `now`. */
-export function formatCheckedAt(checkedAt: number, now: number): string {
-  const minutes = Math.floor(Math.max(0, now - checkedAt) / 60_000);
-
-  if (minutes < 1) {
-    return 'hace un momento';
-  }
-
-  if (minutes < 60) {
-    return `hace ${minutes} min`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-
-  if (hours < 24) {
-    return `hace ${hours} h`;
-  }
-
-  return `hace ${Math.floor(hours / 24)} d`;
 }
 
 /** Numeric segments of a `v1.2.3` tag, or null when it is not comparable. */

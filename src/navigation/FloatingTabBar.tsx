@@ -80,7 +80,12 @@ export function FloatingTabBar({
           const isFocused = state.index === index;
           const name = route.name as keyof MainTabsParamList;
           const color = isFocused ? colors.accent : colors.iconInactive;
-          const showUpdateDot = name === 'Settings' && update.available !== null;
+          // The dot only means "the app found this"; with the auto-check off,
+          // nothing found anything.
+          const showUpdateDot =
+            name === 'Settings' &&
+            update.autoCheck &&
+            update.available !== null;
 
           return (
             <AnimatedPressable

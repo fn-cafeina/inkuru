@@ -1,6 +1,5 @@
 import fixture from './__fixtures__/release.json';
 import {
-  formatCheckedAt,
   isNewerVersion,
   parseRelease,
   shouldCheck,
@@ -39,6 +38,22 @@ assert(
   }) === null,
   'a release without an APK cannot install',
 );
+assert(
+  parseRelease({
+    tag_name: 'v1.1.0',
+    assets: [
+      { name: 'stub.apk', browser_download_url: 'https://x/stub.apk', size: 1024 },
+    ],
+  }) === null,
+  'a stub APK is not the CI build',
+);
+assert(
+  parseRelease({
+    tag_name: 'v1.1.0',
+    assets: [{ name: 'inkuru.apk', browser_download_url: 'https://x/inkuru.apk' }],
+  }) !== null,
+  'an APK without a known size is accepted',
+);
 
 assert(isNewerVersion('v1.0.1', '1.0.0'), '1.0.1 over 1.0.0');
 assert(isNewerVersion('v1.1.0', '1.0.9'), '1.1.0 over 1.0.9');
@@ -56,19 +71,8 @@ const now = 1_700_000_000_000;
 const hour = 60 * 60 * 1000;
 
 assert(shouldCheck(null, now), 'never checked must check');
-assert(!shouldCheck(now - hour, now), 'inside the window does not check again');
-assert(shouldCheck(now - 6 * hour, now), 'window elapsed checks again');
-assert(shouldCheck(now - 6 * hour - 1, now), 'the window edge checks');
-
-const minute = 60 * 1000;
-
-assertEqual(formatCheckedAt(now - 10_000, now), 'hace un momento', 'a recent minute');
-assertEqual(formatCheckedAt(now - minute, now), 'hace 1 min', 'one minute ago');
-assertEqual(formatCheckedAt(now - 45 * minute, now), 'hace 45 min', 'forty-five minutes ago');
-assertEqual(formatCheckedAt(now - hour, now), 'hace 1 h', 'one hour ago');
-assertEqual(formatCheckedAt(now - 5 * hour, now), 'hace 5 h', 'five hours ago');
-assertEqual(formatCheckedAt(now - 24 * hour, now), 'hace 1 d', 'one day ago');
-assertEqual(formatCheckedAt(now - 72 * hour, now), 'hace 3 d', 'three days ago');
-assertEqual(formatCheckedAt(now + minute, now), 'hace un momento', 'the future is not negative');
+assert(!shouldCheck(now - 59 * 60_000, now), 'inside the window does not check again');
+assert(shouldCheck(now - hour, now), 'window elapsed checks again');
+assert(shouldCheck(now - hour - 1, now), 'the window edge checks');
 
 console.log('release ok');

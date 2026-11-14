@@ -4,7 +4,8 @@
   "assets": [
     {
       "name": "inkuru.apk",
-      "browser_download_url": "https://github.com/fn-cafeina/inkuru/releases/download/v1.1.0/inkuru.apk"
+      "browser_download_url": "https://github.com/fn-cafeina/inkuru/releases/download/v1.1.0/inkuru.apk",
+      "size": 52428800
     },
     {
       "name": "notes.txt",
