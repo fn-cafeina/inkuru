@@ -10,7 +10,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/foreground-icon.png",
-        "backgroundColor": "#E6F4FE"
+        "backgroundColor": "#000000"
       },
       "backgroundColor": "#fafafa",
       "softwareKeyboardLayoutMode": "pan",
@@ -26,9 +26,9 @@
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#E6F4FE",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#09090b"
+            "backgroundColor": "#000000"
           }
         }
       ],
