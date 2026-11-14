@@ -1,15 +1,14 @@
-import { ScrollView, Switch, Text } from 'react-native';
+import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppPressable } from '../../../components/AppPressable';
 import { ReaderPreferenceSections } from '../../../components/ReaderPreferenceSections';
 import { SettingSection } from '../../../components/SettingSection';
+import { SwitchRow } from '../../../components/SwitchRow';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
 } from '../../../storage/readerSettings';
-import { useColors } from '../../../theme/colors';
 import { ReaderSheet } from './ReaderSheet';
 
 export function ReaderSettingsSheet({
@@ -59,47 +58,12 @@ export function ReaderSettingsSheet({
         />
         <SettingSection title="Pantalla">
           <SwitchRow
-            label="Mantener encendida"
+            title="Mantener encendida"
             value={keepAwake}
             onValueChange={onSelectKeepAwake}
           />
         </SettingSection>
       </ScrollView>
     </ReaderSheet>
-  );
-}
-
-function SwitchRow({
-  label,
-  value,
-  onValueChange,
-}: {
-  label: string;
-  value: boolean;
-  onValueChange: (value: boolean) => void;
-}) {
-  const colors = useColors();
-
-  return (
-    <AppPressable
-      accessibilityRole="switch"
-      accessibilityLabel={label}
-      accessibilityState={{ checked: value }}
-      onPress={() => onValueChange(!value)}
-      className="min-h-14 flex-row items-center px-4"
-    >
-      <Text className="flex-1 text-base text-zinc-900 dark:text-zinc-100">
-        {label}
-      </Text>
-      {/* The row owns the gesture and the a11y role, so the switch is
-          decoration only: no handler, or it would be pressed twice. */}
-      <Switch
-        accessible={false}
-        pointerEvents="none"
-        value={value}
-        trackColor={{ false: colors.iconInactive, true: colors.accent }}
-        thumbColor="#ffffff"
-      />
-    </AppPressable>
   );
 }
