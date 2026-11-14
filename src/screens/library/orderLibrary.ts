@@ -1,12 +1,6 @@
 import type { LibraryEntry } from '../../storage/library';
 import type { ReaderProgress } from '../../storage/readerProgress';
 
-/**
- * Explicit saves first (newest first), then titles that only have reading
- * progress. Within each group the most recently read comes first, because
- * "continue reading" is the reason the tab exists; progress has no timestamp,
- * so the array order is what the library was loaded in.
- */
 /** Title match for the library search; case and accents are ignored. */
 export function matchesQuery(title: string, query: string): boolean {
   const normalize = (value: string) =>
@@ -16,6 +10,11 @@ export function matchesQuery(title: string, query: string): boolean {
   return needle.length === 0 || normalize(title).includes(needle);
 }
 
+/**
+ * Titles with reading progress first, then the rest: "continue reading" is
+ * the reason the tab exists. Within each group the most recently saved comes
+ * first; progress has no timestamp, so the save order is the only signal.
+ */
 export function orderLibrary(
   entries: LibraryEntry[],
   progress: Record<string, ReaderProgress>,
