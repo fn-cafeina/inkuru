@@ -33,8 +33,8 @@ export function ChoiceRow({
       <Text
         className={`flex-1 text-base ${
           disabled
-            ? 'text-zinc-600'
-            : 'text-zinc-100'
+            ? 'text-neutral-600'
+            : 'text-white'
         }`}
       >
         {label}

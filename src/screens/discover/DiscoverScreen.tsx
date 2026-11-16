@@ -72,7 +72,7 @@ export default function DiscoverScreen() {
               returnKeyType="search"
               placeholder="Título del manga"
               placeholderTextColor={colors.iconInactive}
-              className="h-12 flex-1 text-base text-zinc-50"
+              className="h-12 flex-1 text-base text-white"
             />
             {input ? (
               <Feather

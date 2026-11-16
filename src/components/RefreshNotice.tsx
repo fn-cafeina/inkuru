@@ -24,7 +24,7 @@ export function RefreshNotice({
       <Feather name="refresh-cw" size={16} color={colors.textMuted} />
       <Text
         accessibilityLiveRegion="polite"
-        className="ml-2 flex-1 text-sm text-zinc-300"
+        className="ml-2 flex-1 text-sm text-neutral-300"
       >
         {message}
       </Text>

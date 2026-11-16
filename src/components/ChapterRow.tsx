@@ -14,8 +14,8 @@ export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
   current: 'flex-1 text-sm font-semibold',
   selected: 'flex-1 text-sm font-semibold',
-  read: 'flex-1 text-sm text-zinc-400 line-through',
-  none: 'flex-1 text-sm text-zinc-100',
+  read: 'flex-1 text-sm text-neutral-400 line-through',
+  none: 'flex-1 text-sm text-white',
 };
 
 export function ChapterRow({

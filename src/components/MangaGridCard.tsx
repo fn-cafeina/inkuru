@@ -42,14 +42,14 @@ export function MangaGridCard({
         </View>
         <Text
           numberOfLines={2}
-          className="mt-2 text-sm font-medium text-zinc-100"
+          className="mt-2 text-sm font-medium text-white"
         >
           {title}
         </Text>
         {subtitle ? (
           <Text
             numberOfLines={1}
-            className="mt-1 text-xs text-zinc-400"
+            className="mt-1 text-xs text-neutral-400"
           >
             {subtitle}
           </Text>

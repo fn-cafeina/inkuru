@@ -52,7 +52,7 @@ export function MangaCoverInfo({
         <Text
           accessibilityRole="header"
           numberOfLines={4}
-          className="text-2xl font-extrabold tracking-tight text-zinc-50"
+          className="text-2xl font-extrabold tracking-tight text-white"
         >
           {title}
         </Text>

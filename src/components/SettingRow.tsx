@@ -54,12 +54,12 @@ export function SettingRow({
         />
       ) : null}
       <View className="flex-1 pr-3">
-        <Text className="text-base font-medium text-zinc-100">
+        <Text className="text-base font-medium text-white">
           {title}
         </Text>
         {subtitle !== undefined ? (
           <Text
-            className="mt-1 text-xs font-semibold tracking-wide text-zinc-400"
+            className="mt-1 text-xs font-semibold tracking-wide text-neutral-400"
             style={subtitleColor === undefined ? undefined : { color: subtitleColor }}
           >
             {subtitle}

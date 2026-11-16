@@ -223,7 +223,7 @@ function LibrarySearch({
           returnKeyType="search"
           placeholder="Buscar en la biblioteca"
           placeholderTextColor={colors.iconInactive}
-          className="h-12 flex-1 text-base text-zinc-50"
+          className="h-12 flex-1 text-base text-white"
         />
         {query ? (
           <Feather

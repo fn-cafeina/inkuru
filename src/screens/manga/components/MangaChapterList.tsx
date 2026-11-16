@@ -150,7 +150,7 @@ export function MangaChapterList({
               <Feather name="check" size={16} color={colors.accent} />
               <Text
                 accessibilityLiveRegion="polite"
-                className="ml-2 text-sm text-zinc-200"
+                className="ml-2 text-sm text-neutral-200"
               >
                 {notice}
               </Text>
