@@ -62,7 +62,7 @@ export default function SettingsScreen() {
           paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
         }}
       >
-        <SettingSection title="Actualizaciones">
+        <SettingSection title="Actualizaciones" className="mt-0">
           <SwitchRow
             icon="bell"
             title="Buscar actualizaciones"
