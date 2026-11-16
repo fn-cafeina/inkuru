@@ -201,8 +201,8 @@ assertEqual(
 
 const singleQuotedDetail = parseManga(
   MANGA_FIXTURE.replace(
-    'class="element-title my-2"',
-    "class='element-title my-2'",
+    'class="zt-hd__title"',
+    "class='zt-hd__title'",
   ),
 );
 
@@ -211,8 +211,8 @@ assertEqual(singleQuotedDetail.title, 'ONE PUNCH-MAN', 'detail with single quote
 // Attribute order inside the paginator must not decide hasMore.
 const reorderedPaginator = parseCatalog(
   CATALOG_FIXTURE.replace(
-    'class="page-link" href="https://zonatmo.org/biblioteca?page=2" rel="next"',
-    'rel="next" class="page-link" href="https://zonatmo.org/biblioteca?page=2"',
+    'href="https://zonatmo.org/biblioteca?page=2" rel="next"',
+    'rel="next" href="https://zonatmo.org/biblioteca?page=2"',
   ),
 );
 

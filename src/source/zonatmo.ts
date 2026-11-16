@@ -104,18 +104,18 @@ async function fetchText(
 
 // shortcut: regex tied to zonatmo's detail markup, migrate to an HTML parser when selectors grow.
 export function parseManga(html: string): MangaDetail {
-  const title = textWithClass(html, 'h1', 'element-title') ?? '';
+  const title = textWithClass(html, 'h1', 'zt-hd__title') ?? '';
   const coverTag = html.match(
-    /<img\b[^>]*\bclass\s*=\s*"[^"]*\bbook-thumbnail\b[^"]*"[^>]*>/i,
+    /<meta\b[^>]*\bproperty\s*=\s*"og:image"[^>]*>/i,
   )?.[0];
-  const coverSource = coverTag ? attribute(coverTag, 'src') : undefined;
+  const coverSource = coverTag ? attribute(coverTag, 'content') : undefined;
   const cover = coverSource ? absoluteUrl(coverSource) : undefined;
 
   if (!title || !cover) {
     throw new Error('unexpected ZonaTMO detail format');
   }
 
-  const tags = extractBlocks(html, 'a', 'badge-primary')
+  const tags = extractBlocks(html, 'a', 'zt-hd__genre')
     .map(cleanText)
     .filter((tag) => tag.length > 0);
   return {
@@ -204,12 +204,10 @@ export function parseCatalog(html: string): CatalogPage {
 
   return {
     items,
-    // Scoped to a paginator link: a stray rel="next" in <head> or a comment
-    // must not be read as "has more" and trigger endless empty page fetches.
-    // Attribute order and quote style are not assumed.
-    hasMore: extractBlocks(html, 'a', 'page-link').some((anchor) =>
-      /\brel\s*=\s*["']next["']/i.test(anchor),
-    ),
+    // An anchor with rel="next": the disabled previous link is a span, and a
+    // <link rel="next"> in <head> is not an anchor, so neither reads as
+    // "has more" and triggers endless empty page fetches.
+    hasMore: /<a\b[^>]*\brel\s*=\s*["']next["'][^>]*>/i.test(html),
   };
 }
 
@@ -300,15 +298,17 @@ function parseReaderChapter(block: string): ReaderOption | undefined {
 }
 
 function parseMangaStatus(html: string): string | undefined {
-  const tag = tagWithClass(html, 'span', 'book-status');
+  // Anchored to the real span: the page's <style> block also contains
+  // .zt-hd__state--* selectors for every status.
+  const tag = tagWithClass(html, 'span', 'zt-hd__state');
   const classes = tag ? attribute(tag, 'class') : undefined;
 
   for (const name of classes?.split(/\s+/) ?? []) {
-    const value = STATUS_VALUES[name];
-
-    if (value) {
-      return value;
+    if (!name.startsWith('zt-hd__state--')) {
+      continue;
     }
+
+    return STATUS_VALUES[name.slice('zt-hd__state--'.length)];
   }
 
   return undefined;

@@ -1,33 +1,22 @@
-// Fixture from https://zonatmo.org/library/manga/8232/one-punch-man (2026-10-31). Trimmed markup.
+// Fixture from https://zonatmo.org/library/manga/8232/one-punch-man (2026-11-02). Trimmed markup.
 export const MANGA_FIXTURE = `
+<head>
+  <meta property="og:image" content="https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2">
+</head>
 <section class="element">
-  <header class="container-fluid element-header manga">
-    <div class="row">
-      <div class="col-12 col-md-3 text-center">
-        <h1 class="book-type bg-manga mt-4">MANGA</h1>
-        <div class="element-image my-2">
-          <div class="demography seinen" title="Seinen: dirigido a hombres adultos">Seinen</div>
-          <img class="book-thumbnail" src="https://zonatmo.org/storage/mangas/covers/4j4OmAAYAfJ64M0om5WhauVH9V3Iv3OLZDaYbl0x.jpg?v=2" alt="ONE PUNCH-MAN">
-        </div>
-      </div>
-      <div class="col-12 col-md-9 element-header-content-text">
-        <h1 class="element-title my-2">ONE PUNCH-MAN</h1>
-        <p class="element-description collapsed" id="manga-synopsis">La historia tiene lugar en la Ciudad-Z. ¡Sigue la vida de un héroe promedio que gana todas sus peleas con un solo puño!</p>
-        <h5 class="element-subtitle">Géneros</h5>
-        <h6><a class="badge badge-primary py-2 px-4 mx-1 my-2" href="https://zonatmo.org/tag/accion">Acción</a></h6>
-        <h6><a class="badge badge-primary py-2 px-4 mx-1 my-2" href="https://zonatmo.org/tag/aventura">Aventura</a></h6>
-        <h5 class="element-subtitle">Estado</h5>
-        <span class="book-status publishing">
-          <span class="status-dot publishing"></span>Publicándose
-        </span>
-        <h5 class="element-subtitle mt-2">Autor/es</h5>
-        <span class="badge badge-pill badge-transparent py-2 px-3">
-          <i class="fas fa-pen-nib fa-fw"></i>
-          <a href="https://zonatmo.org/biblioteca?filter_by=author&amp;title=one">one</a>
-        </span>
-      </div>
+  <div class="zt-hd">
+    <p class="zt-hd__kicker">
+      <a href="https://zonatmo.org/biblioteca?type=manga">manga</a>
+      <span>seinen</span>
+      <span class="zt-hd__state zt-hd__state--publishing">Publicándose</span>
+    </p>
+    <h1 class="zt-hd__title">ONE PUNCH-MAN</h1>
+    <p class="zt-hd__syn collapsed" id="manga-synopsis">La historia tiene lugar en la Ciudad-Z. ¡Sigue la vida de un héroe promedio que gana todas sus peleas con un solo puño!</p>
+    <div class="zt-hd__genres">
+      <a class="zt-hd__genre" href="https://zonatmo.org/tag/accion">Acción</a>
+      <a class="zt-hd__genre" href="https://zonatmo.org/tag/aventura">Aventura</a>
     </div>
-  </header>
+  </div>
 
   <ul class="list-group list-chapters" id="chapters-list">
     <li class="list-group-item p-0 bg-light upload-link" data-chapter-number="248">

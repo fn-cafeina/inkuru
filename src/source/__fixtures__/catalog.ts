@@ -1,4 +1,4 @@
-// Fixture from https://zonatmo.org/biblioteca (2026-10-31). Trimmed markup for parser checks.
+// Fixture from https://zonatmo.org/biblioteca (2026-11-02). Trimmed markup for parser checks.
 export const CATALOG_FIXTURE = `
 <div id="library-results">
   <div class="row" id="library-grid">
@@ -51,7 +51,8 @@ export const CATALOG_FIXTURE = `
         </div>
       </a>
     </div>
-    <a class="page-link" href="https://zonatmo.org/biblioteca?page=2" rel="next">Siguiente</a>
+    <a href="https://zonatmo.org/biblioteca?page=2" rel="next"
+       class="relative inline-flex items-center px-4 py-2 rounded-md hover:text-gray-500">Siguiente</a>
   </div>
 </div>
 `;
