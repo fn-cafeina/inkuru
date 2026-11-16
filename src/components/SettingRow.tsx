@@ -43,7 +43,7 @@ export function SettingRow({
   const content = (
     <>
       {divider ? (
-        <View className="absolute left-4 right-0 top-0 h-px bg-neutral-800" />
+        <View className="absolute left-5 right-0 top-0 h-px bg-neutral-800" />
       ) : null}
       {icon !== undefined ? (
         <Feather
@@ -54,12 +54,12 @@ export function SettingRow({
         />
       ) : null}
       <View className="flex-1 pr-3">
-        <Text className="text-base text-zinc-100">
+        <Text className="text-base font-medium text-zinc-100">
           {title}
         </Text>
         {subtitle !== undefined ? (
           <Text
-            className="mt-0.5 text-xs text-zinc-400"
+            className="mt-1 text-xs font-semibold tracking-wide text-zinc-400"
             style={subtitleColor === undefined ? undefined : { color: subtitleColor }}
           >
             {subtitle}
@@ -71,7 +71,7 @@ export function SettingRow({
   );
 
   if (onPress === undefined) {
-    return <View className="min-h-14 flex-row items-center px-4">{content}</View>;
+    return <View className="flex-row items-center px-5 py-4">{content}</View>;
   }
 
   return (
@@ -81,7 +81,7 @@ export function SettingRow({
       hapticFeedback
       disabled={disabled}
       onPress={onPress}
-      className="min-h-14 flex-row items-center px-4"
+      className="flex-row items-center px-5 py-4"
     >
       {content}
     </AnimatedPressable>
