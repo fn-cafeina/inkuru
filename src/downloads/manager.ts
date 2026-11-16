@@ -14,7 +14,7 @@ import {
   writeDownloadFile,
 } from './files';
 import { loadDownloadIndex, removeRecord, upsertRecord } from './metadata';
-import { chapterDirNames } from './paths';
+import { chapterDirNames, existingDirNames } from './paths';
 import { createRunTracker } from './runState';
 import {
   getDownloadState,
@@ -151,9 +151,12 @@ export function initializeDownloads(): Promise<void> {
     try {
       const stored = await loadDownloadIndex();
       const valid: DownloadRecord[] = [];
+      // One root listing for the whole scan; per-record listings would be
+      // O(n^2) in the number of downloads.
+      const dirNames = existingDirNames();
 
       for (const record of stored) {
-        if (hasDownloadFiles(record.chapterPath)) {
+        if (hasDownloadFiles(record.chapterPath, dirNames)) {
           store.records.set(record.chapterPath, record);
           valid.push(record);
         } else {

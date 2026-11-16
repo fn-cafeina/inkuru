@@ -133,6 +133,9 @@ assert(
 );
 assert(indexed().join() === CHAPTER, 'the index keeps only the real download');
 assert(!fake.exists(`${ROOT}/sin-marcador`), 'the orphan folder is swept');
+// The startup scan shares one root listing between index records; the other
+// listing is the reconcile sweep. Per-record listings would make this 3.
+assertEqual(fake.listCalls(), 2, 'startup lists the root once per scan');
 
 // An already-downloaded chapter never reaches the network.
 await manager.enqueueDownload({

@@ -16,6 +16,8 @@ export type FakeFileSystem = {
   failUrls: Set<string>;
   /** Forced failures per URL; the download rejects while the count stays > 0. */
   failTimes: Map<string, number>;
+  /** Directory list() calls since createFakeFileSystem ran. */
+  listCalls: () => number;
   /** Write a file, creating parent directories. */
   write(path: string, content: string): void;
   read(path: string): string | undefined;
@@ -163,6 +165,7 @@ class FakeDirectory {
   }
 
   list(): (FakeFile | FakeDirectory)[] {
+    listCalls += 1;
     const prefix = this.uri === '/' ? '/' : `${this.uri}/`;
     const children: (FakeFile | FakeDirectory)[] = [];
 
@@ -189,6 +192,7 @@ const store = new Map<string, Node>([
 const failDeletes = new Set<string>();
 const failUrls = new Set<string>();
 const failTimes = new Map<string, number>();
+let listCalls = 0;
 
 function createParents(path: string): void {
   const segments = path.split('/').filter((segment) => segment.length > 0);
@@ -201,6 +205,8 @@ function createParents(path: string): void {
 }
 
 export function createFakeFileSystem(): FakeFileSystem {
+  listCalls = 0;
+
   return {
     module: {
       Directory: FakeDirectory,
@@ -210,6 +216,7 @@ export function createFakeFileSystem(): FakeFileSystem {
     failDeletes,
     failUrls,
     failTimes,
+    listCalls: () => listCalls,
     write(path, content) {
       createParents(path);
       store.set(normalize(path), { kind: 'file', content });

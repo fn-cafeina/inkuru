@@ -39,10 +39,10 @@ export function chapterSlots(chapterPath: string): Directory[] {
 }
 
 /**
- * Directories that already exist for the chapter. One root listing beats
- * probing 100 candidate names on every read, delete and startup check.
+ * Directory names currently in the downloads root. Sharing one listing
+ * across records beats re-listing the root per record at startup.
  */
-export function existingChapterDirs(chapterPath: string): Directory[] {
+export function existingDirNames(): string[] {
   const root = downloadsRoot();
 
   if (!root.exists) {
@@ -51,10 +51,23 @@ export function existingChapterDirs(chapterPath: string): Directory[] {
 
   return root
     .list()
-    .filter(
-      (entry): entry is Directory =>
-        entry instanceof Directory && isChapterDirName(chapterPath, entry.name),
-    );
+    .filter((entry): entry is Directory => entry instanceof Directory)
+    .map((entry) => entry.name);
+}
+
+/**
+ * Directories that already exist for the chapter. One root listing beats
+ * probing 100 candidate names on every read, delete and startup check.
+ */
+export function existingChapterDirs(
+  chapterPath: string,
+  dirNames: string[] = existingDirNames(),
+): Directory[] {
+  const root = downloadsRoot();
+
+  return dirNames
+    .filter((name) => isChapterDirName(chapterPath, name))
+    .map((name) => new Directory(root, name));
 }
 
 export function pageExtension(url: string): string {

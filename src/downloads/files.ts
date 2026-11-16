@@ -222,10 +222,14 @@ export async function readDownloadFile(
  * (once per record at startup) so a hash collision or an unreadable copy
  * cannot pass as this chapter's files. An unreadable marker counts as absent:
  * the record is dropped from the index and reconcileDirectories sweeps the
- * corrupt directory on the next launch.
+ * corrupt directory on the next launch. `dirNames` shares one root listing
+ * across the startup scan.
  */
-export function hasDownloadFiles(chapterPath: string): boolean {
-  for (const directory of existingChapterDirs(chapterPath)) {
+export function hasDownloadFiles(
+  chapterPath: string,
+  dirNames?: string[],
+): boolean {
+  for (const directory of existingChapterDirs(chapterPath, dirNames)) {
     if (directoryOwner(directory) === chapterPath) {
       return true;
     }
