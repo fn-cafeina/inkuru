@@ -150,8 +150,8 @@ export function MangaHeader({
           >
             <Feather
               name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-              size={18}
-              color={colors.text}
+              size={20}
+              color={colors.accent}
             />
           </AnimatedPressable>
         </View>
@@ -197,7 +197,7 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
       <SectionTitle className="mb-3 mt-6 px-5">Sinopsis</SectionTitle>
       <Text
         numberOfLines={!expanded && longSynopsis ? 6 : undefined}
-        className="px-5 text-sm text-neutral-300"
+        className="px-5 text-sm font-medium leading-6 text-neutral-400"
       >
         {synopsis}
       </Text>
@@ -205,10 +205,10 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
         <AnimatedPressable
           accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
           onPress={() => setExpanded((value) => !value)}
-          className="mt-1 min-h-12 justify-center px-5 self-start"
+          className="mt-2 px-5 self-start"
         >
           <Text
-            className="text-sm font-medium"
+            className="text-sm font-bold leading-6"
             style={{ color: colors.accent }}
           >
             {expanded ? 'Ver menos' : 'Ver más'}
