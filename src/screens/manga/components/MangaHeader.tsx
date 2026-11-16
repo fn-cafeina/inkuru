@@ -91,52 +91,8 @@ export function MangaHeader({
       {manga.synopsis ? <MangaSynopsis synopsis={manga.synopsis} /> : null}
 
       <View className="mt-6 px-5">
-        {ranges.length > 1 ? (
-          <>
-            <SectionTitle className="mb-2">Rangos</SectionTitle>
-            <View
-              accessibilityRole="radiogroup"
-              accessibilityLabel="Rangos de capítulos"
-            >
-              <ScrollView
-                ref={chipRowRef}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerClassName="gap-3 pb-3"
-              >
-                {ranges.map((range, index) => (
-                  <View
-                    key={`${range.label}-${index}`}
-                    onLayout={(event) => {
-                      const x = event.nativeEvent.layout.x;
-
-                      chipXs.current[index] = x;
-
-                      // First layout runs after the restore effect above.
-                      if (index === activeRange) {
-                        chipRowRef.current?.scrollTo({ x, animated: false });
-                      }
-                    }}
-                  >
-                    <OptionChip
-                      label={range.label}
-                      accessibilityLabel={`Capítulos ${range.label.replace('-', ' a ')}`}
-                      selected={index === activeRange}
-                      onPress={() => onSelectRange(index)}
-                    />
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-          </>
-        ) : null}
-        <View className="flex-row items-center">
-          <View className="flex-1 flex-row items-center gap-2">
-            <SectionTitle>Capítulos</SectionTitle>
-            <Text className="text-xs text-neutral-400">
-              {manga.chapters.length}
-            </Text>
-          </View>
+        <View className="flex-row items-center justify-between">
+          <SectionTitle>{`Capítulos (${manga.chapters.length})`}</SectionTitle>
           <AnimatedPressable
             accessibilityLabel={
               sortOrder === 'asc'
@@ -146,15 +102,52 @@ export function MangaHeader({
             accessibilityHint="Toca para invertir el orden"
             hitSlop={4}
             onPress={onToggleSort}
-            className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            className="min-h-12 min-w-12 items-center justify-center"
           >
             <Feather
-              name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+              name={sortOrder === 'asc' ? 'chevron-up' : 'chevron-down'}
               size={20}
               color={colors.accent}
             />
           </AnimatedPressable>
         </View>
+        {ranges.length > 1 ? (
+          <View
+            className="mt-3"
+            accessibilityRole="radiogroup"
+            accessibilityLabel="Rangos de capítulos"
+          >
+            <ScrollView
+              ref={chipRowRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-3 pb-3"
+            >
+              {ranges.map((range, index) => (
+                <View
+                  key={`${range.label}-${index}`}
+                  onLayout={(event) => {
+                    const x = event.nativeEvent.layout.x;
+
+                    chipXs.current[index] = x;
+
+                    // First layout runs after the restore effect above.
+                    if (index === activeRange) {
+                      chipRowRef.current?.scrollTo({ x, animated: false });
+                    }
+                  }}
+                >
+                  <OptionChip
+                    label={range.label}
+                    accessibilityLabel={`Capítulos ${range.label.replace('-', ' a ')}`}
+                    selected={index === activeRange}
+                    onPress={() => onSelectRange(index)}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
       </View>
     </View>
   );
