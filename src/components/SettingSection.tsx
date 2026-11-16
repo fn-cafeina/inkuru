@@ -15,8 +15,8 @@ export function SettingSection({
   children: ReactNode;
 }) {
   return (
-    <View className={className ?? 'mt-6'}>
-      <SectionTitle className="mb-2">{title}</SectionTitle>
+    <View className={className ?? 'mt-8'}>
+      <SectionTitle className="mb-3">{title}</SectionTitle>
       <View
         accessibilityRole={groupRole}
         className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"

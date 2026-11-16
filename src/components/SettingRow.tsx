@@ -3,7 +3,6 @@ import type { AccessibilityState } from 'react-native';
 import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { useColors } from '../theme/colors';
 import { AnimatedPressable } from './AnimatedPressable';
 
 /**
@@ -25,7 +24,7 @@ export function SettingRow({
   accessibilityState,
 }: {
   icon?: keyof typeof Feather.glyphMap;
-  /** Defaults to the inactive icon color; pass the accent for actions. */
+  /** Defaults to the muted settings icon color; pass the accent for actions. */
   iconColor?: string;
   title: string;
   subtitle?: string;
@@ -38,8 +37,6 @@ export function SettingRow({
   accessibilityRole?: 'button' | 'switch';
   accessibilityState?: AccessibilityState;
 }) {
-  const colors = useColors();
-
   const content = (
     <>
       {divider ? (
@@ -49,7 +46,7 @@ export function SettingRow({
         <Feather
           name={icon}
           size={18}
-          color={iconColor ?? colors.iconInactive}
+          color={iconColor ?? '#737373'}
           style={{ marginRight: 12 }}
         />
       ) : null}

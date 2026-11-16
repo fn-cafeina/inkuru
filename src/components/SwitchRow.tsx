@@ -40,7 +40,7 @@ export function SwitchRow({
           accessible={false}
           pointerEvents="none"
           value={value}
-          trackColor={{ false: colors.iconInactive, true: colors.accent }}
+          trackColor={{ false: '#404040', true: colors.accent }}
           thumbColor="#ffffff"
         />
       }
