@@ -220,37 +220,6 @@ export default function MangaScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      <View
-        className="absolute left-0 right-0 top-0 bg-black"
-        style={{ zIndex: 10 }}
-      >
-        <View style={{ height: insets.top }} />
-        <ScreenHeader
-          onBack={goBack}
-          action={
-            <AnimatedPressable
-              accessibilityLabel={
-                inLibrary
-                  ? 'Quitar de la biblioteca'
-                  : 'Añadir a la biblioteca'
-              }
-              accessibilityState={{ selected: inLibrary }}
-              disabled={!data && !inLibrary}
-              onPress={() => {
-                void toggleLibrary();
-              }}
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
-            >
-              <Feather
-                name="bookmark"
-                size={20}
-                color={inLibrary ? colors.accent : colors.iconInactive}
-              />
-            </AnimatedPressable>
-          }
-        />
-      </View>
-
       {loading && !data ? (
         <MangaSkeleton />
       ) : hasError && !data ? (
@@ -285,6 +254,37 @@ export default function MangaScreen({ navigation, route }: Props) {
       ) : (
         <ErrorState message="Manga no disponible" onRetry={reload} />
       )}
+
+      {/* Last child so the bar draws above the scrolling list while it flings,
+          the same order the reader chrome uses; a zIndex on an earlier sibling
+          does not hold during the scroll. */}
+      <View className="absolute left-0 right-0 top-0 bg-black">
+        <View style={{ height: insets.top }} />
+        <ScreenHeader
+          onBack={goBack}
+          action={
+            <AnimatedPressable
+              accessibilityLabel={
+                inLibrary
+                  ? 'Quitar de la biblioteca'
+                  : 'Añadir a la biblioteca'
+              }
+              accessibilityState={{ selected: inLibrary }}
+              disabled={!data && !inLibrary}
+              onPress={() => {
+                void toggleLibrary();
+              }}
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            >
+              <Feather
+                name="bookmark"
+                size={20}
+                color={inLibrary ? colors.accent : colors.iconInactive}
+              />
+            </AnimatedPressable>
+          }
+        />
+      </View>
     </Screen>
   );
 }
