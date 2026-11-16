@@ -4,6 +4,3 @@
 export const SCREEN_PADDING = 20;
 export const APP_BAR_GAP = 8;
 export const GRID_GAP = 12;
-// ScreenHeader: 48dp bar + py-1 (8dp) + APP_BAR_GAP (8dp). Used where content
-// must start below the pinned header.
-export const SCREEN_HEADER_HEIGHT = 64;

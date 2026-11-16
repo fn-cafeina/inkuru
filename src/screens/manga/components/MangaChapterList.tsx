@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { Alert, FlatList, RefreshControl, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -15,13 +16,14 @@ import {
 import { useDownloadVersion } from '../../../hooks/useDownloads';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
-import { SCREEN_HEADER_HEIGHT } from '../../../theme/spacing';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
 import { ChapterDownloadButton } from './ChapterDownloadButton';
 import { MangaHeader } from './MangaHeader';
 
 type Props = {
+  /** Back + bookmark row; scrolls away with the hero, like rokimu. */
+  topBar: ReactNode;
   manga: MangaDetail;
   mangaPath: string;
   chapters: MangaChapter[];
@@ -44,6 +46,7 @@ type Props = {
 };
 
 export function MangaChapterList({
+  topBar,
   manga,
   mangaPath,
   chapters,
@@ -111,6 +114,7 @@ export function MangaChapterList({
 
   return (
     <FlatList
+      style={{ flex: 1 }}
       data={chapters}
       keyExtractor={(item) => item.path}
       ItemSeparatorComponent={ListDivider}
@@ -130,6 +134,7 @@ export function MangaChapterList({
       )}
       ListHeaderComponent={
         <View>
+          {topBar}
           <MangaHeader
             manga={manga}
             readCount={readCount}
@@ -174,7 +179,6 @@ export function MangaChapterList({
         />
       }
       contentContainerStyle={{
-        paddingTop: SCREEN_HEADER_HEIGHT,
         flexGrow: 1,
       }}
       showsVerticalScrollIndicator={false}

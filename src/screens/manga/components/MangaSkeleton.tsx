@@ -1,21 +1,23 @@
+import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { ListDivider } from '../../../components/ListDivider';
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
-import { SCREEN_HEADER_HEIGHT, SCREEN_PADDING } from '../../../theme/spacing';
+import { SCREEN_PADDING } from '../../../theme/spacing';
 
 /** Honest detail placeholder: only blocks that always exist. */
-export function MangaSkeleton() {
+export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
   return (
     <ScrollView
+      style={{ flex: 1 }}
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingTop: SCREEN_HEADER_HEIGHT,
         paddingHorizontal: SCREEN_PADDING,
         paddingBottom: 24,
       }}
     >
+      {topBar}
       <View className="flex-row">
         <Skeleton
           className="rounded-2xl"
