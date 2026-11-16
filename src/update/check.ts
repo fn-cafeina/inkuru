@@ -7,6 +7,7 @@ import {
   parseRelease,
   shouldCheck,
 } from './release';
+import { withTimeout } from '../downloads/timeout';
 import type { LatestRelease } from './release';
 
 const REPO = 'fn-cafeina/inkuru';
@@ -149,7 +150,10 @@ async function doCheck(
       headers['If-None-Match'] = previous.etag;
     }
 
-    const response = await fetchWithTimeout(RELEASES_URL, headers);
+    const controller = new AbortController();
+    const response = await withTimeout(controller, CHECK_TIMEOUT_MS, () =>
+      fetch(RELEASES_URL, { headers, signal: controller.signal }),
+    );
 
     if (response.status === 304) {
       commit({ ...previous, checkedAt: now });
@@ -194,20 +198,6 @@ async function isOffline(): Promise<boolean> {
   } catch {
     // NetInfo unavailable: assume online, the fetch decides.
     return false;
-  }
-}
-
-async function fetchWithTimeout(
-  url: string,
-  headers: Record<string, string>,
-): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
-
-  try {
-    return await fetch(url, { headers, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
   }
 }
 

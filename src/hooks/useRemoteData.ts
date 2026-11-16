@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { readCache, writeCache } from '../storage/queryCache';
 import { readRemoteCache, writeRemoteCache } from '../storage/remoteCache';
+import { withTimeout } from '../downloads/timeout';
 
 type RemoteData<T> = {
   data: T | null;
@@ -98,7 +99,6 @@ export function useRemoteData<T>(
       controllerRef.current = controller;
       const requestId = ++requestRef.current;
       const key = cacheKey;
-      const timeout = setTimeout(() => controller.abort(), 15000);
 
       setState((prev) =>
         prev.key === key
@@ -112,7 +112,10 @@ export function useRemoteData<T>(
       );
 
       try {
-        const result = await fetcher(controller.signal);
+        // A request hanging past the budget is aborted and read as an error.
+        const result = await withTimeout(controller, 15000, () =>
+          fetcher(controller.signal),
+        );
         const savedAt = Date.now();
 
         // Cache valid results even if the consumer unmounted while the
@@ -147,8 +150,6 @@ export function useRemoteData<T>(
           );
         }
       } finally {
-        clearTimeout(timeout);
-
         if (requestId === requestRef.current) {
           setState((prev) =>
             prev.key === key
