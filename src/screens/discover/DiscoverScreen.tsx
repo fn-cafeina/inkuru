@@ -21,7 +21,6 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
-import { PageTitle } from '../../components/PageTitle';
 import { RefreshNotice } from '../../components/RefreshNotice';
 import { Screen } from '../../components/Screen';
 import { MangaGridSkeleton } from '../../components/Skeleton';
@@ -55,8 +54,7 @@ export default function DiscoverScreen() {
         className="flex-1"
         behavior={Platform.OS === 'android' ? 'height' : 'padding'}
       >
-        <PageTitle>Explorar</PageTitle>
-        <View className="px-5 pb-3">
+        <View className="px-5 pt-4 pb-3">
           <View className="h-12 flex-row items-center rounded-xl border border-neutral-800 bg-neutral-900 px-4">
             <Feather
               name="search"

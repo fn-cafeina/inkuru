@@ -4,7 +4,6 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import { SettingRow } from '../../components/SettingRow';
 import { SettingSection } from '../../components/SettingSection';
@@ -53,17 +52,17 @@ export default function SettingsScreen() {
 
   return (
     <Screen>
-      <PageTitle>Ajustes</PageTitle>
       <ScrollView
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         contentContainerStyle={{
           paddingHorizontal: 20,
+          paddingTop: 16,
           paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
         }}
       >
-        <SettingSection title="Actualizaciones" className="mt-2">
+        <SettingSection title="Actualizaciones">
           <SwitchRow
             icon="bell"
             title="Buscar actualizaciones"

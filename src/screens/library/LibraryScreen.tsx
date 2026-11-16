@@ -18,7 +18,6 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
-import { PageTitle } from '../../components/PageTitle';
 import { Screen } from '../../components/Screen';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
 import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
@@ -125,8 +124,6 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      <PageTitle>Biblioteca</PageTitle>
-
       {entries.length > 4 ? (
         <LibrarySearch query={query} onChange={setQuery} />
       ) : null}
