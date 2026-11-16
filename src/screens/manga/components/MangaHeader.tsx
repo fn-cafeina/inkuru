@@ -195,26 +195,25 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
   return (
     <View>
       <SectionTitle className="mb-3 mt-6 px-5">Sinopsis</SectionTitle>
-      <Text
-        numberOfLines={!expanded && longSynopsis ? 6 : undefined}
-        className="px-5 text-sm font-medium leading-6 text-neutral-400"
+      <AnimatedPressable
+        accessibilityRole="button"
+        onPress={() => setExpanded((value) => !value)}
       >
-        {synopsis}
-      </Text>
-      {longSynopsis ? (
-        <AnimatedPressable
-          accessibilityLabel={expanded ? 'Ver menos' : 'Ver más'}
-          onPress={() => setExpanded((value) => !value)}
-          className="mt-2 px-5 self-start"
+        <Text
+          numberOfLines={!expanded && longSynopsis ? 6 : undefined}
+          className="px-5 text-sm font-medium leading-6 text-neutral-400"
         >
+          {synopsis}
+        </Text>
+        {longSynopsis ? (
           <Text
-            className="text-sm font-bold leading-6"
+            className="mt-2 px-5 text-sm font-bold leading-6"
             style={{ color: colors.accent }}
           >
             {expanded ? 'Ver menos' : 'Ver más'}
           </Text>
-        </AnimatedPressable>
-      ) : null}
+        ) : null}
+      </AnimatedPressable>
     </View>
   );
 }
