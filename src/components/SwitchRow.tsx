@@ -5,9 +5,9 @@ import { useColors } from '../theme/colors';
 import { SettingRow } from './SettingRow';
 
 /**
- * A full-row boolean setting. The row owns the gesture and the a11y role,
- * so the switch is decoration only: no handler, or it would be pressed
- * twice.
+ * A full-row boolean setting where the native switch is the control: the
+ * row is static, so tapping the knob toggles it without the row firing a
+ * second time.
  */
 export function SwitchRow({
   icon,
@@ -32,14 +32,11 @@ export function SwitchRow({
       title={title}
       subtitle={subtitle}
       divider={divider}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: value }}
-      onPress={() => onValueChange(!value)}
       trailing={
         <Switch
-          accessible={false}
-          pointerEvents="none"
+          accessibilityLabel={title}
           value={value}
+          onValueChange={onValueChange}
           trackColor={{ false: '#404040', true: colors.accent }}
           thumbColor="#ffffff"
         />
