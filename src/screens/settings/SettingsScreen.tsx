@@ -38,12 +38,12 @@ export default function SettingsScreen() {
 
   const release = update.available;
   const subtitle = update.checking
-    ? 'Comprobando...'
+    ? 'Buscando...'
     : update.failure !== null
       ? update.failure
       : release !== null
         ? `${release.tag} disponible`
-        : 'Al día';
+        : 'Estás al día';
   const subtitleColor = update.checking
     ? undefined
     : update.failure !== null
