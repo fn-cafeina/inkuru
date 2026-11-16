@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -17,7 +17,6 @@ import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
-import type { MangaDetail } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
@@ -83,12 +82,8 @@ function resolveRangeIndex(
   return Math.min(chosen, Math.max(ranges.length - 1, 0));
 }
 
-function mangaTitle(data: MangaDetail | null, fallback?: string): string {
-  return data?.title ?? fallback ?? '';
-}
-
 export default function MangaScreen({ navigation, route }: Props) {
-  const { path, title } = route.params;
+  const { path } = route.params;
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const fetcher = useCallback(
@@ -118,7 +113,6 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [activeRange, setActiveRange] = useState<number | null>(
     () => viewCache.get(path)?.range ?? null,
   );
-  const [barTitleVisible, setBarTitleVisible] = useState(false);
   // A colour change on a 20dp bookmark is a weak acknowledgement of a user
   // action, so the row under the header says what happened.
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
@@ -226,32 +220,36 @@ export default function MangaScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      <ScreenHeader
-        title={mangaTitle(data, title)}
-        titleVisible={barTitleVisible}
-        onBack={goBack}
-        action={
-          <AnimatedPressable
-            accessibilityLabel={
-              inLibrary
-                ? 'Quitar de la biblioteca'
-                : 'Añadir a la biblioteca'
-            }
-            accessibilityState={{ selected: inLibrary }}
-            disabled={!data && !inLibrary}
-            onPress={() => {
-              void toggleLibrary();
-            }}
-            className="min-h-12 min-w-12 items-center justify-center rounded-full"
-          >
-            <Feather
-              name="bookmark"
-              size={20}
-              color={inLibrary ? colors.accent : colors.iconInactive}
-            />
-          </AnimatedPressable>
-        }
-      />
+      <View
+        className="absolute left-0 right-0 top-0 bg-black"
+        style={{ zIndex: 10 }}
+      >
+        <View style={{ height: insets.top }} />
+        <ScreenHeader
+          onBack={goBack}
+          action={
+            <AnimatedPressable
+              accessibilityLabel={
+                inLibrary
+                  ? 'Quitar de la biblioteca'
+                  : 'Añadir a la biblioteca'
+              }
+              accessibilityState={{ selected: inLibrary }}
+              disabled={!data && !inLibrary}
+              onPress={() => {
+                void toggleLibrary();
+              }}
+              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+            >
+              <Feather
+                name="bookmark"
+                size={20}
+                color={inLibrary ? colors.accent : colors.iconInactive}
+              />
+            </AnimatedPressable>
+          }
+        />
+      </View>
 
       {loading && !data ? (
         <MangaSkeleton />
@@ -269,7 +267,6 @@ export default function MangaScreen({ navigation, route }: Props) {
           currentChapterPath={progress?.chapterPath}
           resumeChapter={resumeChapter}
           bottomInset={insets.bottom}
-          titleVisible={barTitleVisible}
           refreshing={refreshing}
           refreshError={showRefreshError}
           ready={localLoaded}
@@ -283,7 +280,6 @@ export default function MangaScreen({ navigation, route }: Props) {
               mangaPath: path,
             })
           }
-          onScrollPast={setBarTitleVisible}
           notice={savedNotice}
         />
       ) : (

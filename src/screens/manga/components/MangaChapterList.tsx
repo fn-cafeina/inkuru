@@ -15,6 +15,7 @@ import {
 import { useDownloadVersion } from '../../../hooks/useDownloads';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
+import { SCREEN_HEADER_HEIGHT } from '../../../theme/spacing';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
 import { ChapterDownloadButton } from './ChapterDownloadButton';
@@ -31,7 +32,6 @@ type Props = {
   currentChapterPath?: string;
   resumeChapter?: MangaChapter;
   bottomInset: number;
-  titleVisible: boolean;
   refreshing: boolean;
   refreshError: boolean;
   ready: boolean;
@@ -39,7 +39,6 @@ type Props = {
   onSelectRange: (index: number) => void;
   onToggleSort: () => void;
   onOpen: (chapter: MangaChapter) => void;
-  onScrollPast: (past: boolean) => void;
   /** Transient acknowledgement of the library toggle. */
   notice?: string | null;
 };
@@ -55,7 +54,6 @@ export function MangaChapterList({
   currentChapterPath,
   resumeChapter,
   bottomInset,
-  titleVisible,
   refreshing,
   refreshError,
   ready,
@@ -63,7 +61,6 @@ export function MangaChapterList({
   onSelectRange,
   onToggleSort,
   onOpen,
-  onScrollPast,
   notice = null,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
@@ -168,14 +165,6 @@ export function MangaChapterList({
         <View style={{ height: bottomInset + 24 }} />
       }
       ListEmptyComponent={<EmptyState title="Sin capítulos disponibles" />}
-      onScroll={(event) => {
-        const past = event.nativeEvent.contentOffset.y > 120;
-
-        if (past !== titleVisible) {
-          onScrollPast(past);
-        }
-      }}
-      scrollEventThrottle={16}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -184,7 +173,10 @@ export function MangaChapterList({
           progressBackgroundColor={colors.surface}
         />
       }
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{
+        paddingTop: SCREEN_HEADER_HEIGHT,
+        flexGrow: 1,
+      }}
       showsVerticalScrollIndicator={false}
     />
   );
