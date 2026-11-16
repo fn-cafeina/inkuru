@@ -23,16 +23,12 @@ export function OptionChip({
       accessibilityState={{ selected }}
       hitSlop={4}
       onPress={onPress}
-      style={
-        selected
-          ? { backgroundColor: colors.accentContainer, borderColor: 'transparent' }
-          : { borderColor: colors.border }
-      }
-      className="min-h-12 items-center justify-center rounded-full border px-3.5"
+      className="w-[90px] items-center rounded-lg bg-neutral-900 py-2"
+      style={selected ? { backgroundColor: `${colors.accent}26` } : undefined}
     >
       <Text
-        className={selected ? 'text-sm font-semibold' : 'text-sm'}
-        style={{ color: selected ? colors.onAccentContainer : colors.text }}
+        className={`text-xs ${selected ? '' : 'text-neutral-500'}`}
+        style={selected ? { color: colors.accent } : undefined}
       >
         {label}
       </Text>

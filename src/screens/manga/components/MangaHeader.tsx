@@ -102,7 +102,7 @@ export function MangaHeader({
                 ref={chipRowRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerClassName="gap-2 pb-3"
+                contentContainerClassName="gap-3 pb-3"
               >
                 {ranges.map((range, index) => (
                   <View
