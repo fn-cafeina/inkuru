@@ -183,8 +183,10 @@ function DiscoverResults({
     }, [reset]),
   );
 
-  const openManga = (item: MangaListItem) =>
-    navigation.navigate('Manga', { path: item.path, title: item.title });
+  const openManga = useCallback(
+    (path: string, title: string) => navigation.navigate('Manga', { path, title }),
+    [navigation],
+  );
 
   if (!showItems) {
     return (
@@ -215,10 +217,11 @@ function DiscoverResults({
       scrollEventThrottle={16}
       renderItem={({ item }) => (
         <MangaGridCard
+          path={item.path}
           title={item.title}
           cover={item.cover}
           width={cardWidth}
-          onPress={() => openManga(item)}
+          onOpen={openManga}
         />
       )}
       onEndReached={loadMore}

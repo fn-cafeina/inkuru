@@ -1,20 +1,13 @@
 import type { ReactNode } from 'react';
-import { useMemo } from 'react';
-import { Alert, FlatList, RefreshControl, View } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { FlatList, RefreshControl, View } from 'react-native';
 
-import { ChapterRow } from '../../../components/ChapterRow';
 import { EmptyState } from '../../../components/EmptyState';
-import {
-  cancelDownload,
-  deleteDownload,
-  enqueueDownload,
-  getDownloadState,
-} from '../../../downloads/manager';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
 import { getChapterState } from '../chapters';
-import { ChapterDownloadButton } from './ChapterDownloadButton';
+import { ChapterCard } from './ChapterCard';
 import { MangaHeader } from './MangaHeader';
 
 type Props = {
@@ -68,39 +61,10 @@ export function MangaChapterList({
   );
   const colors = useColors();
 
-  const handleDownload = (chapter: MangaChapter) => {
-    const status = getDownloadState(chapter.path)?.status;
-
-    if (status === 'done') {
-      Alert.alert(
-        'Eliminar descarga',
-        `Se eliminará ${chapter.title} del dispositivo.`,
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Eliminar',
-            style: 'destructive',
-            onPress: () => {
-              void deleteDownload(chapter.path);
-            },
-          },
-        ],
-      );
-      return;
-    }
-
-    if (status === 'queued' || status === 'downloading') {
-      cancelDownload(chapter.path);
-      return;
-    }
-
-    void enqueueDownload({
-      chapterPath: chapter.path,
-      chapterTitle: chapter.title,
-      mangaPath,
-      mangaTitle: manga.title,
-    });
-  };
+  const openChapter = useCallback(
+    (chapter: MangaChapter) => onOpen(chapter),
+    [onOpen],
+  );
 
   return (
     <FlatList
@@ -109,20 +73,13 @@ export function MangaChapterList({
       keyExtractor={(item) => item.path}
       ItemSeparatorComponent={RowGap}
       renderItem={({ item }) => (
-        <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
-          <ChapterRow
-            title={item.title}
-            state={getChapterState(item.path, currentChapterPath, readSet)}
-            trailing={
-              <ChapterDownloadButton
-                path={item.path}
-                title={item.title}
-                onPress={() => handleDownload(item)}
-              />
-            }
-            onPress={() => onOpen(item)}
-          />
-        </View>
+        <ChapterCard
+          chapter={item}
+          state={getChapterState(item.path, currentChapterPath, readSet)}
+          mangaPath={mangaPath}
+          mangaTitle={manga.title}
+          onOpen={openChapter}
+        />
       )}
       ListHeaderComponent={
         <View>

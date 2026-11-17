@@ -121,6 +121,10 @@ export default function LibraryScreen() {
   const retry = () => {
     void load(true);
   };
+  const openManga = useCallback(
+    (path: string, title: string) => navigation.navigate('Manga', { path, title }),
+    [navigation],
+  );
 
   return (
     <Screen>
@@ -168,15 +172,11 @@ export default function LibraryScreen() {
           scrollEventThrottle={16}
           renderItem={({ item }) => (
             <MangaGridCard
+              path={item.path}
               title={item.title}
               cover={item.cover}
               width={cardWidth}
-              onPress={() =>
-                navigation.navigate('Manga', {
-                  path: item.path,
-                  title: item.title,
-                })
-              }
+              onOpen={openManga}
             />
           )}
           showsVerticalScrollIndicator={false}
