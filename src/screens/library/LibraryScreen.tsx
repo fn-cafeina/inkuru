@@ -18,6 +18,7 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
+import { SectionTitle } from '../../components/SectionTitle';
 import { Screen } from '../../components/Screen';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
 import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
@@ -124,9 +125,12 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      {entries.length > 4 ? (
-        <LibrarySearch query={query} onChange={setQuery} />
-      ) : null}
+      <View className="px-5 pt-4">
+        <SectionTitle className="mb-3">Biblioteca</SectionTitle>
+        {entries.length > 4 ? (
+          <LibrarySearch query={query} onChange={setQuery} />
+        ) : null}
+      </View>
 
       {failed ? (
         <ErrorState
@@ -205,7 +209,7 @@ function LibrarySearch({
   const colors = useColors();
 
   return (
-    <View className="mb-3 px-5">
+    <View className="mb-3">
       <View className="h-12 flex-row items-center rounded-xl border border-neutral-800 bg-neutral-900 px-4">
         <Feather
           name="search"
