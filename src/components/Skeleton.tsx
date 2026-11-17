@@ -10,7 +10,8 @@ import { GRID_GAP, SCREEN_PADDING } from '../theme/spacing';
 type Props = {
   className?: string;
   style?: StyleProp<ViewStyle>;
-  tone?: 'auto' | 'dark';
+  /** `raised` lightens the block for surfaces above the page background. */
+  tone?: 'auto' | 'raised' | 'dark';
 };
 
 // One pulse for every placeholder on screen: starting a loop per skeleton made
@@ -55,13 +56,16 @@ export function Skeleton({ className, style, tone = 'auto' }: Props) {
 
   useEffect(() => (reduced ? undefined : subscribePulse()), [reduced]);
 
+  // One class, not two: letting both tones land on the element would leave the
+  // winner up to the generated stylesheet.
+  const toneClass =
+    tone === 'raised' ? 'bg-neutral-700' : tone === 'auto' ? 'bg-neutral-800' : '';
+
   return (
     <Animated.View
       accessible={false}
       importantForAccessibility="no-hide-descendants"
-      className={`${
-        tone === 'dark' ? '' : 'bg-neutral-800'
-      } ${className ?? ''}`}
+      className={`${toneClass} ${className ?? ''}`}
       // A pulsing block over the reader's black canvas is invisible, so the
       // dark tone gets its own lighter block.
       style={[

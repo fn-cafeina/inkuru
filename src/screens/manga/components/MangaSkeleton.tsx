@@ -48,7 +48,7 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
 
       <View className="mt-6 flex-row items-center justify-between px-5">
         <Skeleton className="h-3.5 w-28 rounded" />
-        <Skeleton className="h-11 w-11 rounded-full" />
+        <Skeleton className="h-12 w-12 rounded-full" />
       </View>
 
       <View className="mt-3 flex-row gap-3 overflow-hidden px-5 pb-3">
@@ -57,16 +57,19 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         ))}
       </View>
 
-      {Array.from({ length: 5 }, (_, index) => (
+      {Array.from({ length: 6 }, (_, index) => (
         <View key={index}>
           {index > 0 ? <View className="h-3" /> : null}
           <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
             <View className="flex-row items-center justify-between p-4">
+              {/* The card surface is already a step lighter than the page, so
+                  the default tone would vanish inside it. */}
               <Skeleton
+                tone="raised"
                 className="h-5 rounded"
                 style={{ width: `${50 + (index % 3) * 15}%` }}
               />
-              <Skeleton className="h-[18px] w-[18px] rounded-full" />
+              <Skeleton tone="raised" className="h-[18px] w-[18px] rounded-full" />
             </View>
           </View>
         </View>
