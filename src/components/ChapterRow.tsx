@@ -41,7 +41,7 @@ export function ChapterRow({
       accessibilityState={{ selected: highlighted }}
       onPress={onPress}
       style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
-      className="min-h-14 flex-row items-center rounded-xl px-4 py-3"
+      className="min-h-14 flex-row items-center px-4 py-3"
     >
       <Text
         numberOfLines={1}
