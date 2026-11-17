@@ -117,8 +117,10 @@ export default function SettingsScreen() {
 
         <SettingSection title="Descargas">
           <CounterRow
-            title="Descargas simultáneas"
-            subtitle="Capítulos bajando a la vez"
+            icon="layers"
+            title="Simultáneas"
+            subtitle="Capítulos a la vez"
+            accessibilityLabel="descargas simultáneas"
             value={concurrency}
             min={MIN_DOWNLOAD_CONCURRENCY}
             max={MAX_DOWNLOAD_CONCURRENCY}
