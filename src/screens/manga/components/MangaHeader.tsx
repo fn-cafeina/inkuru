@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -26,7 +26,7 @@ type Props = {
   ready: boolean;
 };
 
-export function MangaHeader({
+function MangaHeaderBase({
   manga,
   readCount,
   resumeChapter,
@@ -210,3 +210,4 @@ function MangaSynopsis({ synopsis }: { synopsis: string }) {
     </View>
   );
 }
+export const MangaHeader = memo(MangaHeaderBase);
