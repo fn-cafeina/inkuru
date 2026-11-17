@@ -51,7 +51,7 @@ export function AnimatedPressable({
 
       lastPressTimeRef.current = now;
       if (hapticFeedback) {
-        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        void Haptics.selectionAsync();
       }
       onPress?.(event);
     },

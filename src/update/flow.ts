@@ -177,7 +177,7 @@ export async function beginDownload(): Promise<void> {
         phase: 'error',
         failure: 'No se pudo abrir el instalador. Revisá el permiso de instalación.',
       });
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      void Haptics.selectionAsync();
       return;
     }
 
@@ -189,10 +189,10 @@ export async function beginDownload(): Promise<void> {
 
     await savePermission(true);
     publish({ ...state, phase: 'ready', failure: null });
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    void Haptics.selectionAsync();
   } catch (error) {
     publish({ ...state, phase: 'error', failure: failureFor(error) });
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    void Haptics.selectionAsync();
   } finally {
     downloadAbort = null;
   }

@@ -41,9 +41,8 @@ mock.module('@react-native-async-storage/async-storage', () => ({
   default: asyncStorage,
 }));
 mock.module('expo-haptics', () => ({
-  NotificationFeedbackType: { Error: 'error', Success: 'success' },
-  notificationAsync: async (type: string) => {
-    haptics.push(type);
+  selectionAsync: async () => {
+    haptics.push('tap');
   },
 }));
 
@@ -129,7 +128,7 @@ assertEqual(
   'the resume arm is dropped after the download starts',
 );
 assertEqual(storage.get('update:installPermission'), 'true', 'grant persisted');
-assertEqual(haptics.join(), 'success', 'a success haptic fired');
+assertEqual(haptics.length, 1, 'a success haptic fired');
 
 // Dismissing the installer is the user's call, not an error.
 available = { tag: 'v1.3.0', apkUrl: RELEASE };
@@ -165,7 +164,7 @@ assert(
   (flow.getFlowState().failure ?? '').includes('permiso'),
   'the failure names the permission',
 );
-assertEqual(haptics.join(), 'success,error', 'an error haptic fired');
+assertEqual(haptics.length, 2, 'an error haptic fired');
 
 // The error-phase retry routes through the permission step again.
 await flow.confirmUpdate();
