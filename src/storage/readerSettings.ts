@@ -4,7 +4,9 @@ export type ReaderMode = 'webtoon' | 'paged-ltr' | 'paged-rtl';
 export type ReaderScale = 'fit-screen' | 'fit-width';
 export type ReaderQuality = 'balanced' | 'original';
 
-export const DEFAULT_READER_MODE: ReaderMode = 'webtoon';
+// Manga reads right to left: paged and right to left is what the pages ask
+// for, and a stored value still wins for anyone who picked another mode.
+export const DEFAULT_READER_MODE: ReaderMode = 'paged-rtl';
 export const DEFAULT_READER_SCALE: ReaderScale = 'fit-screen';
 export const DEFAULT_READER_QUALITY: ReaderQuality = 'balanced';
 

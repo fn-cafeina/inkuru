@@ -129,6 +129,11 @@ assertEqual(
 // --- reader settings, including the pre-split stored values ---
 
 assertEqual(await settings.loadReaderMode(), null, 'no saved mode reads as null');
+assertEqual(
+  settings.DEFAULT_READER_MODE,
+  'paged-rtl',
+  'the default reader mode is right to left',
+);
 
 storage.set('reader:mode', 'vertical');
 assertEqual(await settings.loadReaderMode(), 'webtoon', 'vertical migrates to webtoon');
