@@ -88,6 +88,7 @@ function CounterButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
+      hapticFeedback
       disabled={disabled}
       hitSlop={6}
       onPress={onPress}
