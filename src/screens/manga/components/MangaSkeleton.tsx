@@ -60,16 +60,17 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
       {Array.from({ length: 6 }, (_, index) => (
         <View key={index}>
           {index > 0 ? <View className="h-3" /> : null}
-          <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
+          {/* The real card is a filled surface. Filling it here as well put a
+              grey band under the header and left the rows reading as empty
+              boxes, so the shape is drawn with the border alone and every
+              block on the screen keeps the same tone. */}
+          <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800">
             <View className="flex-row items-center justify-between p-4">
-              {/* The card surface is already a step lighter than the page, so
-                  the default tone would vanish inside it. */}
               <Skeleton
-                tone="raised"
                 className="h-5 rounded"
                 style={{ width: `${50 + (index % 3) * 15}%` }}
               />
-              <Skeleton tone="raised" className="h-[18px] w-[18px] rounded-full" />
+              <Skeleton className="h-[18px] w-[18px] rounded-full" />
             </View>
           </View>
         </View>
