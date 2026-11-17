@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { ListDivider } from '../../../components/ListDivider';
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
-import { SCREEN_PADDING } from '../../../theme/spacing';
 
 /** Honest detail placeholder: only blocks that always exist. */
 export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
@@ -12,13 +10,10 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
     <ScrollView
       style={{ flex: 1 }}
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        paddingHorizontal: SCREEN_PADDING,
-        paddingBottom: 24,
-      }}
+      contentContainerStyle={{ paddingBottom: 24 }}
     >
       {topBar}
-      <View className="flex-row">
+      <View className="flex-row px-5">
         <Skeleton
           className="rounded-2xl"
           style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
@@ -30,23 +25,25 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         </View>
       </View>
 
-      <View className="mt-4 flex-row gap-1.5">
+      <View className="mt-4 flex-row gap-1.5 px-5">
         <Skeleton className="h-6 w-16 rounded-md" />
         <Skeleton className="h-6 w-20 rounded-md" />
         <Skeleton className="h-6 w-14 rounded-md" />
       </View>
 
-      <Skeleton className="mt-4 h-14 rounded-xl" />
+      <View className="px-5">
+        <Skeleton className="mt-4 h-14 rounded-xl" />
+      </View>
 
-      <View className="mt-6 flex-row items-center justify-between">
+      <View className="mt-6 flex-row items-center justify-between px-5">
         <Skeleton className="h-3 w-28 rounded" />
         <Skeleton className="h-10 w-10 rounded-full" />
       </View>
 
       {Array.from({ length: 4 }, (_, index) => (
         <View key={index}>
-          {index > 0 ? <ListDivider /> : null}
-          <View className="min-h-14 justify-center">
+          {index > 0 ? <View className="ml-9 h-px bg-neutral-800" /> : null}
+          <View className="mx-5 min-h-14 justify-center">
             <Skeleton
               className="h-4 rounded"
               style={{ width: `${55 + (index % 3) * 15}%` }}

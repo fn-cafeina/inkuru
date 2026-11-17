@@ -5,7 +5,6 @@ import { Feather } from '@expo/vector-icons';
 
 import { ChapterRow } from '../../../components/ChapterRow';
 import { EmptyState } from '../../../components/EmptyState';
-import { ListDivider } from '../../../components/ListDivider';
 import { RefreshNotice } from '../../../components/RefreshNotice';
 import {
   cancelDownload,
@@ -117,20 +116,22 @@ export function MangaChapterList({
       style={{ flex: 1 }}
       data={chapters}
       keyExtractor={(item) => item.path}
-      ItemSeparatorComponent={ListDivider}
+      ItemSeparatorComponent={InsetDivider}
       renderItem={({ item }) => (
-        <ChapterRow
-          title={item.title}
-          state={getChapterState(item.path, currentChapterPath, readSet)}
-          trailing={
-            <ChapterDownloadButton
-              title={item.title}
-              state={getDownloadState(item.path)}
-              onPress={() => handleDownload(item)}
-            />
-          }
-          onPress={() => onOpen(item)}
-        />
+        <View className="mx-5">
+          <ChapterRow
+            title={item.title}
+            state={getChapterState(item.path, currentChapterPath, readSet)}
+            trailing={
+              <ChapterDownloadButton
+                title={item.title}
+                state={getDownloadState(item.path)}
+                onPress={() => handleDownload(item)}
+              />
+            }
+            onPress={() => onOpen(item)}
+          />
+        </View>
       )}
       ListHeaderComponent={
         <View>
@@ -184,4 +185,9 @@ export function MangaChapterList({
       showsVerticalScrollIndicator={false}
     />
   );
+}
+
+/** Divider under the 20px row margin, aligned with the row text. */
+function InsetDivider() {
+  return <View className="ml-9 h-px bg-neutral-800" />;
 }
