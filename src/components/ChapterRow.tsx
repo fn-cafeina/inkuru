@@ -7,8 +7,9 @@ import { useColors } from '../theme/colors';
 
 type ChapterRowState = 'current' | 'read' | 'selected';
 
-/** Base height of a chapter row; dividers add 1px on top (see CHAPTER_ROW_STEP). */
-export const CHAPTER_ROW_HEIGHT = 56;
+/** Row height without a trailing button, as laid out by the reader's picker;
+ * dividers add 1px on top (see CHAPTER_ROW_STEP). */
+export const CHAPTER_ROW_HEIGHT = 36;
 export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 
 const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
@@ -41,7 +42,7 @@ export function ChapterRow({
       accessibilityState={{ selected: highlighted }}
       onPress={onPress}
       style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
-      className="min-h-14 flex-row items-center px-4 py-3"
+      className="flex-row items-center px-4 py-2"
     >
       <Text
         numberOfLines={1}

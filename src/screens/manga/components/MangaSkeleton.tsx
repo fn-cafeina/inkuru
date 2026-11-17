@@ -44,7 +44,7 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         <View key={index}>
           {index > 0 ? <View className="h-3" /> : null}
           <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
-            <View className="min-h-14 justify-center px-4">
+            <View className="h-12 justify-center px-4">
               <Skeleton
                 className="h-4 rounded"
                 style={{ width: `${55 + (index % 3) * 15}%` }}
