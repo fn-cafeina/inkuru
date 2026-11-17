@@ -124,12 +124,14 @@ export default function LibraryScreen() {
 
   return (
     <Screen>
-      <View className="px-5 pt-4">
-        <SectionTitle className="mb-3">Biblioteca</SectionTitle>
-        {entries.length > 4 ? (
-          <LibrarySearch query={query} onChange={setQuery} />
-        ) : null}
-      </View>
+      {entries.length > 0 ? (
+        <View className="px-5 pt-4">
+          <SectionTitle className="mb-3">Biblioteca</SectionTitle>
+          {entries.length > 4 ? (
+            <LibrarySearch query={query} onChange={setQuery} />
+          ) : null}
+        </View>
+      ) : null}
 
       {failed ? (
         <ErrorState
