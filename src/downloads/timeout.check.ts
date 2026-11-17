@@ -24,4 +24,20 @@ const value = await withTimeout(controller, 1000, () =>
 
 assert(value === 'ok', 'resolved value must pass through');
 
+
+
+// A task that ignores the abort must not pin the caller forever: with chapter
+// concurrency 1 that stalled worker was every download the app had.
+const stuck = new AbortController();
+const started = Date.now();
+
+await withTimeout(stuck, 20, () => new Promise<never>(() => undefined)).catch(
+  (error: unknown) => error,
+);
+
+assert(Date.now() - started < 1000, 'a hung task must settle on its own timer');
+assert(stuck.signal.aborted, 'the hung task still aborts its controller');
+
+
+
 console.log('timeout ok');
