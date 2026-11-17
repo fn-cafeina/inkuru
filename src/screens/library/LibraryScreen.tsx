@@ -47,7 +47,6 @@ export default function LibraryScreen() {
   const [progress, setProgress] =
     useState<Record<string, ReaderProgress>>(cachedProgress);
   const [loaded, setLoaded] = useState(cachedEntries !== null);
-  const [checking, setChecking] = useState(true);
   const [failed, setFailed] = useState(false);
   const mounted = useRef(true);
   const loadTicket = useRef(0);
@@ -72,7 +71,6 @@ export default function LibraryScreen() {
     // already removed an entry, which would resurrect it from stale data.
     const ticket = ++loadTicket.current;
 
-    setChecking(true);
     setFailed(false);
 
     if (showSpinner) {
@@ -88,7 +86,6 @@ export default function LibraryScreen() {
     if (result.failed) {
       setFailed(true);
       setLoaded(true);
-      setChecking(false);
       return;
     }
 
@@ -112,7 +109,6 @@ export default function LibraryScreen() {
       sameProgress(current, loadedProgress) ? current : loadedProgress,
     );
     setLoaded(true);
-    setChecking(false);
   }, []);
 
   useFocusEffect(
@@ -146,7 +142,7 @@ export default function LibraryScreen() {
           message="No se pudo leer la biblioteca"
           onRetry={retry}
         />
-      ) : !loaded || (checking && entries.length === 0) ? (
+      ) : !loaded ? (
         <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
         <EmptyState
