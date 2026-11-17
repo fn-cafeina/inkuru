@@ -3,6 +3,7 @@ import type { AccessibilityActionInfo } from 'react-native';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
+import type { SharedValue } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 
 import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
@@ -21,6 +22,9 @@ type Props = {
   scaleMode: ReaderScale;
   quality: ReaderQuality;
   paged: boolean;
+  /** Column zoom shared by every page in webtoon mode. */
+  zoomScale?: SharedValue<number>;
+  zoomSaved?: SharedValue<number>;
   onTap: (x: number) => void;
   onZoomChange: (zoomed: boolean) => void;
   onNextPage?: () => void;
@@ -36,6 +40,8 @@ export function ReaderPage({
   scaleMode,
   quality,
   paged,
+  zoomScale,
+  zoomSaved,
   onTap,
   onZoomChange,
   onNextPage,
@@ -79,6 +85,10 @@ export function ReaderPage({
     overflowsY,
     onTap,
     onZoomChange,
+    sharedZoom:
+      zoomScale !== undefined && zoomSaved !== undefined
+        ? { scale: zoomScale, savedScale: zoomSaved }
+        : undefined,
   });
 
   const actions: AccessibilityActionInfo[] = [];

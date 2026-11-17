@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { ActivityIndicator, FlatList, View } from 'react-native';
 import type { ListViewToken } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 
 import type {
   ReaderQuality,
@@ -35,6 +36,10 @@ export function VerticalPages({
 }) {
   const listRef = useRef<FlatList<string>>(null);
   const didRetry = useRef(false);
+  // One scale for the whole column: a pinch on any page zooms every page
+  // together instead of a single image.
+  const zoomScale = useSharedValue(1);
+  const zoomSaved = useSharedValue(1);
   const initialIndex =
     pages.length > 0 ? Math.min(initialPage, pages.length - 1) : 0;
   // getItemLayout estimates a uniform height, but webtoon pages differ, so the
@@ -156,6 +161,8 @@ export function VerticalPages({
             scaleMode={scale}
             quality={quality}
             paged={false}
+            zoomScale={zoomScale}
+            zoomSaved={zoomSaved}
             onTap={() => onToggleChrome()}
             onZoomChange={setZoomed}
             onReady={index < pages.length - 1 ? undefined : markFooterReady}

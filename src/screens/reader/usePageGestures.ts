@@ -9,9 +9,11 @@ import {
 import {
   runOnJS,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import type { SharedValue } from 'react-native-reanimated';
 
 import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
 
@@ -24,6 +26,111 @@ const SETTLE_DURATION = 180;
 // finger clearly left the touch slop.
 const PAN_OFFSET: [number, number] = [-8, 8];
 
+type ZoomState = {
+  scale: SharedValue<number>;
+  savedScale: SharedValue<number>;
+  translateX: SharedValue<number>;
+  translateY: SharedValue<number>;
+  savedX: SharedValue<number>;
+  savedY: SharedValue<number>;
+};
+
+/**
+ * Settle the zoom into its bounds. Below the reset threshold the page springs
+ * back to 1x, otherwise the translation is clamped. Returns whether the page
+ * stays zoomed.
+ */
+function settleZoom(
+  baseWidth: number,
+  baseHeight: number,
+  viewportWidth: number,
+  viewportHeight: number,
+  zoom: ZoomState,
+): boolean {
+  'worklet';
+
+  zoom.savedScale.value = zoom.scale.value;
+  zoom.savedX.value = zoom.translateX.value;
+  zoom.savedY.value = zoom.translateY.value;
+
+  if (zoom.scale.value <= RESET_THRESHOLD) {
+    zoom.scale.value = withTiming(1, { duration: SETTLE_DURATION });
+    zoom.translateX.value = withTiming(0, { duration: SETTLE_DURATION });
+    zoom.translateY.value = withTiming(0, { duration: SETTLE_DURATION });
+    zoom.savedScale.value = 1;
+    zoom.savedX.value = 0;
+    zoom.savedY.value = 0;
+
+    return false;
+  }
+
+  const bounds = translationBounds(
+    baseWidth,
+    baseHeight,
+    viewportWidth,
+    viewportHeight,
+    zoom.scale.value,
+  );
+  const x = clamp(zoom.translateX.value, -bounds.maxX, bounds.maxX);
+  const y = clamp(zoom.translateY.value, -bounds.maxY, bounds.maxY);
+
+  zoom.translateX.value = withTiming(x, { duration: SETTLE_DURATION });
+  zoom.translateY.value = withTiming(y, { duration: SETTLE_DURATION });
+  zoom.savedX.value = x;
+  zoom.savedY.value = y;
+
+  return true;
+}
+
+/**
+ * Double tap: zoom to DOUBLE_TAP_ZOOM around the tap, or back to 1x when
+ * already zoomed. Returns the resulting zoomed state.
+ */
+function doubleTapToZoom(
+  baseWidth: number,
+  baseHeight: number,
+  viewportWidth: number,
+  viewportHeight: number,
+  zoom: ZoomState,
+  focalX: number,
+  focalY: number,
+): boolean {
+  'worklet';
+
+  if (zoom.scale.value > RESET_THRESHOLD) {
+    return settleZoom(baseWidth, baseHeight, viewportWidth, viewportHeight, zoom);
+  }
+
+  const next = zoomAroundPoint(
+    zoom.scale.value,
+    zoom.translateX.value,
+    zoom.translateY.value,
+    focalX,
+    focalY,
+    focalX,
+    focalY,
+    DOUBLE_TAP_ZOOM,
+  );
+  const bounds = translationBounds(
+    baseWidth,
+    baseHeight,
+    viewportWidth,
+    viewportHeight,
+    DOUBLE_TAP_ZOOM,
+  );
+  const x = clamp(next.x, -bounds.maxX, bounds.maxX);
+  const y = clamp(next.y, -bounds.maxY, bounds.maxY);
+
+  zoom.scale.value = withTiming(DOUBLE_TAP_ZOOM, { duration: SETTLE_DURATION });
+  zoom.translateX.value = withTiming(x, { duration: SETTLE_DURATION });
+  zoom.translateY.value = withTiming(y, { duration: SETTLE_DURATION });
+  zoom.savedScale.value = DOUBLE_TAP_ZOOM;
+  zoom.savedX.value = x;
+  zoom.savedY.value = y;
+
+  return true;
+}
+
 type Params = {
   baseWidth: number;
   baseHeight: number;
@@ -33,6 +140,9 @@ type Params = {
   overflowsY: boolean;
   onTap: (x: number) => void;
   onZoomChange: (zoomed: boolean) => void;
+  /** Webtoon mode: the scale is shared with every page in the column, so a
+   * pinch zooms the whole scroll instead of one image. */
+  sharedZoom?: { scale: SharedValue<number>; savedScale: SharedValue<number> };
 };
 
 export function usePageGestures({
@@ -44,13 +154,16 @@ export function usePageGestures({
   overflowsY,
   onTap,
   onZoomChange,
+  sharedZoom,
 }: Params) {
   const [zoomed, setZoomed] = useState(false);
   const zoomedRef = useRef(false);
-  const scale = useSharedValue(1);
+  const ownScale = useSharedValue(1);
+  const ownSavedScale = useSharedValue(1);
+  const scale = sharedZoom?.scale ?? ownScale;
+  const savedScale = sharedZoom?.savedScale ?? ownSavedScale;
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const savedScale = useSharedValue(1);
   const savedX = useSharedValue(0);
   const savedY = useSharedValue(0);
   const startScale = useSharedValue(1);
@@ -58,6 +171,17 @@ export function usePageGestures({
   const startY = useSharedValue(0);
   const startFocalX = useSharedValue(0);
   const startFocalY = useSharedValue(0);
+  // A shared scale is blind to other pages' pinches, so the pan gate reads it.
+  const sharedZoomed = useDerivedValue(() => scale.value > RESET_THRESHOLD);
+  const zoomState: ZoomState = {
+    scale,
+    savedScale,
+    translateX,
+    translateY,
+    savedX,
+    savedY,
+  };
+
   const notifyZoom = (next: boolean) => {
     zoomedRef.current = next;
     setZoomed(next);
@@ -73,43 +197,6 @@ export function usePageGestures({
     },
     [onZoomChange],
   );
-  const resetZoom = () => {
-    'worklet';
-    scale.value = withTiming(1, { duration: SETTLE_DURATION });
-    translateX.value = withTiming(0, { duration: SETTLE_DURATION });
-    translateY.value = withTiming(0, { duration: SETTLE_DURATION });
-    savedScale.value = 1;
-    savedX.value = 0;
-    savedY.value = 0;
-    runOnJS(notifyZoom)(false);
-  };
-  const settle = () => {
-    'worklet';
-    savedScale.value = scale.value;
-    savedX.value = translateX.value;
-    savedY.value = translateY.value;
-
-    if (scale.value <= RESET_THRESHOLD) {
-      resetZoom();
-      return;
-    }
-
-    const bounds = translationBounds(
-      baseWidth,
-      baseHeight,
-      viewportWidth,
-      viewportHeight,
-      scale.value,
-    );
-    const x = clamp(translateX.value, -bounds.maxX, bounds.maxX);
-    const y = clamp(translateY.value, -bounds.maxY, bounds.maxY);
-
-    translateX.value = withTiming(x, { duration: SETTLE_DURATION });
-    translateY.value = withTiming(y, { duration: SETTLE_DURATION });
-    savedX.value = x;
-    savedY.value = y;
-    runOnJS(notifyZoom)(true);
-  };
 
   const pinch = usePinchGesture({
     onActivate: (event) => {
@@ -146,11 +233,15 @@ export function usePageGestures({
       translateX.value = clamp(next.x, -bounds.maxX, bounds.maxX);
       translateY.value = clamp(next.y, -bounds.maxY, bounds.maxY);
     },
-    onFinalize: settle,
+    onFinalize: () => {
+      runOnJS(notifyZoom)(
+        settleZoom(baseWidth, baseHeight, viewportWidth, viewportHeight, zoomState),
+      );
+    },
   });
 
   const pan = usePanGesture({
-    enabled: zoomed || overflowsX || overflowsY,
+    enabled: sharedZoom ? sharedZoomed : zoomed || overflowsX || overflowsY,
     // Two fingers belong to the pinch; panning is a one-finger gesture.
     maxPointers: 1,
     activeOffsetY: !zoomed && overflowsY && !overflowsX ? PAN_OFFSET : undefined,
@@ -195,42 +286,17 @@ export function usePageGestures({
         return;
       }
 
-      const focalX = event.x - viewportWidth / 2;
-      const focalY = event.y - viewportHeight / 2;
-
-      if (scale.value > RESET_THRESHOLD) {
-        resetZoom();
-        return;
-      }
-
-      const nextScale = DOUBLE_TAP_ZOOM;
-      const next = zoomAroundPoint(
-        scale.value,
-        translateX.value,
-        translateY.value,
-        focalX,
-        focalY,
-        focalX,
-        focalY,
-        nextScale,
+      runOnJS(notifyZoom)(
+        doubleTapToZoom(
+          baseWidth,
+          baseHeight,
+          viewportWidth,
+          viewportHeight,
+          zoomState,
+          event.x - viewportWidth / 2,
+          event.y - viewportHeight / 2,
+        ),
       );
-      const bounds = translationBounds(
-        baseWidth,
-        baseHeight,
-        viewportWidth,
-        viewportHeight,
-        nextScale,
-      );
-      const x = clamp(next.x, -bounds.maxX, bounds.maxX);
-      const y = clamp(next.y, -bounds.maxY, bounds.maxY);
-
-      scale.value = withTiming(nextScale, { duration: SETTLE_DURATION });
-      translateX.value = withTiming(x, { duration: SETTLE_DURATION });
-      translateY.value = withTiming(y, { duration: SETTLE_DURATION });
-      savedScale.value = nextScale;
-      savedX.value = x;
-      savedY.value = y;
-      runOnJS(notifyZoom)(true);
     },
   });
 
