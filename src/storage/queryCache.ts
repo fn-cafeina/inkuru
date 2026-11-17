@@ -43,16 +43,15 @@ function isStoredEntry(value: unknown): value is StoredEntry {
 }
 
 async function rebuildIndex(): Promise<IndexEntry[]> {
-  const keys = await AsyncStorage.getAllKeys().catch(() => []);
+  const keys = (await AsyncStorage.getAllKeys().catch(() => [])).filter((key) =>
+    key.startsWith(ENTRY_PREFIX),
+  );
+  // One bridge call for every entry: a getItem per key was up to 200 round
+  // trips on the JS thread, and the parse itself is only ~0.2ms per entry.
+  const pairs = await AsyncStorage.multiGet(keys).catch(() => []);
   const entries: IndexEntry[] = [];
 
-  for (const key of keys) {
-    if (!key.startsWith(ENTRY_PREFIX)) {
-      continue;
-    }
-
-    const raw = await AsyncStorage.getItem(key).catch(() => null);
-
+  for (const [key, raw] of pairs) {
     if (!raw) {
       continue;
     }
