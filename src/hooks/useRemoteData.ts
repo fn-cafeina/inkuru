@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { readCache, writeCache } from '../storage/queryCache';
 import { readRemoteCache, writeRemoteCache } from '../storage/remoteCache';
 import { withTimeout } from '../downloads/timeout';
+import { trace, elapsed } from '../dev/trace';
 
 type RemoteData<T> = {
   data: T | null;
@@ -112,11 +113,16 @@ export function useRemoteData<T>(
       );
 
       try {
+        const startedAt = performance.now();
+
+        trace('remote fetch start', key);
         // A request hanging past the budget is aborted and read as an error.
         const result = await withTimeout(controller, 15000, () =>
           fetcher(controller.signal),
         );
         const savedAt = Date.now();
+
+        trace('remote fetch done', key, elapsed(startedAt));
 
         // Cache valid results even if the consumer unmounted while the
         // request was in flight; the next mount should not pay for it again.
@@ -193,7 +199,10 @@ export function useRemoteData<T>(
       }
 
       if (key !== undefined && validate) {
+        const startedAt = performance.now();
         const stored = await readCache(key, validate);
+
+        trace('remote cache', key, elapsed(startedAt));
 
         if (cancelled) {
           return;

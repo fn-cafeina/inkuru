@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -12,6 +12,7 @@ import { ScreenHeader } from '../../components/ScreenHeader';
 import { MangaChapterList } from './components/MangaChapterList';
 import { MangaSkeleton } from './components/MangaSkeleton';
 import { useRemoteData } from '../../hooks/useRemoteData';
+import { trace } from '../../dev/trace';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
@@ -216,7 +217,10 @@ export default function MangaScreen({ navigation, route }: Props) {
     },
     [path, sortOrder],
   );
-  const goBack = () => goBackOrTabs(navigation);
+  const goBack = () => {
+    trace('manga back', { loading, hasData: data !== null });
+    goBackOrTabs(navigation);
+  };
   const openChapter = useCallback(
     (chapter: MangaChapter) =>
       navigation.navigate('Reader', {
@@ -226,6 +230,10 @@ export default function MangaScreen({ navigation, route }: Props) {
       }),
     [navigation, path],
   );
+
+  useEffect(() => {
+    trace('manga state', { loading, hasData: data !== null, hasError });
+  }, [loading, data, hasError]);
 
   // The top row lives inside the scroll content, like rokimu's banner: no
   // overlay to pin, cover or hide.
