@@ -110,6 +110,12 @@ export function ChapterPicker({
           paddingTop: APP_BAR_GAP,
           paddingBottom: insets.bottom + 16,
         }}
+        // Rows are cheap, but a 200-chapter sheet at the default windowSize 21
+        // keeps ~300 of them mounted behind an overlay.
+        initialNumToRender={14}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews
       />
     </ReaderSheet>
   );

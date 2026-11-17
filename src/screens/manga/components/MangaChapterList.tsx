@@ -156,6 +156,14 @@ export function MangaChapterList({
       contentContainerStyle={{
         flexGrow: 1,
       }}
+      // 474 chapters at the defaults (windowSize 21) mount ~320 rows, each one a
+      // pressable with its own download subscription. Five viewports is plenty
+      // to scroll ahead of the finger.
+      initialNumToRender={12}
+      maxToRenderPerBatch={8}
+      updateCellsBatchingPeriod={50}
+      windowSize={5}
+      removeClippedSubviews
       showsVerticalScrollIndicator={false}
     />
   );
