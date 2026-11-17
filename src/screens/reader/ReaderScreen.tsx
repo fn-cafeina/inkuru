@@ -87,7 +87,9 @@ export default function ReaderScreen({ navigation, route }: Props) {
     readerCacheKey(chapterPath),
     {
       freshMs: downloaded ? 0 : CACHE_FRESH_MS.chapter,
-      validate: isReaderData,
+      // A downloaded chapter is read from its own file; caching it to disk as
+      // well meant reading and writing the same payload on every open.
+      validate: downloaded ? undefined : isReaderData,
     },
   );
   const { page, setPage, total, restored } = useReaderProgress({

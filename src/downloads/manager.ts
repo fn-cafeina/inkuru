@@ -2,7 +2,6 @@ import { fetchReader } from '../source/zonatmo';
 import { readerCacheKey } from '../storage/cacheKeys';
 import { forgetRemoteCache } from '../storage/remoteCache';
 import { forgetPageProgress } from '../storage/readerProgress';
-import type { ReaderData } from '../source/zonatmo';
 import {
   deleteChapterFiles,
   downloadPageWithRetry,
@@ -10,10 +9,10 @@ import {
   hasDownloadFilesAsync,
   pageFile,
   prepareChapterDirectory,
-  readDownloadFile,
   reconcileDirectories,
   writeDownloadFile,
 } from './files';
+import { forgetLocalReader, rememberLocalReader } from './localReader';
 import { loadDownloadIndex, removeRecord, upsertRecord } from './metadata';
 import { chapterDirNames, existingDirNames } from './paths';
 import { createRunTracker } from './runState';
@@ -28,18 +27,11 @@ import { withTimeout } from './timeout';
 import { clampDownloadConcurrency } from '../storage/downloadSettings';
 import type { DownloadInput, DownloadRecord } from './types';
 
+export { loadDownloadedReader } from './localReader';
 export { subscribe, getVersion, getDownloadState };
 
 const MAX_PARALLEL_PAGES = 3;
 const runs = createRunTracker();
-
-export async function loadDownloadedReader(
-  chapterPath: string,
-): Promise<ReaderData | null> {
-  const file = await readDownloadFile(chapterPath);
-
-  return file?.data ?? null;
-}
 
 export async function enqueueDownload(input: DownloadInput) {
   const chapterPath = input.chapterPath;
@@ -116,6 +108,7 @@ export async function deleteDownload(chapterPath: string) {
   }
 
   store.states.delete(chapterPath);
+  forgetLocalReader(chapterPath);
   const deleted = deleteChapterFiles(chapterPath);
   forgetRemoteCache(readerCacheKey(chapterPath));
   void forgetPageProgress(chapterPath);
@@ -334,6 +327,7 @@ async function runDownload(input: DownloadInput) {
     }
 
     store.records.set(chapterPath, record);
+    rememberLocalReader(chapterPath, { ...data, pages: localPages });
     store.states.delete(chapterPath);
     forgetRemoteCache(readerCacheKey(chapterPath));
     notify();
