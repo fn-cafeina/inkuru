@@ -6,6 +6,7 @@ import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated'
 
 import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { useColors } from '../../../theme/colors';
+import { SHEET_HEIGHT } from '../../../theme/spacing';
 import { getUpdateState } from '../../../update/check';
 import {
   beginDownload,
@@ -73,13 +74,18 @@ export function UpdateFlowSheet() {
       />
       <Animated.View
         entering={SlideInDown.duration(200)}
-        className="rounded-t-2xl bg-neutral-900 px-5 pt-5"
-        style={{ paddingBottom: insets.bottom + 16 }}
+        className="rounded-t-2xl px-4"
+        style={{
+          backgroundColor: colors.surface,
+          height: SHEET_HEIGHT,
+          paddingBottom: insets.bottom + 16,
+        }}
       >
-        <View className="mb-3 flex-row items-center justify-between">
+        <View className="min-h-14 flex-row items-center justify-between">
           <Text
             accessibilityRole="header"
-            className="text-xl font-semibold text-white"
+            className="text-base font-semibold"
+            style={{ color: colors.text }}
           >
             {titleFor(phase)}
           </Text>

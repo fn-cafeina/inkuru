@@ -18,7 +18,7 @@ import { ListDivider } from '../../../components/ListDivider';
 import type { MangaChapter } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import { APP_BAR_GAP } from '../../../theme/spacing';
-import { ReaderSheet, SHEET_HEIGHT } from './ReaderSheet';
+import { ReaderSheet } from './ReaderSheet';
 
 export function ChapterPicker({
   visible,
@@ -68,11 +68,7 @@ export function ChapterPicker({
   );
 
   return (
-    <ReaderSheet
-      title="Capítulos"
-      onClose={onClose}
-      height={SHEET_HEIGHT.tall}
-    >
+    <ReaderSheet title="Capítulos" onClose={onClose}>
       <FlatList
         data={chapters}
         keyExtractor={(item) => item.path}
