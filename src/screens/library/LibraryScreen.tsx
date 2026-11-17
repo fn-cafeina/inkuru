@@ -159,6 +159,9 @@ export default function LibraryScreen() {
           contentContainerStyle={{
             paddingHorizontal: 20,
             paddingBottom: insets.bottom + TAB_BAR_CLEARANCE,
+            // Without flexGrow the empty component collapses to the top of the
+            // list instead of centering in the remaining area.
+            flexGrow: 1,
           }}
           onScroll={handleScroll}
           scrollEventThrottle={16}

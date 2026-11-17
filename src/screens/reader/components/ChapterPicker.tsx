@@ -3,7 +3,6 @@ import type { ComponentRef } from 'react';
 import {
   AccessibilityInfo,
   FlatList,
-  Text,
   View,
   findNodeHandle,
 } from 'react-native';
@@ -14,9 +13,9 @@ import {
   CHAPTER_ROW_STEP,
   ChapterRow,
 } from '../../../components/ChapterRow';
+import { EmptyState } from '../../../components/EmptyState';
 import { ListDivider } from '../../../components/ListDivider';
 import type { MangaChapter } from '../../../source/zonatmo';
-import { useColors } from '../../../theme/colors';
 import { APP_BAR_GAP } from '../../../theme/spacing';
 import { ReaderSheet } from './ReaderSheet';
 
@@ -35,7 +34,6 @@ export function ChapterPicker({
   onClose: () => void;
   onSelect: (chapter: MangaChapter) => void;
 }) {
-  const colors = useColors();
   const insets = useSafeAreaInsets();
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
   const currentRef = useRef<ComponentRef<typeof View>>(null);
@@ -99,13 +97,7 @@ export function ChapterPicker({
             />
           )
         }
-        ListEmptyComponent={
-          <View className="items-center py-8">
-            <Text className="text-sm" style={{ color: colors.textMuted }}>
-              Sin capítulos
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState icon="book" title="Sin capítulos" />}
         contentContainerStyle={{
           paddingTop: APP_BAR_GAP,
           paddingBottom: insets.bottom + 16,
