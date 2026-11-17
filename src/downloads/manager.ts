@@ -203,10 +203,17 @@ async function drainWorker(): Promise<void> {
         break;
       }
 
-      await runDownload(input);
+      // A run that rejects must not kill the worker: the queue behind it would
+      // never be picked up, which with concurrency 1 strands every download.
+      await runDownload(input).catch((error: unknown) => {
+        console.warn('[downloads] worker:', error);
+      });
     }
   } finally {
     activeWorkers -= 1;
+    // A worker that exits while work is waiting (a run that leaked its slot, a
+    // cap raised mid-flight) starts a fresh one instead of idling the queue.
+    pump();
   }
 }
 

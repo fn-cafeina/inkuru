@@ -1,76 +1,13 @@
-import { mock } from 'bun:test';
-
-import { createFakeFileSystem } from './__fixtures__/fileSystem';
+import {
+  assert,
+  assertEqual,
+  fake,
+  manager,
+  net,
+  storage,
+  waitFor,
+} from './__fixtures__/managerHarness';
 import { hashKey } from './ownership';
-
-function assert(condition: unknown, message: string): asserts condition {
-  if (!condition) {
-    throw new Error(message);
-  }
-}
-
-function assertEqual<T>(actual: T, expected: T, label: string): void {
-  if (actual !== expected) {
-    throw new Error(`${label}: expected ${String(expected)}, received ${String(actual)}`);
-  }
-}
-
-/** The queue is fire-and-forget; poll until the state the test expects lands. */
-async function waitFor(
-  predicate: () => boolean,
-  label: string,
-): Promise<void> {
-  const started = Date.now();
-
-  while (!predicate()) {
-    if (Date.now() - started > 5000) {
-      throw new Error(`timeout: ${label}`);
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 5));
-  }
-}
-
-const fake = createFakeFileSystem();
-const storage = new Map<string, string>();
-
-const asyncStorage = {
-  getItem: async (key: string) => storage.get(key) ?? null,
-  setItem: async (key: string, value: string) => {
-    storage.set(key, value);
-  },
-  removeItem: async (key: string) => {
-    storage.delete(key);
-  },
-  getAllKeys: async () => [...storage.keys()],
-  multiGet: async (keys: string[]) =>
-    keys.map((key) => [key, storage.get(key) ?? null] as const),
-  multiRemove: async (keys: string[]) => {
-    for (const key of keys) {
-      storage.delete(key);
-    }
-  },
-};
-
-let fetchCalls = 0;
-let fetchImpl: (path: string, signal?: AbortSignal) => Promise<unknown> =
-  async () => {
-    throw new Error('unexpected network call');
-  };
-
-mock.module('expo-file-system', () => fake.module);
-mock.module('@react-native-async-storage/async-storage', () => ({
-  default: asyncStorage,
-}));
-mock.module('../source/zonatmo', () => ({
-  fetchReader: (path: string, signal?: AbortSignal) => {
-    fetchCalls += 1;
-
-    return fetchImpl(path, signal);
-  },
-}));
-
-const manager = await import('./manager');
 
 const ROOT = '/documents/downloads';
 const INDEX_KEY = 'downloads:index';
@@ -145,7 +82,7 @@ await manager.enqueueDownload({
   mangaTitle: 'Manga',
 });
 
-assert(fetchCalls === 0, 'what is already downloaded is not fetched again');
+assert(net.calls === 0, 'what is already downloaded is not fetched again');
 assert(manager.getDownloadState(CHAPTER)?.status === 'done', 'still downloaded');
 
 // A delete that cannot remove the files must keep memory, files and index in sync.
@@ -178,7 +115,7 @@ const pageUrls = [
   'https://cdn.zonatmo.org/9/2.webp',
 ];
 
-fetchImpl = async (path) => {
+net.fetchImpl = async (path) => {
   assert(path === CHAPTER2, 'fetchReader asks for the queued chapter');
 
   return {
@@ -202,7 +139,7 @@ await waitFor(
   'the download finishes',
 );
 
-assertEqual(fetchCalls, 1, 'the chapter is fetched exactly once');
+assertEqual(net.calls, 1, 'the chapter is fetched exactly once');
 assertEqual(
   fake.read(`${dir2}/001.webp`),
   `page:${pageUrls[0]}`,
@@ -231,7 +168,7 @@ const CHAPTER3 = '/view_uploads/10';
 const dir3 = `${ROOT}/${hashKey(CHAPTER3)}`;
 const flaky = 'https://cdn.zonatmo.org/10/1.webp';
 
-fetchImpl = async (path) => {
+net.fetchImpl = async (path) => {
   assert(path === CHAPTER3, 'fetchReader asks for the queued chapter');
 
   return {
@@ -277,7 +214,7 @@ let maxOpenFetches = 0;
 let openFetches = 0;
 const gates: (() => void)[] = [];
 
-fetchImpl = (path) =>
+net.fetchImpl = (path) =>
   new Promise((resolve) => {
     openFetches += 1;
     maxOpenFetches = Math.max(maxOpenFetches, openFetches);
