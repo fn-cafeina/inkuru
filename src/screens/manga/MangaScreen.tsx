@@ -17,6 +17,7 @@ import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
+import type { MangaChapter } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
@@ -185,21 +186,41 @@ export default function MangaScreen({ navigation, route }: Props) {
   );
   const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
   const rangeIndex = resolveRangeIndex(ranges, activeRange, progress);
-  const activeChapters = ranges[rangeIndex]?.chapters ?? [];
-  const visibleChapters = displayChapters(activeChapters, sortOrder);
+  const activeChapters = useMemo(
+    () => ranges[rangeIndex]?.chapters ?? [],
+    [rangeIndex, ranges],
+  );
+  // Stable identity keeps the memoized chapter cards from re-rendering when
+  // only the screen's own state changed.
+  const visibleChapters = useMemo(
+    () => displayChapters(activeChapters, sortOrder),
+    [activeChapters, sortOrder],
+  );
 
-  const toggleSort = () => {
+  const toggleSort = useCallback(() => {
     const next = sortOrder === 'desc' ? 'asc' : 'desc';
 
     rememberView(path, { range: activeRange, sort: next });
     setSortOrder(next);
-  };
+  }, [activeRange, path, sortOrder]);
 
-  const selectRange = (index: number) => {
-    rememberView(path, { range: index, sort: sortOrder });
-    setActiveRange(index);
-  };
+  const selectRange = useCallback(
+    (index: number) => {
+      rememberView(path, { range: index, sort: sortOrder });
+      setActiveRange(index);
+    },
+    [path, sortOrder],
+  );
   const goBack = () => goBackOrTabs(navigation);
+  const openChapter = useCallback(
+    (chapter: MangaChapter) =>
+      navigation.navigate('Reader', {
+        path: chapter.path,
+        title: chapter.title,
+        mangaPath: path,
+      }),
+    [navigation, path],
+  );
 
   // The top row lives inside the scroll content, like rokimu's banner: no
   // overlay to pin, cover or hide.
@@ -257,13 +278,7 @@ export default function MangaScreen({ navigation, route }: Props) {
           onRefresh={refresh}
           onSelectRange={selectRange}
           onToggleSort={toggleSort}
-          onOpen={(chapter) =>
-            navigation.navigate('Reader', {
-              path: chapter.path,
-              title: chapter.title,
-              mangaPath: path,
-            })
-          }
+          onOpen={openChapter}
         />
       ) : (
         <View className="flex-1">
