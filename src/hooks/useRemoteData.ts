@@ -44,20 +44,6 @@ function isFresh(savedAt: number | null | undefined, freshMs?: number) {
   );
 }
 
-/**
- * Runs a disk read once the JS thread is idle.
- *
- * Opening a screen queues the read behind its push; on a cache with many
- * entries the index rebuild spends ~90ms reading and parsing them, which lands
- * exactly while the user may want to leave again. The memory cache answers
- * instantly, so the disk copy can wait for a frame with nothing else to do.
- */
-function onIdle(task: () => void): () => void {
-  const handle = requestIdleCallback(task, { timeout: 1000 });
-
-  return () => cancelIdleCallback(handle);
-}
-
 function initialState<T>(
   cacheKey: string | undefined,
   freshMs?: number,
@@ -178,17 +164,14 @@ export function useRemoteData<T>(
       return;
     }
 
-    // Everything left touches disk (the cache index rebuild reads every
-    // entry) or the network. Both can wait for an idle frame: the skeleton is
-    // already on screen, so nothing visible changes and the back button stays
-    // responsive while the user may already want to leave.
-    const cancelIdle = onIdle(() => {
-      void start();
-    });
+    // The disk read starts now, not on an idle frame. The skeleton pulse keeps
+    // the native side busy, so the idle callback was starved and every cold
+    // open paid the full 1s timeout before showing a cached manga. A cache hit
+    // is one getItem; only the rare stale or missing entry rebuilds the index.
+    void start();
 
     return () => {
       cancelled = true;
-      cancelIdle();
       requestRef.current += 1;
       controllerRef.current?.abort();
     };
