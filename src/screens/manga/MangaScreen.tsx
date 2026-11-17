@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -113,9 +113,6 @@ export default function MangaScreen({ navigation, route }: Props) {
   const [activeRange, setActiveRange] = useState<number | null>(
     () => viewCache.get(path)?.range ?? null,
   );
-  // A colour change on a 20dp bookmark is a weak acknowledgement of a user
-  // action, so the row under the header says what happened.
-  const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -170,9 +167,6 @@ export default function MangaScreen({ navigation, route }: Props) {
     }
 
     setInLibrary(!inLibrary);
-    setSavedNotice(
-      inLibrary ? 'Quitado de la biblioteca' : 'Guardado en la biblioteca',
-    );
     rememberLocal(path, {
       progress,
       readChapters,
@@ -205,18 +199,7 @@ export default function MangaScreen({ navigation, route }: Props) {
     rememberView(path, { range: index, sort: sortOrder });
     setActiveRange(index);
   };
-  useEffect(() => {
-    if (savedNotice === null) {
-      return;
-    }
-
-    const timer = setTimeout(() => setSavedNotice(null), 2500);
-
-    return () => clearTimeout(timer);
-  }, [savedNotice]);
-
   const goBack = () => goBackOrTabs(navigation);
-  const showRefreshError = hasError && data !== null;
 
   // The top row lives inside the scroll content, like rokimu's banner: no
   // overlay to pin, cover or hide.
@@ -270,7 +253,6 @@ export default function MangaScreen({ navigation, route }: Props) {
           resumeChapter={resumeChapter}
           bottomInset={insets.bottom}
           refreshing={refreshing}
-          refreshError={showRefreshError}
           ready={localLoaded}
           onRefresh={refresh}
           onSelectRange={selectRange}
@@ -282,7 +264,6 @@ export default function MangaScreen({ navigation, route }: Props) {
               mangaPath: path,
             })
           }
-          notice={savedNotice}
         />
       ) : (
         <View className="flex-1">

@@ -21,7 +21,6 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
-import { RefreshNotice } from '../../components/RefreshNotice';
 import { Screen } from '../../components/Screen';
 import { MangaGridSkeleton } from '../../components/Skeleton';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
@@ -236,13 +235,11 @@ function DiscoverResults({
       keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
       ListFooterComponent={
-        <View className="py-4">
-          {hasError ? (
-            <RefreshNotice message="No se pudo cargar más" onRetry={reload} className="" />
-          ) : fetching && hasMore ? (
+        fetching && hasMore ? (
+          <View className="py-4">
             <ActivityIndicator size="small" color={colors.iconInactive} />
-          ) : null}
-        </View>
+          </View>
+        ) : undefined
       }
     />
   );
