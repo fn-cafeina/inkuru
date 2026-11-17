@@ -43,7 +43,7 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
       <View className="mx-5 mt-3 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
         {Array.from({ length: 4 }, (_, index) => (
           <View key={index}>
-            {index > 0 ? <View className="ml-4 h-px bg-neutral-800" /> : null}
+            {index > 0 ? <View className="mx-4 h-px bg-neutral-800" /> : null}
             <View className="min-h-14 justify-center px-4">
               <Skeleton
                 className="h-4 rounded"

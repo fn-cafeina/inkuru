@@ -118,7 +118,7 @@ export function MangaChapterList({
       keyExtractor={(item) => item.path}
       renderItem={({ item, index }) => (
         <View className={rowFrameClass(index, chapters.length)}>
-          {index > 0 ? <View className="ml-4 h-px bg-neutral-800" /> : null}
+          {index > 0 ? <View className="mx-4 h-px bg-neutral-800" /> : null}
           <ChapterRow
             title={item.title}
             state={getChapterState(item.path, currentChapterPath, readSet)}
