@@ -7,9 +7,9 @@ import { useColors } from '../theme/colors';
 
 type ChapterRowState = 'current' | 'read' | 'selected';
 
-/** Row height without a trailing button, as laid out by the reader's picker;
- * dividers add 1px on top (see CHAPTER_ROW_STEP). */
-export const CHAPTER_ROW_HEIGHT = 36;
+/** Row height in the reader picker, where rows carry min-h-14; dividers add
+ * 1px on top (see CHAPTER_ROW_STEP). */
+export const CHAPTER_ROW_HEIGHT = 56;
 export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 
 const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
@@ -24,11 +24,14 @@ export function ChapterRow({
   state,
   trailing,
   onPress,
+  className,
 }: {
   title: string;
   state?: ChapterRowState;
   trailing?: ReactNode;
   onPress: () => void;
+  /** Extra sizing for contexts that need a taller row, like the reader picker. */
+  className?: string;
 }) {
   const colors = useColors();
   const highlighted = state === 'current' || state === 'selected';
@@ -42,7 +45,7 @@ export function ChapterRow({
       accessibilityState={{ selected: highlighted }}
       onPress={onPress}
       style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
-      className="flex-row items-center px-4 py-2"
+      className={`flex-row items-center px-4 py-2 ${className ?? ''}`}
     >
       <Text
         numberOfLines={1}

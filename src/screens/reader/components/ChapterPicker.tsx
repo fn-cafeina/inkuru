@@ -86,6 +86,7 @@ export function ChapterPicker({
               <ChapterRow
                 title={item.title}
                 state="selected"
+                className="min-h-14"
                 onPress={() => onSelect(item)}
               />
             </View>
@@ -93,6 +94,7 @@ export function ChapterPicker({
             <ChapterRow
               title={item.title}
               state={readSet.has(item.path) ? 'read' : undefined}
+              className="min-h-14"
               onPress={() => onSelect(item)}
             />
           )
