@@ -85,12 +85,18 @@ export function ChapterDownloadButton({
       accessibilityLabel={labelFor(status, title)}
       hitSlop={10}
       onPress={onPress}
-      className="min-h-6 min-w-6 items-center justify-center rounded-full"
+      // A fixed box, not a min-height: the downloading state stacks a spinner
+      // and a progress bar, and either of them used to grow the whole row.
+      className="h-6 w-6 items-center justify-center rounded-full"
     >
       {status === 'downloading' ? (
-        <View className="items-center">
-          <ActivityIndicator size="small" color={colors.accent} />
-          <View className="mt-1 h-0.5 w-6 overflow-hidden rounded-full bg-neutral-700">
+        <View className="h-6 w-6 items-center justify-center">
+          <ActivityIndicator
+            size="small"
+            color={colors.accent}
+            style={{ transform: [{ scale: 0.8 }] }}
+          />
+          <View className="absolute bottom-0 h-0.5 w-6 overflow-hidden rounded-full bg-neutral-700">
             <View
               className="h-full rounded-full"
               style={{
