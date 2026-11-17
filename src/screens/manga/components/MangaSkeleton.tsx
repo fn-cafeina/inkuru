@@ -40,10 +40,10 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         <Skeleton className="h-10 w-10 rounded-full" />
       </View>
 
-      <View className="mx-5 mt-3 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
-        {Array.from({ length: 4 }, (_, index) => (
-          <View key={index}>
-            {index > 0 ? <View className="mx-4 h-px bg-neutral-800" /> : null}
+      {Array.from({ length: 4 }, (_, index) => (
+        <View key={index}>
+          {index > 0 ? <View className="h-3" /> : null}
+          <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
             <View className="min-h-14 justify-center px-4">
               <Skeleton
                 className="h-4 rounded"
@@ -51,8 +51,8 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
               />
             </View>
           </View>
-        ))}
-      </View>
+        </View>
+      ))}
     </ScrollView>
   );
 }

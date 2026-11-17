@@ -15,7 +15,7 @@ const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
   current: 'flex-1 text-sm font-semibold',
   selected: 'flex-1 text-sm font-semibold',
   read: 'flex-1 text-sm text-neutral-400 line-through',
-  none: 'flex-1 text-sm text-white',
+  none: 'flex-1 text-sm font-semibold text-white',
 };
 
 export function ChapterRow({

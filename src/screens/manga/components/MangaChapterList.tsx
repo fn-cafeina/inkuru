@@ -116,9 +116,9 @@ export function MangaChapterList({
       style={{ flex: 1 }}
       data={chapters}
       keyExtractor={(item) => item.path}
-      renderItem={({ item, index }) => (
-        <View className={rowFrameClass(index, chapters.length)}>
-          {index > 0 ? <View className="mx-4 h-px bg-neutral-800" /> : null}
+      ItemSeparatorComponent={RowGap}
+      renderItem={({ item }) => (
+        <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
           <ChapterRow
             title={item.title}
             state={getChapterState(item.path, currentChapterPath, readSet)}
@@ -187,23 +187,7 @@ export function MangaChapterList({
   );
 }
 
-/** Card frame per row: the first and last rows carry the corners, the
- * middle ones only the side borders, so the list reads as one bordered card.
- */
-function rowFrameClass(index: number, count: number): string {
-  const frame = 'mx-5 border-neutral-800 bg-neutral-900';
-
-  if (count === 1) {
-    return `${frame} overflow-hidden rounded-xl border`;
-  }
-
-  if (index === 0) {
-    return `${frame} overflow-hidden rounded-t-xl border-x border-t`;
-  }
-
-  if (index === count - 1) {
-    return `${frame} overflow-hidden rounded-b-xl border-x border-b`;
-  }
-
-  return `${frame} border-x`;
+/** 12px of air between chapter cards, like rokimu's episode list. */
+function RowGap() {
+  return <View className="h-3" />;
 }
