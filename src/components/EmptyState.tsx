@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 import { useColors } from '../theme/colors';
@@ -7,12 +6,10 @@ import { useColors } from '../theme/colors';
 export function EmptyState({
   title,
   subtitle,
-  action,
   icon = 'frown',
 }: {
   title: string;
   subtitle?: string;
-  action?: ReactNode;
   icon?: keyof typeof Feather.glyphMap;
 }) {
   const colors = useColors();
@@ -28,7 +25,6 @@ export function EmptyState({
           {subtitle}
         </Text>
       ) : null}
-      {action ? <View className="mt-4">{action}</View> : null}
     </View>
   );
 }

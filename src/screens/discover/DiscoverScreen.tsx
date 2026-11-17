@@ -17,7 +17,6 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
@@ -86,7 +85,7 @@ export default function DiscoverScreen() {
           </View>
         </View>
 
-        <DiscoverResults term={term} onClear={clear} />
+        <DiscoverResults term={term} />
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -98,7 +97,6 @@ function DiscoverFallback({
   fetching,
   hasError,
   cardWidth,
-  onClear,
   onRetry,
 }: {
   term: string;
@@ -106,7 +104,6 @@ function DiscoverFallback({
   fetching: boolean;
   hasError: boolean;
   cardWidth: number;
-  onClear: () => void;
   onRetry: () => void;
 }) {
   if (loading || fetching) {
@@ -131,24 +128,11 @@ function DiscoverFallback({
       subtitle={
         term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
       }
-      action={
-        term ? (
-          <Button variant="secondary" onPress={onClear}>
-            Ver catálogo
-          </Button>
-        ) : undefined
-      }
     />
   );
 }
 
-function DiscoverResults({
-  term,
-  onClear,
-}: {
-  term: string;
-  onClear: () => void;
-}) {
+function DiscoverResults({ term }: { term: string }) {
   const navigation = useNavigation<TabNavigation<'Discover'>>();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<MangaListItem>>(null);
@@ -197,7 +181,6 @@ function DiscoverResults({
         fetching={fetching}
         hasError={hasError}
         cardWidth={cardWidth}
-        onClear={onClear}
         onRetry={reload}
       />
     );

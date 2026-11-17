@@ -13,7 +13,6 @@ import {
 } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
@@ -149,14 +148,6 @@ export default function LibraryScreen() {
           icon="bookmark"
           title="Biblioteca vacía"
           subtitle="Guarda un manga para retomarlo aquí."
-          action={
-            <Button
-              variant="primary"
-              onPress={() => navigation.navigate('Discover')}
-            >
-              Explorar catálogo
-            </Button>
-          }
         />
       ) : (
         <FlatList
@@ -186,11 +177,6 @@ export default function LibraryScreen() {
               icon="search"
               title={`Sin resultados para «${query}»`}
               subtitle="Prueba con otro título."
-              action={
-                <Button variant="secondary" onPress={() => setQuery('')}>
-                  Ver biblioteca
-                </Button>
-              }
             />
           }
         />
