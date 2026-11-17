@@ -6,7 +6,7 @@ import {
 
 import { useReaderSettings } from '../../hooks/useReaderSettings';
 
-export function useReaderPreferences() {
+export function useReaderPreferences(mangaPath?: string) {
   const {
     mode,
     scale,
@@ -18,7 +18,7 @@ export function useReaderPreferences() {
     selectScale,
     selectQuality,
     selectKeepAwake,
-  } = useReaderSettings();
+  } = useReaderSettings(mangaPath);
 
   useEffect(() => {
     let active = true;

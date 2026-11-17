@@ -28,6 +28,7 @@ const MODE_KEY = 'reader:mode';
 const SCALE_KEY = 'reader:scale';
 const QUALITY_KEY = 'reader:quality';
 const KEEP_AWAKE_KEY = 'reader:keepAwake';
+const MANGA_OVERRIDES_KEY = 'reader:manga-overrides';
 
 // Stored values accepted as-is or mapped to their current name: the mode
 // split and the older scale/quality synonyms.
@@ -112,4 +113,103 @@ export async function loadKeepAwake(): Promise<boolean> {
 
 export function saveKeepAwake(keepAwake: boolean): Promise<void> {
   return saveSetting(KEEP_AWAKE_KEY, String(keepAwake));
+}
+
+// Per-manga overrides, like "this webtoon reads vertical, that one rtl".
+// One JSON map so the number of AsyncStorage keys does not grow with the
+// library.
+export type MangaReaderOverrides = {
+  mode?: ReaderMode;
+  scale?: ReaderScale;
+  quality?: ReaderQuality;
+};
+
+type OverrideField = 'mode' | 'scale' | 'quality';
+
+function normalizeOverride(entry: unknown): MangaReaderOverrides | null {
+  if (typeof entry !== 'object' || entry === null) {
+    return null;
+  }
+
+  const record = entry as Record<string, unknown>;
+  const overrides: MangaReaderOverrides = {};
+  const mode = typeof record.mode === 'string' ? MODE_VALUES[record.mode] : undefined;
+  const scale =
+    typeof record.scale === 'string' ? SCALE_VALUES[record.scale] : undefined;
+  const quality =
+    typeof record.quality === 'string'
+      ? QUALITY_VALUES[record.quality]
+      : undefined;
+
+  if (mode !== undefined) {
+    overrides.mode = mode;
+  }
+
+  if (scale !== undefined) {
+    overrides.scale = scale;
+  }
+
+  if (quality !== undefined) {
+    overrides.quality = quality;
+  }
+
+  return Object.keys(overrides).length > 0 ? overrides : null;
+}
+
+async function loadOverrideMap(): Promise<Record<string, MangaReaderOverrides>> {
+  try {
+    const raw = await AsyncStorage.getItem(MANGA_OVERRIDES_KEY);
+
+    if (raw === null) {
+      return {};
+    }
+
+    const value: unknown = JSON.parse(raw);
+
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return {};
+    }
+
+    const map: Record<string, MangaReaderOverrides> = {};
+
+    for (const [path, entry] of Object.entries(value)) {
+      const overrides = normalizeOverride(entry);
+
+      if (overrides !== null) {
+        map[path] = overrides;
+      }
+    }
+
+    return map;
+  } catch {
+    return {};
+  }
+}
+
+export async function loadMangaReaderOverrides(
+  mangaPath: string,
+): Promise<MangaReaderOverrides | null> {
+  const map = await loadOverrideMap();
+
+  return map[mangaPath] ?? null;
+}
+
+export async function saveMangaReaderOverride(
+  mangaPath: string,
+  field: OverrideField,
+  value: string,
+): Promise<void> {
+  try {
+    const map = await loadOverrideMap();
+
+    await AsyncStorage.setItem(
+      MANGA_OVERRIDES_KEY,
+      JSON.stringify({
+        ...map,
+        [mangaPath]: { ...(map[mangaPath] ?? {}), [field]: value },
+      }),
+    );
+  } catch {
+    // A storage failure must not block reading.
+  }
 }

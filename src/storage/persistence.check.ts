@@ -170,4 +170,42 @@ assertEqual(await settings.loadReaderScale(), 'fit-width', 'the scale roundtrips
 await settings.saveKeepAwake(true);
 assertEqual(await settings.loadKeepAwake(), true, 'keep screen on roundtrips');
 
+// --- per-manga reader overrides ---
+
+assertEqual(
+  await settings.loadMangaReaderOverrides('/library/manga/1'),
+  null,
+  'no overrides read as null',
+);
+
+await settings.saveMangaReaderOverride('/library/manga/1', 'mode', 'paged-ltr');
+await settings.saveMangaReaderOverride('/library/manga/1', 'quality', 'original');
+
+const overrides = await settings.loadMangaReaderOverrides('/library/manga/1');
+
+assertEqual(overrides?.mode, 'paged-ltr', 'the saved mode override reads back');
+assertEqual(overrides?.quality, 'original', 'the quality override reads back');
+assertEqual(overrides?.scale, undefined, 'untouched fields stay unset');
+
+assertEqual(
+  await settings.loadMangaReaderOverrides('/library/manga/2'),
+  null,
+  'overrides are per manga',
+);
+
+storage.set('reader:manga-overrides', 'not json');
+assertEqual(
+  await settings.loadMangaReaderOverrides('/library/manga/1'),
+  null,
+  'a corrupt map reads as empty',
+);
+
+storage.set(
+  'reader:manga-overrides',
+  JSON.stringify({ '/library/manga/1': { mode: 'zarro', scale: 'webtoon' } }),
+);
+const corrupted = await settings.loadMangaReaderOverrides('/library/manga/1');
+assertEqual(corrupted?.mode, undefined, 'an unknown override mode is discarded');
+assertEqual(corrupted?.scale, undefined, 'an unknown override scale is discarded');
+
 console.log('persistence ok');

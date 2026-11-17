@@ -68,7 +68,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     selectScale,
     selectQuality,
     selectKeepAwake,
-  } = useReaderPreferences();
+  } = useReaderPreferences(mangaPath);
   const [chromeVisible, setChromeVisible] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [readChapters, setReadChapters] = useState<string[]>([]);
