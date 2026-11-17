@@ -28,16 +28,21 @@ export function ReaderSkeleton({
       <View className="flex-1 items-center">
         {mode === 'webtoon' ? (
           <View style={{ width }}>
+            {/* Real pages stack with no gap, so the skeleton must not hint at one. */}
             <Skeleton
               tone="dark"
               className="w-full"
               style={{ height: pageHeight }}
             />
-            <View className="h-1" />
             <Skeleton
               tone="dark"
               className="w-full"
               style={{ height: pageHeight * 0.6 }}
+            />
+            <Skeleton
+              tone="dark"
+              className="w-full"
+              style={{ height: pageHeight }}
             />
           </View>
         ) : (
