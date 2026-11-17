@@ -1,15 +1,24 @@
-import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Screen } from '../../components/Screen';
+import { CounterRow } from '../../components/CounterRow';
 import { SettingRow } from '../../components/SettingRow';
 import { SettingSection } from '../../components/SettingSection';
 import { SwitchRow } from '../../components/SwitchRow';
+import { setDownloadConcurrency } from '../../downloads/manager';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
 import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
+import {
+  DEFAULT_DOWNLOAD_CONCURRENCY,
+  loadDownloadConcurrency,
+  MAX_DOWNLOAD_CONCURRENCY,
+  MIN_DOWNLOAD_CONCURRENCY,
+  saveDownloadConcurrency,
+} from '../../storage/downloadSettings';
 import { useColors } from '../../theme/colors';
 import {
   checkForUpdate,
@@ -25,6 +34,17 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { handleScroll, reset } = useTabBarManager();
   const update = useSyncExternalStore(subscribeUpdates, getUpdateState);
+  const [concurrency, setConcurrency] = useState(DEFAULT_DOWNLOAD_CONCURRENCY);
+
+  useEffect(() => {
+    void loadDownloadConcurrency().then(setConcurrency);
+  }, []);
+
+  const changeConcurrency = (next: number) => {
+    setConcurrency(next);
+    setDownloadConcurrency(next);
+    void saveDownloadConcurrency(next);
+  };
 
   useEffect(() => {
     void checkForUpdate();
@@ -92,6 +112,17 @@ export default function SettingsScreen() {
                 </View>
               ) : null
             }
+          />
+        </SettingSection>
+
+        <SettingSection title="Descargas">
+          <CounterRow
+            title="Descargas simultáneas"
+            subtitle="Capítulos bajando a la vez"
+            value={concurrency}
+            min={MIN_DOWNLOAD_CONCURRENCY}
+            max={MAX_DOWNLOAD_CONCURRENCY}
+            onChange={changeConcurrency}
           />
         </SettingSection>
 

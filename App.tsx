@@ -10,6 +10,8 @@ import {
 
 import { UpdateFlowSheet } from './src/screens/settings/components/UpdateFlowSheet';
 import { RootNavigator } from './src/navigation';
+import { setDownloadConcurrency } from './src/downloads/manager';
+import { loadDownloadConcurrency } from './src/storage/downloadSettings';
 import { useColors } from './src/theme/colors';
 import { checkForUpdate } from './src/update/check';
 import { initFlow } from './src/update/flow';
@@ -23,6 +25,7 @@ export default function App() {
     void initFlow();
     void checkForUpdate();
     cleanupOldApk();
+    void loadDownloadConcurrency().then(setDownloadConcurrency);
   }, []);
 
   return (

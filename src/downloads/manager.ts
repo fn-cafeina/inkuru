@@ -24,6 +24,7 @@ import {
   subscribe,
 } from './store';
 import { withTimeout } from './timeout';
+import { clampDownloadConcurrency } from '../storage/downloadSettings';
 import type { DownloadInput, DownloadRecord } from './types';
 
 export { subscribe, getVersion, getDownloadState };
@@ -69,7 +70,7 @@ export async function enqueueDownload(input: DownloadInput) {
   }
 
   store.queue.push(input);
-  void pump();
+  pump();
 }
 
 export function cancelDownload(chapterPath: string) {
@@ -184,15 +185,16 @@ export function initializeDownloads(): Promise<void> {
   return store.initializing;
 }
 
-async function pump() {
-  if (store.running) {
-    return;
-  }
+let activeWorkers = 0;
 
-  store.running = true;
+function startWorker(): void {
+  activeWorkers += 1;
+  void drainWorker();
+}
 
+async function drainWorker(): Promise<void> {
   try {
-    while (store.queue.length > 0) {
+    while (true) {
       const input = store.queue.shift();
 
       if (!input) {
@@ -202,8 +204,21 @@ async function pump() {
       await runDownload(input);
     }
   } finally {
-    store.running = false;
+    activeWorkers -= 1;
   }
+}
+
+/** Spawns workers up to the configured chapter concurrency. */
+function pump(): void {
+  while (activeWorkers < store.concurrency && store.queue.length > 0) {
+    startWorker();
+  }
+}
+
+export function setDownloadConcurrency(value: number): void {
+  store.concurrency = clampDownloadConcurrency(value);
+  // A raised cap must reach a queue that is already waiting.
+  pump();
 }
 
 async function runDownload(input: DownloadInput) {

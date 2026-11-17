@@ -268,4 +268,86 @@ assertEqual(
   'all forced failures were consumed by retries',
 );
 
+// Concurrency: with two at a time, two chapters fetch in parallel and the
+// third waits in the queue for a worker to free up.
+const CHAPTER4 = '/view_uploads/11';
+const CHAPTER5 = '/view_uploads/12';
+const CHAPTER6 = '/view_uploads/13';
+let maxOpenFetches = 0;
+let openFetches = 0;
+const gates: (() => void)[] = [];
+
+fetchImpl = (path) =>
+  new Promise((resolve) => {
+    openFetches += 1;
+    maxOpenFetches = Math.max(maxOpenFetches, openFetches);
+
+    gates.push(() => {
+      openFetches -= 1;
+
+      resolve({
+        title: path,
+        pages: ['https://cdn.zonatmo.org/14/1.webp'],
+        chapters: [{ title: path, path }],
+        chapterIndex: 0,
+      });
+    });
+  });
+
+const releaseOne = () => {
+  const release = gates.pop();
+
+  if (release) {
+    release();
+  }
+};
+
+manager.setDownloadConcurrency(2);
+
+for (const path of [CHAPTER4, CHAPTER5, CHAPTER6]) {
+  await manager.enqueueDownload({
+    chapterPath: path,
+    chapterTitle: path,
+    mangaPath: '/library/manga/7/one',
+    mangaTitle: 'Manga',
+  });
+}
+
+await waitFor(
+  () =>
+    manager.getDownloadState(CHAPTER4)?.status === 'downloading' &&
+    manager.getDownloadState(CHAPTER5)?.status === 'downloading',
+  'two chapters fetch in parallel',
+);
+
+assertEqual(maxOpenFetches, 2, 'the fetch concurrency caps at two');
+assert(
+  manager.getDownloadState(CHAPTER6)?.status === 'queued',
+  'the third chapter waits in the queue',
+);
+
+releaseOne();
+releaseOne();
+
+await waitFor(
+  () =>
+    manager.getDownloadState(CHAPTER4)?.status === 'done' &&
+    manager.getDownloadState(CHAPTER5)?.status === 'done',
+  'the two parallel downloads finish',
+);
+
+await waitFor(
+  () => manager.getDownloadState(CHAPTER6)?.status === 'downloading',
+  'the queued chapter starts once a worker frees up',
+);
+
+releaseOne();
+
+await waitFor(
+  () => manager.getDownloadState(CHAPTER6)?.status === 'done',
+  'the queued chapter finishes',
+);
+
+manager.setDownloadConcurrency(1);
+
 console.log('download manager ok');

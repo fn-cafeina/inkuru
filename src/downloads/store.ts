@@ -16,7 +16,7 @@ export const store = {
   queue: [] as DownloadInput[],
   listeners: new Set<() => void>(),
   version: 0,
-  running: false,
+  concurrency: 1,
   initialized: false,
   initializing: null as Promise<void> | null,
 };

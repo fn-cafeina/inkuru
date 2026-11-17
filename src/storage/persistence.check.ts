@@ -208,4 +208,21 @@ const corrupted = await settings.loadMangaReaderOverrides('/library/manga/1');
 assertEqual(corrupted?.mode, undefined, 'an unknown override mode is discarded');
 assertEqual(corrupted?.scale, undefined, 'an unknown override scale is discarded');
 
+// --- download settings ---
+
+const downloads = await import('./downloadSettings');
+
+assertEqual(downloads.clampDownloadConcurrency(3), 3, 'a valid value is kept');
+assertEqual(downloads.clampDownloadConcurrency(0), 1, 'below the floor clamps up');
+assertEqual(downloads.clampDownloadConcurrency(99), 10, 'above the ceiling clamps down');
+assertEqual(downloads.clampDownloadConcurrency(2.5), 1, 'a non-integer falls back to the default');
+
+assertEqual(await downloads.loadDownloadConcurrency(), 1, 'no value reads the default');
+await downloads.saveDownloadConcurrency(4);
+assertEqual(await downloads.loadDownloadConcurrency(), 4, 'the concurrency roundtrips');
+await downloads.saveDownloadConcurrency(99);
+assertEqual(await downloads.loadDownloadConcurrency(), 10, 'saves are clamped too');
+storage.set('downloads:concurrency', 'abc');
+assertEqual(await downloads.loadDownloadConcurrency(), 1, 'a corrupt value reads the default');
+
 console.log('persistence ok');
