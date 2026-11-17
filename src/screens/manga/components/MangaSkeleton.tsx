@@ -4,7 +4,11 @@ import { ScrollView, View } from 'react-native';
 import { Skeleton } from '../../../components/Skeleton';
 import { COVER_ASPECT_RATIO } from '../../../theme/layout';
 
-/** Honest detail placeholder: only blocks that always exist. */
+/**
+ * Honest detail placeholder: cover, title and status, tags, the read button,
+ * the chapters heading and its range chips, then the chapter cards. Blocks
+ * that only appear on some mangas, like the progress bar, stay out.
+ */
 export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
   return (
     <ScrollView
@@ -19,9 +23,9 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
           style={{ width: '34%', aspectRatio: COVER_ASPECT_RATIO }}
         />
         <View className="ml-4 flex-1">
-          <Skeleton className="h-5 w-3/4 rounded" />
-          <Skeleton className="mt-1 h-5 w-1/2 rounded" />
-          <Skeleton className="mt-2 h-6 w-24 rounded-lg" />
+          <Skeleton className="h-6 w-4/5 rounded" />
+          <Skeleton className="mt-2 h-6 w-3/5 rounded" />
+          <Skeleton className="mt-2 h-6 w-20 self-start rounded-lg" />
         </View>
       </View>
 
@@ -31,30 +35,38 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         <Skeleton className="h-6 w-14 rounded-md" />
       </View>
 
-      <View className="px-5">
-        <Skeleton className="mt-4 h-14 rounded-xl" />
+      <View className="mt-4 px-5">
+        <Skeleton className="h-14 rounded-xl" />
+      </View>
+
+      <View className="mt-6 px-5">
+        <Skeleton className="mb-3 h-3.5 w-16 rounded" />
+        <Skeleton className="h-3.5 w-full rounded" />
+        <Skeleton className="mt-2 h-3.5 w-11/12 rounded" />
+        <Skeleton className="mt-2 h-3.5 w-2/3 rounded" />
       </View>
 
       <View className="mt-6 flex-row items-center justify-between px-5">
-        <Skeleton className="h-3 w-28 rounded" />
-        <Skeleton className="h-10 w-10 rounded-full" />
+        <Skeleton className="h-3.5 w-28 rounded" />
+        <Skeleton className="h-11 w-11 rounded-full" />
       </View>
 
-      <View className="mt-3 flex-row gap-3 px-5">
+      <View className="mt-3 flex-row gap-3 overflow-hidden px-5 pb-3">
         {Array.from({ length: 4 }, (_, index) => (
           <Skeleton key={index} className="h-8 rounded-lg" style={{ width: 90 }} />
         ))}
       </View>
 
-      {Array.from({ length: 4 }, (_, index) => (
+      {Array.from({ length: 5 }, (_, index) => (
         <View key={index}>
           {index > 0 ? <View className="h-3" /> : null}
           <View className="mx-5 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900">
-            <View className="h-12 justify-center px-4">
+            <View className="flex-row items-center justify-between p-4">
               <Skeleton
-                className="h-4 rounded"
-                style={{ width: `${55 + (index % 3) * 15}%` }}
+                className="h-5 rounded"
+                style={{ width: `${50 + (index % 3) * 15}%` }}
               />
+              <Skeleton className="h-[18px] w-[18px] rounded-full" />
             </View>
           </View>
         </View>
