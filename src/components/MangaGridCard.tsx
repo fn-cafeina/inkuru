@@ -7,25 +7,14 @@ import { AnimatedPressable } from './AnimatedPressable';
 type Props = {
   title: string;
   cover: string;
-  subtitle?: string;
   width: number;
   onPress: () => void;
 };
 
-export function MangaGridCard({
-  title,
-  cover,
-  subtitle,
-  width,
-  onPress,
-}: Props) {
+export function MangaGridCard({ title, cover, width, onPress }: Props) {
   return (
     <View style={{ width }} className="mb-3">
-      <AnimatedPressable
-        accessibilityLabel={subtitle ? `${title}, ${subtitle}` : title}
-        hapticFeedback
-        onPress={onPress}
-      >
+      <AnimatedPressable accessibilityLabel={title} hapticFeedback onPress={onPress}>
         <View
           className="overflow-hidden rounded-xl bg-neutral-800"
           style={{ width: '100%', aspectRatio: COVER_ASPECT_RATIO }}
@@ -46,14 +35,6 @@ export function MangaGridCard({
         >
           {title}
         </Text>
-        {subtitle ? (
-          <Text
-            numberOfLines={1}
-            className="mt-1 text-xs text-neutral-400"
-          >
-            {subtitle}
-          </Text>
-        ) : null}
       </AnimatedPressable>
     </View>
   );

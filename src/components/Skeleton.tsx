@@ -92,8 +92,6 @@ export function MangaGridSkeleton({ cardWidth }: { cardWidth: number }) {
             style={{ width: cardWidth, aspectRatio: COVER_ASPECT_RATIO }}
           />
           <Skeleton className="mt-2 h-4 rounded" />
-          <Skeleton className="mt-1 h-4 w-2/3 rounded" />
-          <Skeleton className="mt-1 h-4 w-1/2 rounded" />
         </View>
       ))}
     </ScrollView>

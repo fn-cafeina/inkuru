@@ -218,7 +218,6 @@ function DiscoverResults({
         <MangaGridCard
           title={item.title}
           cover={item.cover}
-          subtitle={item.lastChapter}
           width={cardWidth}
           onPress={() => openManga(item)}
         />

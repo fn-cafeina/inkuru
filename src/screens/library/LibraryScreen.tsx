@@ -167,7 +167,6 @@ export default function LibraryScreen() {
             <MangaGridCard
               title={item.title}
               cover={item.cover}
-              subtitle={progress[item.path]?.chapterTitle ?? 'Sin leer'}
               width={cardWidth}
               onPress={() =>
                 navigation.navigate('Manga', {
