@@ -29,7 +29,7 @@ import { loadProgressMany } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { useColors } from '../../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
-import { matchesQuery, orderLibrary } from './orderLibrary';
+import { matchesQuery, orderLibrary, sameEntries, sameProgress } from './orderLibrary';
 
 let cachedEntries: LibraryEntry[] | null = null;
 let cachedProgress: Record<string, ReaderProgress> = {};
@@ -105,8 +105,12 @@ export default function LibraryScreen() {
     cachedEntries = sorted;
     cachedProgress = loadedProgress;
     setFailed(false);
-    setEntries(sorted);
-    setProgress(loadedProgress);
+    // A focus reload usually returns exactly what is already on screen; a new
+    // array identity re-renders the whole grid for nothing.
+    setEntries((current) => (sameEntries(current, sorted) ? current : sorted));
+    setProgress((current) =>
+      sameProgress(current, loadedProgress) ? current : loadedProgress,
+    );
     setLoaded(true);
     setChecking(false);
   }, []);

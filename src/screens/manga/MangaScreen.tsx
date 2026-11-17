@@ -131,7 +131,12 @@ export default function MangaScreen({ navigation, route }: Props) {
             inLibrary: saved,
           });
           setProgress(value);
-          setReadChapters(reads);
+          setReadChapters((current) =>
+            current.length === reads.length &&
+            reads.every((chapter) => current.includes(chapter))
+              ? current
+              : reads,
+          );
           setInLibrary(saved);
           setLocalLoaded(true);
         }

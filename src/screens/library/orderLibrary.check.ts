@@ -1,4 +1,9 @@
-import { matchesQuery, orderLibrary } from './orderLibrary';
+import {
+  matchesQuery,
+  orderLibrary,
+  sameEntries,
+  sameProgress,
+} from './orderLibrary';
 import type { LibraryEntry } from '../../storage/library';
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -43,5 +48,30 @@ assert(matchesQuery('Boku no Hero', 'boku'), 'prefix match');
 assert(!matchesQuery('Boku no Hero', 'naruto'), 'non match');
 assert(matchesQuery('Café', 'cafe'), 'accents are ignored');
 assert(matchesQuery('Boku no Hero', ''), 'empty query matches everything');
+
+const single = (path: string) => ({
+  path,
+  title: path,
+  cover: path,
+  addedAt: 1,
+});
+
+assert(sameEntries([single('/a')], [single('/a')]), 'equal entries compare equal');
+assert(!sameEntries([single('/a')], [single('/b')]), 'a different path differs');
+assert(!sameEntries([single('/a')], []), 'a shorter list differs');
+assert(
+  sameProgress(
+    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
+  ),
+  'equal progress compares equal',
+);
+assert(
+  !sameProgress(
+    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 4 } },
+  ),
+  'a different page differs',
+);
 
 console.log('library order ok');
