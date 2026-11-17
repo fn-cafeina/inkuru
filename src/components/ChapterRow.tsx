@@ -13,10 +13,10 @@ export const CHAPTER_ROW_HEIGHT = 56;
 export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 
 const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
-  current: 'flex-1 text-sm font-semibold',
-  selected: 'flex-1 text-sm font-semibold',
-  read: 'flex-1 text-sm text-neutral-400 line-through',
-  none: 'flex-1 text-sm font-semibold text-white',
+  current: 'flex-1 text-base font-semibold',
+  selected: 'flex-1 text-base font-semibold',
+  read: 'flex-1 text-base text-neutral-400 line-through',
+  none: 'flex-1 text-base font-semibold text-white',
 };
 
 export function ChapterRow({
@@ -45,7 +45,7 @@ export function ChapterRow({
       accessibilityState={{ selected: highlighted }}
       onPress={onPress}
       style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
-      className={`flex-row items-center px-4 py-2 ${className ?? ''}`}
+      className={`flex-row items-center p-4 ${className ?? ''}`}
     >
       <Text
         numberOfLines={1}

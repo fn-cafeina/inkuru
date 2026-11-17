@@ -83,9 +83,9 @@ export function ChapterDownloadButton({
     <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={labelFor(status, title)}
-      hitSlop={8}
+      hitSlop={10}
       onPress={onPress}
-      className="min-h-8 min-w-8 items-center justify-center rounded-full"
+      className="min-h-6 min-w-6 items-center justify-center rounded-full"
     >
       {status === 'downloading' ? (
         <View className="items-center">
