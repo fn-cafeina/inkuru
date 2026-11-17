@@ -191,7 +191,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
           importantForAccessibility={sheetAccessibility(pickerOpen, settingsOpen)}
         >
           {!ready || (loading && !data) ? (
-            <ReaderSkeleton width={viewWidth} height={viewHeight} />
+            <ReaderSkeleton width={viewWidth} height={viewHeight} mode={mode} />
           ) : hasError && !data ? (
             <ErrorState
               message="No se pudo cargar el capítulo"

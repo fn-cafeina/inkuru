@@ -40,6 +40,12 @@ export function MangaSkeleton({ topBar }: { topBar: ReactNode }) {
         <Skeleton className="h-10 w-10 rounded-full" />
       </View>
 
+      <View className="mt-3 flex-row gap-3 px-5">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Skeleton key={index} className="h-8 rounded-lg" style={{ width: 90 }} />
+        ))}
+      </View>
+
       {Array.from({ length: 4 }, (_, index) => (
         <View key={index}>
           {index > 0 ? <View className="h-3" /> : null}

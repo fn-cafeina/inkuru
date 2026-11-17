@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   TextInput,
   useWindowDimensions,
@@ -18,6 +17,7 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { ErrorState } from '../../components/ErrorState';
 import { MangaGridCard } from '../../components/MangaGridCard';
+import { MangaGridSkeleton } from '../../components/Skeleton';
 import { SectionTitle } from '../../components/SectionTitle';
 import { Screen } from '../../components/Screen';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
@@ -36,7 +36,6 @@ let cachedProgress: Record<string, ReaderProgress> = {};
 
 export default function LibraryScreen() {
   const navigation = useNavigation<TabNavigation<'Library'>>();
-  const colors = useColors();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { handleScroll, reset } = useTabBarManager();
@@ -138,9 +137,7 @@ export default function LibraryScreen() {
           onRetry={retry}
         />
       ) : !loaded || (checking && entries.length === 0) ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={colors.iconInactive} />
-        </View>
+        <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
         <EmptyState
           title="Biblioteca vacía"
