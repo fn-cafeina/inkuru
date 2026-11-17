@@ -112,23 +112,29 @@ function DiscoverFallback({
 
   if (hasError) {
     return (
-      <ErrorState
-        message={term ? 'No se pudo buscar' : 'No se pudo cargar el catálogo'}
-        onRetry={onRetry}
-      />
+      <View className="absolute inset-0" pointerEvents="box-none">
+        <ErrorState
+          message={term ? 'No se pudo buscar' : 'No se pudo cargar el catálogo'}
+          onRetry={onRetry}
+        />
+      </View>
     );
   }
 
   // An empty catalog is not a failure, so there is nothing to retry; only a
   // failed request gets a retry button.
+  // The overlay ignores the search bar, so these states center in the whole
+  // content area like the library ones instead of sitting lower.
   return (
-    <EmptyState
-      icon={term ? 'search' : 'book-open'}
-      title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
-      subtitle={
-        term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
-      }
-    />
+    <View className="absolute inset-0" pointerEvents="box-none">
+      <EmptyState
+        icon={term ? 'search' : 'book-open'}
+        title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
+        subtitle={
+          term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'
+        }
+      />
+    </View>
   );
 }
 
