@@ -10,7 +10,7 @@ import {
 
 import { UpdateFlowSheet } from './src/screens/settings/components/UpdateFlowSheet';
 import { RootNavigator } from './src/navigation';
-import { setDownloadConcurrency } from './src/downloads/manager';
+import { initializeDownloads, setDownloadConcurrency } from './src/downloads/manager';
 import { loadDownloadConcurrency } from './src/storage/downloadSettings';
 import { useColors } from './src/theme/colors';
 import { checkForUpdate } from './src/update/check';
@@ -25,6 +25,8 @@ export default function App() {
     void initFlow();
     void checkForUpdate();
     cleanupOldApk();
+    // The disk scan moves to launch so opening a manga never pays for it.
+    void initializeDownloads();
     void loadDownloadConcurrency().then(setDownloadConcurrency);
   }, []);
 

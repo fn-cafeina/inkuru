@@ -12,6 +12,11 @@ import type {
 export const store = {
   states: new Map<string, DownloadState>(),
   records: new Map<string, DownloadRecord>(),
+  /**
+   * Memoized 'done' states. getDownloadState feeds useSyncExternalStore, so
+   * the snapshot must keep its identity between notifications.
+   */
+  doneStates: new Map<string, DownloadState>(),
   controllers: new Map<string, AbortController>(),
   queue: [] as DownloadInput[],
   listeners: new Set<() => void>(),
@@ -52,7 +57,16 @@ export function getDownloadState(
 
   const record = store.records.get(chapterPath);
 
-  return record
-    ? { status: 'done', page: record.pageCount, total: record.pageCount }
-    : undefined;
+  if (record === undefined) {
+    return undefined;
+  }
+
+  let done = store.doneStates.get(chapterPath);
+
+  if (done === undefined) {
+    done = { status: 'done', page: record.pageCount, total: record.pageCount };
+    store.doneStates.set(chapterPath, done);
+  }
+
+  return done;
 }

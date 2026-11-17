@@ -3,7 +3,8 @@ import { ActivityIndicator, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import type { DownloadState, DownloadStatus } from '../../../downloads/types';
+import type { DownloadStatus } from '../../../downloads/types';
+import { useDownloadState } from '../../../hooks/useDownloads';
 import { useColors } from '../../../theme/colors';
 
 type FeatherName = ComponentProps<typeof Feather>['name'];
@@ -62,15 +63,16 @@ function colorFor(
 }
 
 export function ChapterDownloadButton({
+  path,
   title,
-  state,
   onPress,
 }: {
+  path: string;
   title: string;
-  state?: DownloadState;
   onPress: () => void;
 }) {
   const colors = useColors();
+  const state = useDownloadState(path);
   const status = state?.status;
   const progress =
     state !== undefined && state.status === 'downloading' && state.total > 0

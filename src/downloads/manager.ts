@@ -128,6 +128,7 @@ export async function deleteDownload(chapterPath: string) {
   }
 
   store.records.delete(chapterPath);
+  store.doneStates.delete(chapterPath);
   notify();
 
   await initializeDownloads();
@@ -135,6 +136,7 @@ export async function deleteDownload(chapterPath: string) {
   // Initialization may have recovered the index entry before the files were
   // gone, so remove it again after the scan.
   store.records.delete(chapterPath);
+  store.doneStates.delete(chapterPath);
   await removeRecord(chapterPath);
   notify();
 }

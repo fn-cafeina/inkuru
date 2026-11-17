@@ -10,7 +10,6 @@ import {
   enqueueDownload,
   getDownloadState,
 } from '../../../downloads/manager';
-import { useDownloadVersion } from '../../../hooks/useDownloads';
 import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
@@ -68,7 +67,6 @@ export function MangaChapterList({
     [manga.chapters, readSet],
   );
   const colors = useColors();
-  useDownloadVersion();
 
   const handleDownload = (chapter: MangaChapter) => {
     const status = getDownloadState(chapter.path)?.status;
@@ -117,8 +115,8 @@ export function MangaChapterList({
             state={getChapterState(item.path, currentChapterPath, readSet)}
             trailing={
               <ChapterDownloadButton
+                path={item.path}
                 title={item.title}
-                state={getDownloadState(item.path)}
                 onPress={() => handleDownload(item)}
               />
             }
