@@ -146,6 +146,7 @@ export default function LibraryScreen() {
         <MangaGridSkeleton cardWidth={cardWidth} />
       ) : entries.length === 0 ? (
         <EmptyState
+          icon="bookmark"
           title="Biblioteca vacía"
           subtitle="Guarda un manga para retomarlo aquí."
           action={
@@ -182,6 +183,7 @@ export default function LibraryScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <EmptyState
+              icon="search"
               title={`Sin resultados para «${query}»`}
               subtitle="Prueba con otro título."
               action={

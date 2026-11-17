@@ -126,6 +126,7 @@ function DiscoverFallback({
   // failed request gets a retry button.
   return (
     <EmptyState
+      icon={term ? 'search' : 'book-open'}
       title={term ? `Sin resultados para «${term}»` : 'Catálogo vacío'}
       subtitle={
         term ? 'Prueba con otro término.' : 'No hay mangas para mostrar.'

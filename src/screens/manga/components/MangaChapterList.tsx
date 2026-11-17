@@ -101,7 +101,9 @@ export function MangaChapterList({
       ListFooterComponent={
         <View style={{ height: bottomInset + 24 }} />
       }
-      ListEmptyComponent={<EmptyState title="Sin capítulos disponibles" />}
+      ListEmptyComponent={
+        <EmptyState icon="book" title="Sin capítulos disponibles" />
+      }
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
