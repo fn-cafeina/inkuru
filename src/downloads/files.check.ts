@@ -18,6 +18,7 @@ const {
   deleteChapterFiles,
   downloadPage,
   hasDownloadFiles,
+  hasDownloadFilesAsync,
   prepareChapterDirectory,
   readDownloadFile,
   reconcileDirectories,
@@ -69,6 +70,14 @@ function seed(chapterPath: string) {
 const dirA = seed(chapterA);
 
 assert(hasDownloadFiles(chapterA), 'a valid marker counts as downloaded');
+assert(
+  await hasDownloadFilesAsync(chapterA),
+  'the async marker read agrees with the sync one',
+);
+assert(
+  !(await hasDownloadFilesAsync(chapterB)),
+  'the async read does not inherit another chapter files',
+);
 assert(!hasDownloadFiles(chapterB), 'another chapter does not inherit the files');
 
 const wrapper = await readDownloadFile(chapterA);

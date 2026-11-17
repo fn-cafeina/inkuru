@@ -225,6 +225,35 @@ export async function readDownloadFile(
  * corrupt directory on the next launch. `dirNames` shares one root listing
  * across the startup scan.
  */
+/**
+ * Same question as `hasDownloadFiles`, but the marker read is awaited instead
+ * of blocking the JS thread: the launch scan parses one marker per download.
+ */
+export async function hasDownloadFilesAsync(
+  chapterPath: string,
+  dirNames?: string[],
+): Promise<boolean> {
+  for (const directory of existingChapterDirs(chapterPath, dirNames)) {
+    const file = new File(directory, READER_FILE);
+
+    if (!file.exists) {
+      continue;
+    }
+
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+
+      if (isDownloadFile(parsed) && parsed.record.chapterPath === chapterPath) {
+        return true;
+      }
+    } catch {
+      // Unreadable marker: ownership unknown, so it does not count.
+    }
+  }
+
+  return false;
+}
+
 export function hasDownloadFiles(
   chapterPath: string,
   dirNames?: string[],

@@ -7,6 +7,7 @@ import {
   deleteChapterFiles,
   downloadPageWithRetry,
   hasDownloadFiles,
+  hasDownloadFilesAsync,
   pageFile,
   prepareChapterDirectory,
   readDownloadFile,
@@ -159,7 +160,7 @@ export function initializeDownloads(): Promise<void> {
       const dirNames = existingDirNames();
 
       for (const record of stored) {
-        if (hasDownloadFiles(record.chapterPath, dirNames)) {
+        if (await hasDownloadFilesAsync(record.chapterPath, dirNames)) {
           store.records.set(record.chapterPath, record);
           valid.push(record);
         } else {
