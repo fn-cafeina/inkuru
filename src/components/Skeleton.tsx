@@ -73,7 +73,8 @@ export function Skeleton({ className, style, tone = 'auto' }: Props) {
   );
 }
 
-/** Mirrors the 3-column MangaGridCard layout used by Discover. */
+/** Mirrors the 3-column MangaGridCard layout used by Discover and Library:
+ *  cover, then the two lines the title can take, with the card's own margin. */
 export function MangaGridSkeleton({ cardWidth }: { cardWidth: number }) {
   return (
     <ScrollView
@@ -81,17 +82,18 @@ export function MangaGridSkeleton({ cardWidth }: { cardWidth: number }) {
       contentContainerStyle={{
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: GRID_GAP,
+        columnGap: GRID_GAP,
         paddingHorizontal: SCREEN_PADDING,
       }}
     >
-      {Array.from({ length: 6 }, (_, index) => (
-        <View key={index} style={{ width: cardWidth }}>
+      {Array.from({ length: 9 }, (_, index) => (
+        <View key={index} className="mb-3" style={{ width: cardWidth }}>
           <Skeleton
             className="rounded-xl"
             style={{ width: cardWidth, aspectRatio: COVER_ASPECT_RATIO }}
           />
           <Skeleton className="mt-2 h-4 rounded" />
+          <Skeleton className="mt-1 h-4 w-2/3 rounded" />
         </View>
       ))}
     </ScrollView>
