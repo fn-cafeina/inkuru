@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import {
-  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -147,21 +146,17 @@ function DiscoverResults({ term }: { term: string }) {
   const insets = useSafeAreaInsets();
   const {
     items,
-    itemsTerm,
-    hasMore,
     loading,
     fetching,
     hasError,
     refreshing,
     reload,
     refresh,
-    loadMore,
   } = useDiscoverFeed(term);
   const colors = useColors();
   const cardWidth = mangaCardWidth(width);
-  // Keep the previous results visible while the next term loads, but never
-  // present them as the result of a query that already failed.
-  const showItems = items.length > 0 && (itemsTerm === term || fetching);
+  // Filter failures are reported by the fallback, never as an empty grid.
+  const showItems = items.length > 0;
 
   useEffect(() => {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -214,7 +209,6 @@ function DiscoverResults({ term }: { term: string }) {
           onOpen={openManga}
         />
       )}
-      onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       refreshControl={
         <RefreshControl
@@ -227,13 +221,6 @@ function DiscoverResults({ term }: { term: string }) {
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
-      ListFooterComponent={
-        fetching && hasMore ? (
-          <View className="py-4">
-            <ActivityIndicator size="small" color={colors.iconInactive} />
-          </View>
-        ) : undefined
-      }
     />
   );
 }
