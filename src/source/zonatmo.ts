@@ -5,6 +5,7 @@ import {
   tagWithClass,
   textWithClass,
 } from './html';
+import { elapsed, trace } from '../dev/trace';
 
 const BASE_URL = 'https://zonatmo.org';
 const CATALOG_PATH =
@@ -60,7 +61,12 @@ export async function fetchManga(
   path: string,
   signal?: AbortSignal,
 ): Promise<MangaDetail> {
-  return parseManga(await fetchText(path, signal));
+  const startedAt = performance.now();
+  const detail = parseManga(await fetchText(path, signal));
+
+  trace('manga parse', detail.chapters.length, elapsed(startedAt));
+
+  return detail;
 }
 
 export async function fetchReader(
@@ -92,14 +98,24 @@ async function fetchText(
   path: string,
   signal?: AbortSignal,
 ): Promise<string> {
-  // Callers pass origin-stripped paths; absoluteUrl owns the rule.
-  const response = await fetch(absoluteUrl(path), { signal });
+  // expo/fetch reads the body in native code. The global fetch is whatwg-fetch
+  // over XHR, which rebuilds the whole string on every 8KB chunk because a
+  // signal puts the request in incremental mode: a 2MB manga page blocks the
+  // JS thread for seconds and every tap queues behind it. Imported lazily so
+  // the parser self-checks stay free of React Native.
+  const { fetch: nativeFetch } = await import('expo/fetch');
+  const startedAt = performance.now();
+  const response = await nativeFetch(absoluteUrl(path), { signal });
 
   if (!response.ok) {
     throw new Error(`ZonaTMO returned HTTP ${response.status}`);
   }
 
-  return response.text();
+  const text = await response.text();
+
+  trace('http page', path, text.length, elapsed(startedAt));
+
+  return text;
 }
 
 // shortcut: regex tied to zonatmo's detail markup, migrate to an HTML parser when selectors grow.
