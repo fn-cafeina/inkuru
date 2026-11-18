@@ -15,6 +15,7 @@ import {
   saveReaderQuality,
   saveReaderScale,
 } from '../storage/readerSettings';
+import { resolveReaderValues } from '../storage/readerOverrides';
 import type {
   MangaReaderOverrides,
   ReaderMode,
@@ -69,50 +70,38 @@ export function useReaderSettings(mangaPath?: string) {
       return;
     }
 
-    if (storedMode) {
-      cachedMode = storedMode;
-      setMode(storedMode);
+    // The module cache holds global settings only. A manga override is resolved
+    // per mount: leaving it in the cache made the next title open with the
+    // previous title's mode, since nothing else overwrote it when the user had
+    // never saved a global value.
+    const global = {
+      mode: storedMode ?? cachedMode,
+      scale: storedScale ?? cachedScale,
+      quality: storedQuality ?? cachedQuality,
+    };
+
+    cachedMode = global.mode;
+    cachedScale = global.scale;
+    cachedQuality = global.quality;
+
+    if (mangaPath !== undefined && overrides !== null) {
+      rememberOverrideFor(mangaPath, overrides);
     }
 
-    if (storedScale) {
-      cachedScale = storedScale;
-      setScale(storedScale);
-    }
+    const values = resolveReaderValues(
+      global,
+      mangaPath === undefined ? null : overrides,
+    );
 
-    if (storedQuality) {
-      cachedQuality = storedQuality;
-      setQuality(storedQuality);
-    }
-
+    setMode(values.mode);
+    setScale(values.scale);
+    setQuality(values.quality);
     cachedKeepAwake = storedKeepAwake;
     setKeepAwake(storedKeepAwake);
-
-    // Per-manga overrides beat the global values.
-    if (mangaPath !== undefined && overrides !== null) {
-      cachedOverridesPath = mangaPath;
-      cachedOverrides = overrides;
-
-      if (overrides.mode !== undefined) {
-        cachedMode = overrides.mode;
-        setMode(overrides.mode);
-      }
-
-      if (overrides.scale !== undefined) {
-        cachedScale = overrides.scale;
-        setScale(overrides.scale);
-      }
-
-      if (overrides.quality !== undefined) {
-        cachedQuality = overrides.quality;
-        setQuality(overrides.quality);
-      }
-    }
-
     setLoaded(true);
   }, [mangaPath]);
 
   const selectMode = useCallback((next: ReaderMode) => {
-    cachedMode = next;
     setMode(next);
 
     if (mangaPath !== undefined) {
@@ -124,11 +113,11 @@ export function useReaderSettings(mangaPath?: string) {
       return;
     }
 
+    cachedMode = next;
     void saveReaderMode(next);
   }, [mangaPath]);
 
   const selectScale = useCallback((next: ReaderScale) => {
-    cachedScale = next;
     setScale(next);
 
     if (mangaPath !== undefined) {
@@ -140,11 +129,11 @@ export function useReaderSettings(mangaPath?: string) {
       return;
     }
 
+    cachedScale = next;
     void saveReaderScale(next);
   }, [mangaPath]);
 
   const selectQuality = useCallback((next: ReaderQuality) => {
-    cachedQuality = next;
     setQuality(next);
 
     if (mangaPath !== undefined) {
@@ -156,6 +145,7 @@ export function useReaderSettings(mangaPath?: string) {
       return;
     }
 
+    cachedQuality = next;
     void saveReaderQuality(next);
   }, [mangaPath]);
 
