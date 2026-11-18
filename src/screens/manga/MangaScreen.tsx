@@ -219,9 +219,9 @@ export default function MangaScreen({ navigation, route }: Props) {
   };
   const openMangaRelated = useCallback(
     (relatedPath: string, title: string) =>
-      // Push, not navigate: the drawer stack keeps the way back to the manga
-      // the user was reading when the two titles share a route.
-      navigation.push('Manga', { path: relatedPath, title }),
+      // Replace, not push: hopping through related titles must not grow the
+      // stack, so back always lands on the tabs, like rokimu.
+      navigation.replace('Manga', { path: relatedPath, title }),
     [navigation],
   );
   const openChapter = useCallback(
