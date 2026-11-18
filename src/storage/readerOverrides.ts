@@ -14,6 +14,7 @@ export type ReaderValues = {
 /**
  * A manga's own override beats the global setting, which beats the default.
  * Resolved per mount so a title's choice never becomes the next title's base.
+ * Quality is not part of the overrides: it is a device-wide setting.
  */
 export function resolveReaderValues(
   global: ReaderValues,
@@ -22,6 +23,6 @@ export function resolveReaderValues(
   return {
     mode: overrides?.mode ?? global.mode,
     scale: overrides?.scale ?? global.scale,
-    quality: overrides?.quality ?? global.quality,
+    quality: global.quality,
   };
 }

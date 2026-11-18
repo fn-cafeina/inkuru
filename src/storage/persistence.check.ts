@@ -184,13 +184,24 @@ assertEqual(
 );
 
 await settings.saveMangaReaderOverride('/library/manga/1', 'mode', 'paged-ltr');
-await settings.saveMangaReaderOverride('/library/manga/1', 'quality', 'original');
+await settings.saveMangaReaderOverride('/library/manga/1', 'scale', 'fit-width');
 
 const overrides = await settings.loadMangaReaderOverrides('/library/manga/1');
 
 assertEqual(overrides?.mode, 'paged-ltr', 'the saved mode override reads back');
-assertEqual(overrides?.quality, 'original', 'the quality override reads back');
-assertEqual(overrides?.scale, undefined, 'untouched fields stay unset');
+assertEqual(overrides?.scale, 'fit-width', 'the saved scale override reads back');
+
+// Quality became a global setting; a quality-only entry from an older build
+// must not survive as an empty override.
+storage.set(
+  'reader:manga-overrides',
+  JSON.stringify({ '/library/manga/3': { quality: 'original' } }),
+);
+assertEqual(
+  await settings.loadMangaReaderOverrides('/library/manga/3'),
+  null,
+  'a stored quality override is dropped',
+);
 
 assertEqual(
   await settings.loadMangaReaderOverrides('/library/manga/2'),

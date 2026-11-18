@@ -119,14 +119,14 @@ export function saveKeepAwake(keepAwake: boolean): Promise<void> {
 
 // Per-manga overrides, like "this webtoon reads vertical, that one rtl".
 // One JSON map so the number of AsyncStorage keys does not grow with the
-// library.
+// library. Quality lives in the global setting: it is a device tradeoff, so
+// a stored `quality` field in older overrides is dropped here.
 export type MangaReaderOverrides = {
   mode?: ReaderMode;
   scale?: ReaderScale;
-  quality?: ReaderQuality;
 };
 
-type OverrideField = 'mode' | 'scale' | 'quality';
+type OverrideField = 'mode' | 'scale';
 
 function normalizeOverride(entry: unknown): MangaReaderOverrides | null {
   if (typeof entry !== 'object' || entry === null) {
@@ -138,10 +138,6 @@ function normalizeOverride(entry: unknown): MangaReaderOverrides | null {
   const mode = typeof record.mode === 'string' ? MODE_VALUES[record.mode] : undefined;
   const scale =
     typeof record.scale === 'string' ? SCALE_VALUES[record.scale] : undefined;
-  const quality =
-    typeof record.quality === 'string'
-      ? QUALITY_VALUES[record.quality]
-      : undefined;
 
   if (mode !== undefined) {
     overrides.mode = mode;
@@ -149,10 +145,6 @@ function normalizeOverride(entry: unknown): MangaReaderOverrides | null {
 
   if (scale !== undefined) {
     overrides.scale = scale;
-  }
-
-  if (quality !== undefined) {
-    overrides.quality = quality;
   }
 
   return Object.keys(overrides).length > 0 ? overrides : null;

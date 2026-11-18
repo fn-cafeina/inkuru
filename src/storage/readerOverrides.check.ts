@@ -20,12 +20,21 @@ assert(leaked.mode === 'paged-rtl', 'no override keeps the global mode');
 assert(leaked.scale === 'fit-screen', 'no override keeps the global scale');
 assert(leaked.quality === 'balanced', 'no override keeps the global quality');
 
-// One field overridden leaves the other two on the global values.
+// One field overridden leaves the other on the global values.
 const partial = resolveReaderValues(defaults, { mode: 'webtoon' });
 
 assert(partial.mode === 'webtoon', 'override wins for its own field');
 assert(partial.scale === 'fit-screen', 'untouched fields stay global');
-assert(partial.quality === 'balanced', 'untouched fields stay global');
+
+// Quality is device-wide: a per-manga entry can never change it.
+const qualityGlobal = resolveReaderValues(
+  { mode: 'paged-rtl', scale: 'fit-screen', quality: 'original' },
+  { mode: 'webtoon', scale: 'fit-width' },
+);
+
+assert(qualityGlobal.mode === 'webtoon', 'the manga keeps its mode');
+assert(qualityGlobal.scale === 'fit-width', 'the manga keeps its scale');
+assert(qualityGlobal.quality === 'original', 'quality stays the global value');
 
 // A stored global still beats the default for mangas without an override.
 const custom = resolveReaderValues(

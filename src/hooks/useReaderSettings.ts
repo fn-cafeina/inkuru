@@ -134,20 +134,12 @@ export function useReaderSettings(mangaPath?: string) {
   }, [mangaPath]);
 
   const selectQuality = useCallback((next: ReaderQuality) => {
-    setQuality(next);
-
-    if (mangaPath !== undefined) {
-      rememberOverrideFor(mangaPath, {
-        ...(cachedOverridesPath === mangaPath ? cachedOverrides ?? {} : {}),
-        quality: next,
-      });
-      void saveMangaReaderOverride(mangaPath, 'quality', next);
-      return;
-    }
-
+    // Image quality is a device-level tradeoff, not a per-title one: picking
+    // maximum in one manga applies to every manga.
     cachedQuality = next;
+    setQuality(next);
     void saveReaderQuality(next);
-  }, [mangaPath]);
+  }, []);
 
   const selectKeepAwake = useCallback((next: boolean) => {
     cachedKeepAwake = next;
