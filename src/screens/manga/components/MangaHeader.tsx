@@ -11,6 +11,7 @@ import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
 import { useColors } from '../../../theme/colors';
 import type { ChapterRange } from '../chapters';
 import { MangaCoverInfo, mangaStatusLabel } from './MangaCoverInfo';
+import { MangaRelated } from './MangaRelated';
 import { TagRow } from './TagRow';
 
 type Props = {
@@ -22,6 +23,7 @@ type Props = {
   activeRange: number;
   onSelectRange: (index: number) => void;
   onToggleSort: () => void;
+  onOpenRelated: (path: string, title: string) => void;
   onRead: (chapter: MangaChapter) => void;
   ready: boolean;
 };
@@ -35,6 +37,7 @@ function MangaHeaderBase({
   activeRange,
   onSelectRange,
   onToggleSort,
+  onOpenRelated,
   onRead,
   ready,
 }: Props) {
@@ -89,6 +92,13 @@ function MangaHeaderBase({
       ) : null}
 
       {manga.synopsis ? <MangaSynopsis synopsis={manga.synopsis} /> : null}
+
+      {manga.related.length > 0 ? (
+        <View className="mt-6 px-5">
+          <SectionTitle className="mb-3">Relacionados</SectionTitle>
+          <MangaRelated items={manga.related} onOpen={onOpenRelated} />
+        </View>
+      ) : null}
 
       <View className="mt-6 px-5">
         <View className="flex-row items-center justify-between">

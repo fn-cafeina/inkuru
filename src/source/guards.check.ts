@@ -51,6 +51,13 @@ assert(
   'a missing title is rejected',
 );
 
+const related = {
+  path: '/library/manga/2/otro',
+  title: 'Otro',
+  cover: 'https://cdn/otro.jpg',
+  type: 'manga',
+};
+
 assert(
   isMangaDetail({
     title: 'Manga',
@@ -59,8 +66,41 @@ assert(
     tags: ['Accion'],
     status: 'Ongoing',
     chapters: [chapter],
+    related: [related],
   }),
   'a valid detail is accepted',
+);
+assert(
+  isMangaDetail({
+    title: 'Manga',
+    cover: 'https://cdn/cover.jpg',
+    synopsis: '...',
+    tags: ['Accion'],
+    chapters: [chapter],
+    related: [{ ...related, type: undefined }],
+  }),
+  'a related manga without a type is accepted',
+);
+assert(
+  !isMangaDetail({
+    title: 'Manga',
+    cover: 'https://cdn/cover.jpg',
+    synopsis: '...',
+    tags: ['Accion'],
+    chapters: [chapter],
+  }),
+  'a cached detail without related (older cache) is rejected',
+);
+assert(
+  !isMangaDetail({
+    title: 'Manga',
+    cover: 'https://cdn/cover.jpg',
+    synopsis: '...',
+    tags: ['Accion'],
+    chapters: [chapter],
+    related: [{ ...related, path: 42 }],
+  }),
+  'a related manga with a non-text path is rejected',
 );
 assert(
   !isMangaDetail({
@@ -70,6 +110,7 @@ assert(
     tags: ['Accion'],
     status: 7,
     chapters: [chapter],
+    related: [],
   }),
   'a non-text status is rejected',
 );

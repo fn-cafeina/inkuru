@@ -5,9 +5,10 @@ import {
   tagWithClass,
   textWithClass,
 } from './html';
+import { parseMangaRelated } from './related';
+import type { RelatedManga } from './related';
+import { absoluteUrl, toPath } from './url';
 import { elapsed, trace } from '../dev/trace';
-
-const BASE_URL = 'https://zonatmo.org';
 const CATALOG_PATH =
   '/biblioteca?order_item=likes_count&order_dir=desc&title=&filter_by=title&author_filter=&type=&demography=shounen&status=';
 
@@ -26,6 +27,8 @@ export type MangaChapter = {
   path: string;
 };
 
+export type { RelatedManga };
+
 export type MangaDetail = {
   title: string;
   cover: string;
@@ -33,6 +36,7 @@ export type MangaDetail = {
   status?: string;
   synopsis: string;
   chapters: MangaChapter[];
+  related: RelatedManga[];
 };
 
 export type ReaderData = {
@@ -143,9 +147,16 @@ export function parseManga(html: string): MangaDetail {
     chapters: extractBlocks(html, 'li', 'upload-link')
       .map(parseMangaChapter)
       .filter(isDefined),
+    related: parseMangaRelated(html),
   };
 }
 
+/**
+ * The related carousel sits in its own block, and `rel-card` is used nowhere
+ * else, so splitting on the card opener finds every item without nesting
+ * bookkeeping. A card is cut at its first closing div: path, cover and title
+ * all live above it.
+ */
 // shortcut: regex tied to zonatmo's reader markup, migrate to an HTML parser when selectors grow.
 export function parseReader(html: string): ReaderData {
   const pages = (
@@ -354,13 +365,4 @@ function extractCover(block: string): string | undefined {
   return absoluteUrl(source);
 }
 
-function toPath(url: string): string { return url.replace(/^https?:\/\/[^/]+/i, ''); }
-// Android blocks cleartext traffic, so an http source would never load.
-function absoluteUrl(source: string): string {
-  if (/^https?:\/\//i.test(source)) {
-    return source.replace(/^http:\/\//i, 'https://');
-  }
-
-  return `${BASE_URL}${source.startsWith('/') ? '' : '/'}${source}`;
-}
 function isDefined<T>(value: T | undefined): value is T { return value !== undefined; }

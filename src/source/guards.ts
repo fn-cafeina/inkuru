@@ -4,6 +4,7 @@ import type {
   MangaDetail,
   MangaListItem,
   ReaderData,
+  RelatedManga,
 } from './zonatmo';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -51,6 +52,19 @@ export function isCatalogPage(value: unknown): value is CatalogPage {
   );
 }
 
+function isRelatedManga(value: unknown): value is RelatedManga {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    isString(value.title) &&
+    isString(value.cover) &&
+    isString(value.path) &&
+    isOptionalString(value.type)
+  );
+}
+
 export function isMangaDetail(value: unknown): value is MangaDetail {
   if (!isRecord(value)) {
     return false;
@@ -64,7 +78,9 @@ export function isMangaDetail(value: unknown): value is MangaDetail {
     value.tags.every(isString) &&
     isOptionalString(value.status) &&
     Array.isArray(value.chapters) &&
-    value.chapters.every(isMangaChapter)
+    value.chapters.every(isMangaChapter) &&
+    Array.isArray(value.related) &&
+    value.related.every(isRelatedManga)
   );
 }
 

@@ -1,5 +1,5 @@
 import { CATALOG_EMPTY_FIXTURE, CATALOG_FIXTURE } from './__fixtures__/catalog';
-import { MANGA_FIXTURE } from './__fixtures__/manga';
+import { MANGA_FIXTURE, MANGA_RELATED_FIXTURE } from './__fixtures__/manga';
 import { READER_FIXTURE } from './__fixtures__/reader';
 import { SEARCH_FIXTURE } from './__fixtures__/search';
 import { parseCatalog, parseManga, parseReader, parseSearch } from './zonatmo';
@@ -56,6 +56,57 @@ assertEqual(
   'first chapter path',
 );
 assertEqual(item(manga.chapters, 0).title, 'Capítulo 248', 'first chapter title');
+assertEqual(manga.related.length, 0, 'a page without the carousel has no related mangas');
+
+// The carousel renders above the chapter list on the real page.
+const withRelated = parseManga(
+  MANGA_FIXTURE.replace('<ul', `${MANGA_RELATED_FIXTURE}<ul`),
+);
+
+assertEqual(withRelated.related.length, 2, 'related mangas');
+assertEqual(
+  item(withRelated.related, 0).path,
+  '/library/manga/33514/giant-ojou-sama',
+  'related path',
+);
+assertEqual(item(withRelated.related, 0).title, 'Giant Ojou-Sama', 'related title');
+assertEqual(
+  item(withRelated.related, 0).cover,
+  'https://storage.zonatmo.org/covers/33514_1794932498.webp',
+  'related cover comes from the inline style',
+);
+assertEqual(item(withRelated.related, 0).type, 'manga', 'related type');
+assertEqual(item(withRelated.related, 1).type, 'manhwa', 'related type of the second card');
+assertEqual(
+  item(withRelated.related, 1).title,
+  'Emperador & Estafa',
+  'related title decodes entities',
+);
+assertEqual(
+  item(withRelated.related, 1).cover,
+  'https://storage2.zonatmo.org/covers/33507_1794884772.webp',
+  'an http related cover is served over https',
+);
+assertEqual(withRelated.title, 'ONE PUNCH-MAN', 'the carousel does not disturb the title');
+assertEqual(withRelated.chapters.length, 2, 'the carousel does not disturb the chapters');
+
+// The carousel also carries links outside /library/, which are not mangas.
+const strayLink = parseManga(
+  MANGA_FIXTURE.replace(
+    '<ul',
+    `${MANGA_RELATED_FIXTURE.replace(
+      '/library/manga/33514/giant-ojou-sama',
+      '/view_uploads/9',
+    )}<ul`,
+  ),
+);
+
+assertEqual(strayLink.related.length, 1, 'a card without a library path is dropped');
+assertEqual(
+  item(strayLink.related, 0).path,
+  '/library/manhwa/33507/emperador-estafa',
+  'the surviving card is the library one',
+);
 
 const reader = parseReader(READER_FIXTURE);
 

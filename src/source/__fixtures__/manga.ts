@@ -54,3 +54,52 @@ export const MANGA_FIXTURE = `
   </ul>
 </section>
 `;
+
+// The related carousel from the same page, trimmed to two cards.
+export const MANGA_RELATED_FIXTURE = `
+<div class="element-related mb-4">
+  <div class="element-section-title">
+    <h2><i class="fas fa-layer-group fa-fw"></i> Relacionados</h2>
+  </div>
+  <div class="rel-carousel-wrap">
+    <div class="rel-carousel" id="rel-carousel">
+      <div class="rel-card" data-zt-type="manga" data-zt-demo="shounen" data-zt-adult="0">
+        <a href="https://zonatmo.org/library/manga/33514/giant-ojou-sama">
+          <style>
+            .rel-thumb-33514::before {
+              background-image: url('https://storage.zonatmo.org/covers/33514_1794932498.webp');
+            }
+          </style>
+          <div class="thumbnail book rel-thumb-33514">
+            <div class="thumbnail-title">
+              <h4 class="text-truncate" title="Giant Ojou-Sama">
+                Giant Ojou-Sama
+              </h4>
+            </div>
+            <span class="score"><i class="fas fa-star fa-fw"></i><span>6.00</span></span>
+            <span class="book-type badge badge-manga">MANGA</span>
+          </div>
+        </a>
+      </div>
+      <div class="rel-card" data-zt-type="manhwa" data-zt-demo="" data-zt-adult="0">
+        <a href="https://zonatmo.org/library/manhwa/33507/emperador-estafa">
+          <style>
+            .rel-thumb-33507::before {
+              background-image: url('http://storage2.zonatmo.org/covers/33507_1794884772.webp');
+            }
+          </style>
+          <div class="thumbnail book rel-thumb-33507">
+            <div class="thumbnail-title">
+              <h4 class="text-truncate" title="Emperador &amp; Estafa">
+                Emperador &amp; Estafa
+              </h4>
+            </div>
+            <span class="score"><i class="fas fa-star fa-fw"></i><span>7.50</span></span>
+            <span class="book-type badge badge-manhwa">MANHWA</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+`;

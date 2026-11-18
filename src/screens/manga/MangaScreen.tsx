@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AnimatedPressable } from '../../components/AnimatedPressable';
 import { ErrorState } from '../../components/ErrorState';
 import { Screen } from '../../components/Screen';
-import { ScreenHeader } from '../../components/ScreenHeader';
 import { MangaChapterList } from './components/MangaChapterList';
 import { MangaSkeleton } from './components/MangaSkeleton';
+import { MangaTopBar } from './components/MangaTopBar';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { trace } from '../../dev/trace';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
@@ -20,7 +18,6 @@ import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
 import type { MangaChapter } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
-import { useColors } from '../../theme/colors';
 import type { RootStackParamList } from '../../navigation/types';
 import { goBackOrTabs } from '../../navigation/back';
 import {
@@ -87,7 +84,6 @@ function resolveRangeIndex(
 export default function MangaScreen({ navigation, route }: Props) {
   const { path } = route.params;
   const insets = useSafeAreaInsets();
-  const colors = useColors();
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchManga(path, signal),
     [path],
@@ -221,6 +217,13 @@ export default function MangaScreen({ navigation, route }: Props) {
     trace('manga back', { loading, hasData: data !== null });
     goBackOrTabs(navigation);
   };
+  const openMangaRelated = useCallback(
+    (relatedPath: string, title: string) =>
+      // Push, not navigate: the drawer stack keeps the way back to the manga
+      // the user was reading when the two titles share a route.
+      navigation.push('Manga', { path: relatedPath, title }),
+    [navigation],
+  );
   const openChapter = useCallback(
     (chapter: MangaChapter) =>
       navigation.navigate('Reader', {
@@ -238,29 +241,13 @@ export default function MangaScreen({ navigation, route }: Props) {
   // The top row lives inside the scroll content, like rokimu's banner: no
   // overlay to pin, cover or hide.
   const topBar = (
-    <ScreenHeader
+    <MangaTopBar
       onBack={goBack}
-      action={
-        <AnimatedPressable
-          accessibilityLabel={
-            inLibrary
-              ? 'Quitar de la biblioteca'
-              : 'Añadir a la biblioteca'
-          }
-          accessibilityState={{ selected: inLibrary }}
-          disabled={!data && !inLibrary}
-          onPress={() => {
-            void toggleLibrary();
-          }}
-          className="min-h-12 min-w-12 items-center justify-center rounded-full"
-        >
-          <Feather
-            name="bookmark"
-            size={20}
-            color={inLibrary ? colors.accent : colors.iconInactive}
-          />
-        </AnimatedPressable>
-      }
+      canToggleLibrary={Boolean(data) || inLibrary}
+      inLibrary={inLibrary}
+      onToggleLibrary={() => {
+        void toggleLibrary();
+      }}
     />
   );
 
@@ -292,6 +279,7 @@ export default function MangaScreen({ navigation, route }: Props) {
           onSelectRange={selectRange}
           onToggleSort={toggleSort}
           onOpen={openChapter}
+          onOpenRelated={openMangaRelated}
         />
       ) : (
         <View className="flex-1">

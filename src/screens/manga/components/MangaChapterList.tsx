@@ -29,6 +29,7 @@ type Props = {
   onSelectRange: (index: number) => void;
   onToggleSort: () => void;
   onOpen: (chapter: MangaChapter) => void;
+  onOpenRelated: (path: string, title: string) => void;
 };
 
 export function MangaChapterList({
@@ -49,6 +50,7 @@ export function MangaChapterList({
   onSelectRange,
   onToggleSort,
   onOpen,
+  onOpenRelated,
 }: Props) {
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
   const readCount = useMemo(
@@ -93,6 +95,7 @@ export function MangaChapterList({
             activeRange={rangeIndex}
             onSelectRange={onSelectRange}
             onToggleSort={onToggleSort}
+            onOpenRelated={onOpenRelated}
             onRead={onOpen}
             ready={ready}
           />
