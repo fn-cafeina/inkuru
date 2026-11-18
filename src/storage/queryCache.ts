@@ -5,8 +5,11 @@ import { withLock } from './serialize';
 const PREFIX = 'cache:query:';
 const ENTRY_PREFIX = `${PREFIX}v1:`;
 const VERSION = 1;
-const MAX_ENTRIES = 200;
-const MAX_BYTES = 2 * 1024 * 1024;
+// Chapter payloads are small (a couple of KB) and manga pages around 40KB, so
+// eight megabytes keeps hundreds of chapters warm while staying cheap to
+// index: a rebuild parses every entry after a stale one is deleted.
+const MAX_ENTRIES = 300;
+const MAX_BYTES = 8 * 1024 * 1024;
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const CACHE_FRESH_MS = {
