@@ -18,9 +18,80 @@ const ENTITIES: Record<string, string> = {
   rsquo: '’',
 };
 
-// Matches a class attribute in either quote style.
-function classAttr(className: string): string {
-  return `\\bclass\\s*=\\s*(?:"[^"]*\\b${className}\\b[^"]*"|'[^']*\\b${className}\\b[^']*')`;
+/**
+ * Whole class tokens of an opening tag. The tag is a few hundred bytes, so a
+ * regex on it is bounded work.
+ */
+function classNames(openingTag: string): string[] {
+  const match = openingTag.match(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+  const value = match?.[1] ?? match?.[2];
+
+  return value === undefined ? [] : value.split(/\s+/);
+}
+
+/** Whitespace, '>' or '/', so `<li` never matches `<line`. */
+function isTagEnd(code: number): boolean {
+  return (
+    code === 32 ||
+    code === 9 ||
+    code === 10 ||
+    code === 13 ||
+    code === 47 ||
+    code === 62 ||
+    Number.isNaN(code)
+  );
+}
+
+function tagAt(html: string, tag: string, from: number): number {
+  const open = `<${tag}`;
+
+  for (
+    let at = html.indexOf(open, from);
+    at >= 0;
+    at = html.indexOf(open, at + 1)
+  ) {
+    if (isTagEnd(html.charCodeAt(at + open.length))) {
+      return at;
+    }
+  }
+
+  return -1;
+}
+
+type Opening = { start: number; end: number };
+
+/**
+ * Scans for an opening tag instead of matching a document-wide regex.
+ *
+ * The class-based regexes this replaces backtracked over every candidate tag
+ * in the page (`[^>]*` plus two quoted alternatives plus `\b`). On a 2.5MB
+ * manga page with 1241 chapters Hermes spent 100s inside parseManga; indexOf
+ * keeps the work linear in the page size.
+ */
+function findOpening(
+  html: string,
+  tag: string,
+  className: string | undefined,
+): Opening | null {
+  let at = tagAt(html, tag, 0);
+
+  while (at >= 0) {
+    const close = html.indexOf('>', at);
+
+    if (close < 0) {
+      return null;
+    }
+
+    const opening = html.slice(at, close + 1);
+
+    if (className === undefined || classNames(opening).includes(className)) {
+      return { start: at, end: close + 1 };
+    }
+
+    at = tagAt(html, tag, close + 1);
+  }
+
+  return null;
 }
 
 export function extractBlocks(
@@ -28,12 +99,39 @@ export function extractBlocks(
   tag: string,
   className: string | undefined,
 ): string[] {
-  const opening = className
-    ? `<${tag}\\b[^>]*${classAttr(className)}[^>]*>`
-    : `<${tag}\\b[^>]*>`;
-  const pattern = new RegExp(`${opening}[\\s\\S]*?</${tag}>`, 'gi');
+  const blocks: string[] = [];
+  const closing = `</${tag}>`;
+  let from = 0;
 
-  return html.match(pattern) ?? [];
+  for (;;) {
+    const start = tagAt(html, tag, from);
+
+    if (start < 0) {
+      return blocks;
+    }
+
+    const close = html.indexOf('>', start);
+
+    if (close < 0) {
+      return blocks;
+    }
+
+    const opening = html.slice(start, close + 1);
+
+    if (className !== undefined && !classNames(opening).includes(className)) {
+      from = close + 1;
+      continue;
+    }
+
+    const end = html.indexOf(closing, close + 1);
+
+    if (end < 0) {
+      return blocks;
+    }
+
+    blocks.push(html.slice(start, end + closing.length));
+    from = end + closing.length;
+  }
 }
 
 export function tagWithClass(
@@ -41,9 +139,9 @@ export function tagWithClass(
   tag: string,
   className: string,
 ): string | undefined {
-  const pattern = new RegExp(`<${tag}\\b[^>]*${classAttr(className)}[^>]*>`, 'i');
+  const opening = findOpening(html, tag, className);
 
-  return html.match(pattern)?.[0];
+  return opening === null ? undefined : html.slice(opening.start, opening.end);
 }
 
 export function textWithClass(
@@ -51,14 +149,19 @@ export function textWithClass(
   tag: string,
   className: string,
 ): string | undefined {
-  const pattern = new RegExp(
-    `<${tag}\\b[^>]*${classAttr(className)}[^>]*>([\\s\\S]*?)</${tag}>`,
-    'i',
-  );
-  const match = html.match(pattern);
-  const text = match?.[1];
+  const opening = findOpening(html, tag, className);
 
-  return text !== undefined ? cleanText(text) : undefined;
+  if (opening === null) {
+    return undefined;
+  }
+
+  const end = html.indexOf(`</${tag}>`, opening.end);
+
+  if (end < 0) {
+    return undefined;
+  }
+
+  return cleanText(html.slice(opening.end, end));
 }
 
 export function attribute(tag: string, name: string): string | undefined {
