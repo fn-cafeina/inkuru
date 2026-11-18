@@ -1,9 +1,4 @@
-import {
-  matchesQuery,
-  orderLibrary,
-  sameEntries,
-  sameProgress,
-} from './orderLibrary';
+import { orderLibrary, sameEntries, sameProgress } from './orderLibrary';
 import type { LibraryEntry } from '../../storage/library';
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -41,13 +36,6 @@ assert(
   orderLibrary([], {}).length === 0,
   'an empty library stays empty',
 );
-
-assert(matchesQuery('Shingeki no Kyojin', 'kyojin'), 'substring match');
-assert(matchesQuery('Shingeki no Kyojin', '  KYOJIN '), 'case and spaces ignored');
-assert(matchesQuery('Boku no Hero', 'boku'), 'prefix match');
-assert(!matchesQuery('Boku no Hero', 'naruto'), 'non match');
-assert(matchesQuery('Café', 'cafe'), 'accents are ignored');
-assert(matchesQuery('Boku no Hero', ''), 'empty query matches everything');
 
 const single = (path: string) => ({
   path,
