@@ -12,6 +12,7 @@ import { ReaderProgressBar } from './components/ReaderProgressBar';
 import { ReaderSettingsSheet } from './components/ReaderSettingsSheet';
 import { ReaderSkeleton } from './components/ReaderSkeleton';
 import { ReaderPages } from './pages/ReaderPages';
+import { prefetchChapter } from './prefetchChapter';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { useFocusEffect } from '@react-navigation/native';
 import { readerConsumesBack } from './readerBack';
@@ -120,6 +121,16 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const showError = hasError && data !== null;
   const ready = preferencesLoaded && restored;
+
+  // Warm the next chapter once the last pages of this one are on screen, so
+  // "next" opens from cache instead of waiting on zonatmo.
+  useEffect(() => {
+    if (data?.next === undefined || total === 0 || page < total - 3) {
+      return;
+    }
+
+    void prefetchChapter(data.next.path);
+  }, [data, page, total]);
   useFocusEffect(
     useCallback(() => {
       let active = true;
