@@ -18,10 +18,13 @@
 ## Release
 
 - Releases are cut from tags `v*.*.*` by `.github/workflows/release.yml`.
-- `bun run release 1.0.1` requires a clean tree, branch `main`, a new
-  version and a missing tag. It bumps `version` in `app.json` and
+- `bun run release patch|minor|major|X.Y.Z` requires a clean tree,
+  branch `main`, a target version that differs from the current one and
+  a missing tag. The bump words behave like `npm version`; an explicit
+  version is taken as-is. It bumps `version` in `app.json` and
   `package.json`, commits `chore(release): vX.Y.Z`, tags and pushes.
-  `--dry-run` prints the plan without touching anything.
+  `--dry-run` prints the plan and the resolved version without
+  touching anything.
 - CI is the quality gate. The workflow fails unless the tag matches
   both version files, then builds the APK with a local EAS build and
   publishes a GitHub Release with it attached.

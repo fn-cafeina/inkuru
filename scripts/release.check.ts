@@ -1,4 +1,4 @@
-import { bumpVersions } from './release';
+import { bumpVersions, resolveVersion } from './release';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -64,6 +64,50 @@ assert(pkgOut.private === true, 'package.json private stays intact');
 assert(
   nextPkg.endsWith('\n'),
   'package.json ends with a newline',
+);
+
+assert(
+  resolveVersion('1.2.4', 'patch') === '1.2.5',
+  'patch bumps the last number',
+);
+assert(
+  resolveVersion('1.2.4', 'minor') === '1.3.0',
+  'minor bumps the middle number and resets patch',
+);
+assert(
+  resolveVersion('1.2.4', 'major') === '2.0.0',
+  'major bumps the first number and resets the rest',
+);
+assert(
+  resolveVersion('1.2.9', 'patch') === '1.2.10',
+  'patch carries past nine',
+);
+assert(
+  resolveVersion('1.9.3', 'minor') === '1.10.0',
+  'minor carries past nine',
+);
+assert(
+  resolveVersion('0.1.0', 'major') === '1.0.0',
+  'major on 0.x leaves it the way npm does',
+);
+assert(
+  resolveVersion('0.1.0', 'minor') === '0.2.0',
+  'minor on 0.x does not jump to 1.0.0',
+);
+assert(
+  resolveVersion('1.2.4', '1.2.4') === '1.2.4',
+  'an explicit version is taken as-is',
+);
+
+for (const spec of ['banana', '1.2', 'v1.2.3', '1.0.1-beta.1', '']) {
+  didThrow(
+    () => resolveVersion('1.2.4', spec),
+    `an invalid bump blocks the release: ${spec}`,
+  );
+}
+didThrow(
+  () => resolveVersion('1.2', 'patch'),
+  'a broken current version cannot be bumped',
 );
 
 const [again] = bumpVersions(nextApp, nextPkg, '9.9.9');

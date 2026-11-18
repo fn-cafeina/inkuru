@@ -1,9 +1,50 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const SEMVER = /^\d+\.\d+\.\d+$/;
+const SEMVER = /^(\d+)\.(\d+)\.(\d+)$/;
 
+const BUMPS = ['patch', 'minor', 'major'] as const;
+
+type Bump = (typeof BUMPS)[number];
+type Parts = [major: number, minor: number, patch: number];
 type Json = Record<string, unknown>;
+
+function isBump(spec: string): spec is Bump {
+  return (BUMPS as readonly string[]).includes(spec);
+}
+
+function parseVersion(version: string): Parts {
+  const match = SEMVER.exec(version);
+  if (!match) {
+    throw new Error(`invalid version: ${version} (expected X.Y.Z)`);
+  }
+  const [, major = '0', minor = '0', patch = '0'] = match;
+  return [Number(major), Number(minor), Number(patch)];
+}
+
+/**
+ * Resolves a bump spec the way `npm version` does: patch, minor, major, or an
+ * explicit version that is then taken as-is.
+ */
+export function resolveVersion(current: string, spec: string): string {
+  const [major, minor, patch] = parseVersion(current);
+
+  if (!isBump(spec)) {
+    if (!SEMVER.test(spec)) {
+      throw new Error(
+        `invalid bump: ${spec} (expected patch, minor, major or X.Y.Z)`,
+      );
+    }
+    return spec;
+  }
+  if (spec === 'major') {
+    return `${major + 1}.0.0`;
+  }
+  if (spec === 'minor') {
+    return `${major}.${minor + 1}.0`;
+  }
+  return `${major}.${minor}.${patch + 1}`;
+}
 
 function parse(text: string, file: string): Json {
   try {
@@ -104,22 +145,30 @@ function assertReady(
 function main(): void {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
-  const version = args.find((arg) => !arg.startsWith('--'));
+  const spec = args.find((arg) => !arg.startsWith('--'));
   const done: string[] = [];
   let committed = false;
+  let tag = '';
+  let version = '';
 
   try {
-    if (!version) {
-      throw new Error('missing version: bun run release X.Y.Z [--dry-run]');
+    if (!spec) {
+      throw new Error(
+        'missing version: bun run release patch|minor|major|X.Y.Z [--dry-run]',
+      );
     }
-    const tag = `v${version}`;
     const appText = readFileSync('app.json', 'utf8');
     const pkgText = readFileSync('package.json', 'utf8');
+    const current = pkgVersion(pkgText);
+    version = resolveVersion(current, spec);
+    tag = `v${version}`;
     const [nextApp, nextPkg] = bumpVersions(appText, pkgText, version);
     assertReady(appText, pkgText, version, tag);
 
     if (dryRun) {
-      console.log(`Dry run for ${tag}, nothing is touched:`);
+      console.log(
+        `Dry run ${current} -> ${version} (${tag}), nothing is touched:`,
+      );
       console.log(`  1. app.json expo.version -> ${version}`);
       console.log(`  2. package.json version -> ${version}`);
       console.log(`  3. git commit -m "chore(release): ${tag}"`);

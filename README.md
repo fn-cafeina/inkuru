@@ -39,15 +39,19 @@ request.
 Releases are cut from tags and built on GitHub Actions.
 
 ```bash
-bun run release 1.0.1
+bun run release patch   # 1.2.4 -> 1.2.5
+bun run release minor   # 1.2.4 -> 1.3.0
+bun run release major   # 1.2.4 -> 2.0.0
+bun run release 1.3.0   # explicit version
 ```
 
-The script refuses to run unless the working tree is clean, you are on
-`main`, the version differs from the current one, both version files
-agree and the tag `vX.Y.Z` does not exist yet. It then bumps `version`
-in `app.json` and `package.json`, commits with `chore(release): vX.Y.Z`,
-tags and pushes both. Add `--dry-run` to see the plan without touching
-anything.
+The bump words work the way `npm version` does; an explicit `X.Y.Z` is
+taken as-is. The script refuses to run unless the working tree is clean,
+you are on `main`, the resolved version differs from the current one,
+both version files agree and the tag `vX.Y.Z` does not exist yet. It
+then bumps `version` in `app.json` and `package.json`, commits with
+`chore(release): vX.Y.Z`, tags and pushes both. Add `--dry-run` to see
+the plan and the version it would land on without touching anything.
 
 The release workflow runs the checks, fails unless the tag matches
 both versions, builds a signed APK with `eas build --local`, and
