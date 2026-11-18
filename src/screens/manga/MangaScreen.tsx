@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -10,13 +10,14 @@ import { MangaChapterList } from './components/MangaChapterList';
 import { MangaSkeleton } from './components/MangaSkeleton';
 import { MangaTopBar } from './components/MangaTopBar';
 import { useRemoteData } from '../../hooks/useRemoteData';
-import { trace } from '../../dev/trace';
+import { useOpenLog } from '../../hooks/useOpenLog';
+import type { Fields } from '../../dev/log';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
-import type { MangaChapter } from '../../source/zonatmo';
+import type { MangaChapter, MangaDetail } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
 import type { RootStackParamList } from '../../navigation/types';
 import { goBackOrTabs } from '../../navigation/back';
@@ -79,6 +80,18 @@ function resolveRangeIndex(
   const chosen = active ?? rangeIndexForChapter(ranges, progress?.chapterPath);
 
   return Math.min(chosen, Math.max(ranges.length - 1, 0));
+}
+
+/** Sizes for the open line, or null while there is nothing to show yet. */
+function mangaOpenFields(data: MangaDetail | null): Fields | null {
+  if (data === null) {
+    return null;
+  }
+
+  return {
+    chapters: data.chapters.length,
+    related: data.related.length,
+  };
 }
 
 export default function MangaScreen({ navigation, route }: Props) {
@@ -214,7 +227,6 @@ export default function MangaScreen({ navigation, route }: Props) {
     [path, sortOrder],
   );
   const goBack = () => {
-    trace('manga back', { loading, hasData: data !== null });
     goBackOrTabs(navigation);
   };
   const openMangaRelated = useCallback(
@@ -234,9 +246,9 @@ export default function MangaScreen({ navigation, route }: Props) {
     [navigation, path],
   );
 
-  useEffect(() => {
-    trace('manga state', { loading, hasData: data !== null, hasError });
-  }, [loading, data, hasError]);
+  // One line per open: how long the screen took to have something to show,
+  // with the sizes that explain it.
+  useOpenLog('manga', path, mangaOpenFields(data));
 
   // The top row lives inside the scroll content, like rokimu's banner: no
   // overlay to pin, cover or hide.

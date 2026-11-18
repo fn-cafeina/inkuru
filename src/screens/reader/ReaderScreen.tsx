@@ -14,7 +14,8 @@ import { ReaderSkeleton } from './components/ReaderSkeleton';
 import { ReaderPages } from './pages/ReaderPages';
 import { prefetchChapter } from './prefetchChapter';
 import { useRemoteData } from '../../hooks/useRemoteData';
-import { useFocusEffect } from '@react-navigation/native';
+import { useOpenLog } from '../../hooks/useOpenLog';
+import type { Fields } from '../../dev/log';import { useFocusEffect } from '@react-navigation/native';
 import { readerConsumesBack } from './readerBack';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderProgress } from './useReaderProgress';
@@ -48,6 +49,21 @@ function sheetAccessibility(pickerOpen: boolean, settingsOpen: boolean) {
   const open = pickerOpen || settingsOpen;
 
   return open ? 'no-hide-descendants' : 'auto';
+}
+
+/** Where the reader's payload came from, for the open line. */
+function readerOpenFields(
+  data: ReaderData | null,
+  downloaded: boolean,
+): Fields | null {
+  if (data === null) {
+    return null;
+  }
+
+  return {
+    pages: data.pages.length,
+    from: downloaded ? 'download' : 'network',
+  };
 }
 
 export default function ReaderScreen({ navigation, route }: Props) {
@@ -121,6 +137,10 @@ export default function ReaderScreen({ navigation, route }: Props) {
   };
   const showError = hasError && data !== null;
   const ready = preferencesLoaded && restored;
+
+  // Pages, where the payload came from and the total wait: a download that
+  // keeps falling back to the network shows up here.
+  useOpenLog('reader', chapterPath, readerOpenFields(data, downloaded));
 
   // Warm the next chapter once the last pages of this one are on screen, so
   // "next" opens from cache instead of waiting on zonatmo.

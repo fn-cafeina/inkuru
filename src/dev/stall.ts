@@ -6,6 +6,8 @@
  * cannot answer within, so a slow screen is blamed with a number instead of a
  * hunch. `__DEV__` is stripped in release builds.
  */
+import { log } from './log';
+
 const TICK_MS = 100;
 // Below this the loop is just busy; above it the stall is felt as jank.
 const WARN_MS = 120;
@@ -26,7 +28,7 @@ export function watchStalls(): void {
     last = now;
 
     if (gap > WARN_MS) {
-      console.warn(`[stall] ${gap}ms`);
+      log.warn('js', 'stall', { ms: gap });
     }
   }, TICK_MS);
 }

@@ -53,12 +53,24 @@
   `components/` and pure helpers next to the screen.
 - Shared UI lives in `src/components/`. Move a component there only when more
   than one screen uses it.
-- `src/source/` holds the HTML parsers; `src/downloads/` the download
-  lifecycle; `src/update/` release check and APK install; `src/storage/`
-  persistence and the query cache; `src/hooks/`
-  shared hooks; `src/navigation/` the tabs and stack; `src/theme/` colors.
+- `src/source/` holds the HTML parsers and the http transport;
+  `src/downloads/` the download lifecycle; `src/update/` release check and
+  APK install; `src/storage/` persistence and the query cache; `src/hooks/`
+  shared hooks; `src/navigation/` the tabs and stack; `src/theme/` colors;
+  `src/dev/` the logger and the stall watchdog.
 - Keep files under 300 lines (blank lines and comments excluded); ESLint
   enforces this with `max-lines`.
+
+## Logs
+
+- Every dev line goes through `log.debug|info|warn|error` from
+  `src/dev/log.ts`. No bare `console.log` or `console.warn`.
+- Log the numbers that answer a question: `ms`, byte sizes, counts, the
+  cache source and why an entry was dropped. A line without a number
+  belongs in a comment, not in the log.
+- debug is the per-request flow, info is a total the user feels (a manga
+  or chapter taking this long), warn is degraded, error is terminal.
+- Release keeps warn and error only.
 
 ## Testing
 

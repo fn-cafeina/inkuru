@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { log, ms, reason } from '../dev/log';
 import { withLock } from './serialize';
 
 const PREFIX = 'cache:query:';
@@ -177,6 +178,7 @@ export function readCache<T>(
   // Reading and any removal run as one queued task: a write queued behind the
   // read must not be deleted by a removal decided from the older value.
   return withLock(QUEUE_KEY, async () => {
+    const startedAt = performance.now();
     const raw = await AsyncStorage.getItem(storageKey(key)).catch(() => null);
 
     if (!raw) {
@@ -185,22 +187,53 @@ export function readCache<T>(
 
     try {
       const parsed: unknown = JSON.parse(raw);
+      const dropped = dropReason(parsed, validate);
 
-      if (
-        !isStoredEntry(parsed) ||
-        Date.now() - parsed.savedAt > MAX_AGE_MS ||
-        !validate(parsed.value)
-      ) {
+      if (dropped !== undefined) {
+        // A dropped entry is the one cache event worth seeing: expired is
+        // routine, but a payload that fails its guard means the shape changed
+        // and every open pays for the network until the cache refills.
+        log.debug('cache', key, {
+          dropped,
+          ms: ms(startedAt),
+        });
         await deleteEntry(key);
         return null;
       }
 
-      return { value: parsed.value, savedAt: parsed.savedAt };
-    } catch {
+      return toEntry<T>(parsed);
+    } catch (error) {
+      log.warn('cache', key, { dropped: 'broken', reason: reason(error) });
       await deleteEntry(key);
       return null;
     }
   });
+}
+
+/**
+ * The typed view of a stored entry. `dropReason` already proved the shape and
+ * the guard, so the caller only needs the value.
+ */
+function toEntry<T>(parsed: unknown): { value: T; savedAt: number } {
+  const entry = parsed as { value: T; savedAt: number };
+
+  return { value: entry.value, savedAt: entry.savedAt };
+}
+
+/** Why a stored entry cannot be served, or undefined when it can. */
+function dropReason<T>(
+  parsed: unknown,
+  validate: (value: unknown) => value is T,
+): 'shape' | 'stale' | 'guard' | undefined {
+  if (!isStoredEntry(parsed)) {
+    return 'shape';
+  }
+
+  if (Date.now() - parsed.savedAt > MAX_AGE_MS) {
+    return 'stale';
+  }
+
+  return validate(parsed.value) ? undefined : 'guard';
 }
 
 export function writeCache(key: string, value: unknown): void {

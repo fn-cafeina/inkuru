@@ -1,4 +1,5 @@
 import { fetchReader } from '../source/zonatmo';
+import { log, ms, reason } from '../dev/log';
 import { readerCacheKey } from '../storage/cacheKeys';
 import { forgetRemoteCache } from '../storage/remoteCache';
 import { forgetPageProgress } from '../storage/readerProgress';
@@ -200,7 +201,7 @@ async function drainWorker(): Promise<void> {
       // A run that rejects must not kill the worker: the queue behind it would
       // never be picked up, which with concurrency 1 strands every download.
       await runDownload(input).catch((error: unknown) => {
-        console.warn('[downloads] worker:', error);
+        log.warn('downloads', 'worker', { reason: reason(error) });
       });
     }
   } finally {
@@ -226,6 +227,7 @@ export function setDownloadConcurrency(value: number): void {
 
 async function runDownload(input: DownloadInput) {
   const chapterPath = input.chapterPath;
+  const startedAt = performance.now();
   const generation = runs.start(chapterPath);
   const controller = new AbortController();
   store.controllers.set(chapterPath, controller);
@@ -331,6 +333,8 @@ async function runDownload(input: DownloadInput) {
     store.states.delete(chapterPath);
     forgetRemoteCache(readerCacheKey(chapterPath));
     notify();
+
+    log.info('downloads', 'done', { chapter: chapterPath, pages: total, ms: ms(startedAt) });
   } catch (error) {
     settleFailed(chapterPath, generation, error);
   } finally {
@@ -355,7 +359,7 @@ function settleFailed(
   }
 
   // Log real failures (fetch, write, JSON) so "failed" is diagnosable.
-  console.warn(`[downloads] ${chapterPath}:`, error);
+  log.warn('downloads', 'failed', { chapter: chapterPath, reason: reason(error) });
 
   deleteChapterFiles(chapterPath);
 

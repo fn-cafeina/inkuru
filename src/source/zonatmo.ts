@@ -7,8 +7,9 @@ import {
 } from './html';
 import { parseMangaRelated } from './related';
 import type { RelatedManga } from './related';
+import { fetchText } from './http';
 import { absoluteUrl, toPath } from './url';
-import { elapsed, trace } from '../dev/trace';
+import { log, ms } from '../dev/log';
 const CATALOG_PATH =
   '/biblioteca?order_item=likes_count&order_dir=desc&title=&filter_by=title&author_filter=&type=&demography=shounen&status=';
 
@@ -68,7 +69,11 @@ export async function fetchManga(
   const startedAt = performance.now();
   const detail = parseManga(await fetchText(path, signal));
 
-  trace('manga parse', detail.chapters.length, elapsed(startedAt));
+  log.debug('parse', 'manga', {
+    ms: ms(startedAt),
+    chapters: detail.chapters.length,
+    related: detail.related.length,
+  });
 
   return detail;
 }
@@ -77,7 +82,15 @@ export async function fetchReader(
   path: string,
   signal?: AbortSignal,
 ): Promise<ReaderData> {
-  return parseReader(await fetchText(path, signal));
+  const startedAt = performance.now();
+  const data = parseReader(await fetchText(path, signal));
+
+  log.debug('parse', 'reader', {
+    ms: ms(startedAt),
+    pages: data.pages.length,
+  });
+
+  return data;
 }
 
 export async function fetchSearch(
@@ -96,30 +109,6 @@ export async function fetchCatalog(
   const path = page > 1 ? `${CATALOG_PATH}&page=${page}` : CATALOG_PATH;
 
   return parseCatalog(await fetchText(path, signal));
-}
-
-async function fetchText(
-  path: string,
-  signal?: AbortSignal,
-): Promise<string> {
-  // expo/fetch reads the body in native code. The global fetch is whatwg-fetch
-  // over XHR, which rebuilds the whole string on every 8KB chunk because a
-  // signal puts the request in incremental mode: a 2MB manga page blocks the
-  // JS thread for seconds and every tap queues behind it. Imported lazily so
-  // the parser self-checks stay free of React Native.
-  const { fetch: nativeFetch } = await import('expo/fetch');
-  const startedAt = performance.now();
-  const response = await nativeFetch(absoluteUrl(path), { signal });
-
-  if (!response.ok) {
-    throw new Error(`ZonaTMO returned HTTP ${response.status}`);
-  }
-
-  const text = await response.text();
-
-  trace('http page', path, text.length, elapsed(startedAt));
-
-  return text;
 }
 
 // shortcut: regex tied to zonatmo's detail markup, migrate to an HTML parser when selectors grow.

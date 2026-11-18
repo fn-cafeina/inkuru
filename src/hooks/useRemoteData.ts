@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { readCache, writeCache } from '../storage/queryCache';
 import { readRemoteCache, writeRemoteCache } from '../storage/remoteCache';
 import { withTimeout } from '../downloads/timeout';
-import { trace, elapsed } from '../dev/trace';
+import { log, ms, reason, seconds } from '../dev/log';
 
 type RemoteData<T> = {
   data: T | null;
@@ -98,17 +98,16 @@ export function useRemoteData<T>(
           : prev,
       );
 
-      try {
-        const startedAt = performance.now();
+      const startedAt = performance.now();
 
-        trace('remote fetch start', key);
+      try {
         // A request hanging past the budget is aborted and read as an error.
         const result = await withTimeout(controller, 15000, () =>
           fetcher(controller.signal),
         );
         const savedAt = Date.now();
 
-        trace('remote fetch done', key, elapsed(startedAt));
+        log.debug('fetch', key ?? 'reader', { ms: ms(startedAt) });
 
         // Cache valid results even if the consumer unmounted while the
         // request was in flight; the next mount should not pay for it again.
@@ -133,7 +132,10 @@ export function useRemoteData<T>(
         // Expected when superseded or timed out; real failures (network,
         // markup changes) are logged so they are not invisible.
         if (!controller.signal.aborted) {
-          console.warn(`[useRemoteData] ${key ?? 'reader'}:`, error);
+          log.warn('fetch', key ?? 'reader', {
+            ms: ms(startedAt),
+            reason: reason(error),
+          });
         }
 
         if (requestId === requestRef.current) {
@@ -161,6 +163,10 @@ export function useRemoteData<T>(
     const inMemory = readRemoteCache<T>(key);
 
     if (inMemory && isFresh(inMemory.savedAt, freshMs)) {
+      log.debug('cache', key ?? 'reader', {
+        source: 'memory',
+        age: seconds(Date.now() - inMemory.savedAt),
+      });
       return;
     }
 
@@ -185,7 +191,12 @@ export function useRemoteData<T>(
         const startedAt = performance.now();
         const stored = await readCache(key, validate);
 
-        trace('remote cache', key, elapsed(startedAt));
+        log.debug('cache', key, {
+          source: 'disk',
+          hit: stored !== null,
+          ms: ms(startedAt),
+          age: stored ? seconds(Date.now() - stored.savedAt) : undefined,
+        });
 
         if (cancelled) {
           return;
