@@ -10,6 +10,7 @@ import {
 
 import { UpdateFlowSheet } from './src/screens/settings/components/UpdateFlowSheet';
 import { RootNavigator } from './src/navigation';
+import { watchStalls } from './src/dev/stall';
 import { initializeDownloads, setDownloadConcurrency } from './src/downloads/manager';
 import { loadDownloadConcurrency } from './src/storage/downloadSettings';
 import { useColors } from './src/theme/colors';
@@ -21,6 +22,7 @@ export default function App() {
   const colors = useColors();
 
   useEffect(() => {
+    watchStalls();
     // The tab dot replaces the old launch alert as the update announcement.
     void initFlow();
     void checkForUpdate();
