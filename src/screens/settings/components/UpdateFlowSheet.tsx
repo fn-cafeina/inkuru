@@ -1,4 +1,8 @@
-import { useEffect, useSyncExternalStore, type ReactElement } from 'react';
+import {
+  useEffect,
+  useSyncExternalStore,
+  type ReactElement,
+} from 'react';
 import { AppState, Pressable, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,7 +10,6 @@ import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated'
 
 import { AnimatedPressable } from '../../../components/AnimatedPressable';
 import { useColors } from '../../../theme/colors';
-import { SHEET_HEIGHT } from '../../../theme/spacing';
 import { getUpdateState } from '../../../update/check';
 import {
   beginDownload,
@@ -16,8 +19,10 @@ import {
   confirmUpdate,
   getFlowState,
   grantPermissionAndDownload,
+  retryUpdate,
   subscribeFlow,
-} from '../../../update/flow';import type { UpdatePhase } from '../../../update/flow';
+} from '../../../update/flow';
+import type { UpdatePhase } from '../../../update/flow';
 import type { DownloadProgress } from '../../../update/install';
 
 /** The phases the sheet actually renders; idle and ready show nothing. */
@@ -57,6 +62,7 @@ export function UpdateFlowSheet() {
   const dismissable =
     phase === 'confirm' || phase === 'permission' || phase === 'error';
   const tag = getUpdateState().available?.tag ?? '';
+  const actions = renderActions(phase);
 
   return (
     <Animated.View
@@ -74,17 +80,16 @@ export function UpdateFlowSheet() {
       />
       <Animated.View
         entering={SlideInDown.duration(200)}
-        className="rounded-t-2xl px-4"
+        className="rounded-t-xl px-5 pt-5"
         style={{
           backgroundColor: colors.surface,
-          height: SHEET_HEIGHT,
-          paddingBottom: insets.bottom + 16,
+          paddingBottom: insets.bottom + (actions === null ? 20 : 0),
         }}
       >
-        <View className="min-h-14 flex-row items-center justify-between">
+        <View className="mb-3 flex-row items-center justify-between">
           <Text
             accessibilityRole="header"
-            className="text-base font-semibold"
+            className="text-xl font-bold"
             style={{ color: colors.text }}
           >
             {titleFor(phase)}
@@ -93,21 +98,54 @@ export function UpdateFlowSheet() {
             <AnimatedPressable
               accessibilityLabel="Cerrar"
               onPress={closeUpdate}
-              className="min-h-12 min-w-12 items-center justify-center rounded-full"
+              className="-mr-2 min-h-11 min-w-11 items-center justify-center rounded-full"
             >
               <Feather name="x" size={20} color={colors.textMuted} />
             </AnimatedPressable>
           ) : null}
         </View>
-        {phase === 'confirm' ? <ConfirmBody tag={tag} /> : null}
-        {phase === 'permission' ? <PermissionBody /> : null}
-        {phase === 'downloading' ? <DownloadingBody progress={progress} /> : null}
-        {phase === 'installing' ? <InstallingBody /> : null}
-        {phase === 'error' ? <ErrorBody failure={failure} /> : null}
-        <Actions phase={phase} />
+        <SheetBody
+          phase={phase}
+          tag={tag}
+          progress={progress}
+          failure={failure}
+        />
+        {actions === null ? null : (
+          <View
+            className="mt-5 -mx-5 flex-row border-t"
+            style={{ borderColor: colors.border }}
+          >
+            {actions}
+          </View>
+        )}
       </Animated.View>
     </Animated.View>
   );
+}
+
+function SheetBody({
+  phase,
+  tag,
+  progress,
+  failure,
+}: {
+  phase: VisiblePhase;
+  tag: string;
+  progress: DownloadProgress;
+  failure: string | null;
+}): ReactElement {
+  switch (phase) {
+    case 'confirm':
+      return <ConfirmBody tag={tag} />;
+    case 'permission':
+      return <PermissionBody />;
+    case 'downloading':
+      return <DownloadingBody progress={progress} />;
+    case 'installing':
+      return <InstallingBody />;
+    case 'error':
+      return <ErrorBody failure={failure} />;
+  }
 }
 
 function titleFor(phase: VisiblePhase): string {
@@ -123,6 +161,92 @@ function titleFor(phase: VisiblePhase): string {
     case 'error':
       return 'No se pudo actualizar';
   }
+}
+
+/** A cancel/confirm pair split by a hairline, like rokimu's update sheet. */
+function Actions({
+  secondary,
+  primary,
+}: {
+  secondary: { label: string; onPress: () => void };
+  primary?: { label: string; onPress: () => void };
+}): ReactElement {
+  const colors = useColors();
+
+  return (
+    <>
+      <ActionButton label={secondary.label} onPress={secondary.onPress} />
+      {primary === undefined ? null : (
+        <>
+          <View className="w-px" style={{ backgroundColor: colors.border }} />
+          <ActionButton
+            label={primary.label}
+            emphasized
+            onPress={primary.onPress}
+          />
+        </>
+      )}
+    </>
+  );
+}
+
+function renderActions(phase: VisiblePhase): ReactElement | null {
+  switch (phase) {
+    case 'installing':
+      return null;
+    case 'downloading':
+      // One way out: the download cancels itself, nothing to confirm.
+      return <Actions secondary={{ label: 'Cancelar', onPress: cancelDownload }} />;
+    case 'confirm':
+      return (
+        <Actions
+          secondary={{ label: 'Cancelar', onPress: closeUpdate }}
+          primary={{ label: 'Actualizar', onPress: () => void confirmUpdate() }}
+        />
+      );
+    case 'permission':
+      return (
+        <Actions
+          secondary={{ label: 'Cancelar', onPress: closeUpdate }}
+          primary={{
+            label: 'Abrir ajustes',
+            onPress: () => void grantPermissionAndDownload(),
+          }}
+        />
+      );
+    case 'error':
+      return (
+        <Actions
+          secondary={{ label: 'Cerrar', onPress: closeUpdate }}
+          // Reinstalls the APK already downloaded, so a failed install does
+          // not pay for the full download again.
+          primary={{ label: 'Reintentar', onPress: () => void retryUpdate() }}
+        />
+      );
+  }
+}
+
+function ActionButton({
+  label,
+  emphasized = false,
+  onPress,
+}: {
+  label: string;
+  emphasized?: boolean;
+  onPress: () => void;
+}) {
+  const colors = useColors();
+
+  return (
+    <AnimatedPressable onPress={onPress} className="flex-1 items-center py-4">
+      <Text
+        className={`text-sm ${emphasized ? 'font-medium' : ''}`}
+        style={{ color: emphasized ? colors.accent : colors.textMuted }}
+      >
+        {label}
+      </Text>
+    </AnimatedPressable>
+  );
 }
 
 function ConfirmBody({ tag }: { tag: string }): ReactElement {
@@ -193,70 +317,6 @@ function ErrorBody({ failure }: { failure: string | null }): ReactElement {
     >
       {failure ?? 'Ocurrió un error inesperado.'}
     </Text>
-  );
-}
-
-function Actions({ phase }: { phase: VisiblePhase }): ReactElement | null {
-  const colors = useColors();
-
-  if (phase === 'installing') {
-    return null;
-  }
-
-  return (
-    <View className="mt-5 flex-row border-t pt-2" style={{ borderColor: colors.border }}>
-      <ActionButton
-        label={phase === 'error' ? 'Cerrar' : 'Cancelar'}
-        onPress={phase === 'downloading' ? cancelDownload : closeUpdate}
-      />
-      <View className="mx-2 h-8" style={{ backgroundColor: colors.border }} />
-      <ActionButton
-        label={
-          phase === 'confirm'
-            ? 'Actualizar'
-            : phase === 'permission'
-              ? 'Abrir ajustes'
-              : 'Reintentar'
-        }
-        emphasized
-        onPress={
-          phase === 'confirm'
-            ? () => void confirmUpdate()
-            : phase === 'permission'
-              ? () => void grantPermissionAndDownload()
-              // The error retry routes through confirmUpdate so a failure in
-              // the permission step goes back to the permission step instead
-              // of re-downloading into the same missing permission.
-              : () => void confirmUpdate()
-        }
-      />
-    </View>
-  );
-}
-
-function ActionButton({
-  label,
-  emphasized = false,
-  onPress,
-}: {
-  label: string;
-  emphasized?: boolean;
-  onPress: () => void;
-}) {
-  const colors = useColors();
-
-  return (
-    <AnimatedPressable
-      onPress={onPress}
-      className="flex-1 items-center py-4"
-    >
-      <Text
-        className={`text-sm ${emphasized ? 'font-medium' : ''}`}
-        style={{ color: emphasized ? colors.accent : colors.textMuted }}
-      >
-        {label}
-      </Text>
-    </AnimatedPressable>
   );
 }
 

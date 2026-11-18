@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 
 import { getUpdateState } from './check';
+import type { File } from 'expo-file-system';
+
 import {
   downloadApk,
   installApk,
@@ -40,6 +42,8 @@ let state: UpdateFlowState = {
 };
 let initialized = false;
 let downloadAbort: AbortController | null = null;
+/** APK from the last complete download; survives a failed install. */
+let downloadedApk: File | null = null;
 const listeners = new Set<() => void>();
 
 function publish(next: UpdateFlowState): void {
@@ -114,6 +118,24 @@ export async function confirmUpdate(): Promise<void> {
   await beginDownload();
 }
 
+/**
+ * Retry after a failure. A failed install left the APK on disk, so retrying
+ * hands that file back to the installer instead of downloading it again.
+ */
+export async function retryUpdate(): Promise<void> {
+  if (!state.installPermissionGranted) {
+    publish({ ...state, phase: 'permission' });
+    return;
+  }
+
+  if (downloadedApk === null) {
+    await beginDownload();
+    return;
+  }
+
+  await runInstall(downloadedApk);
+}
+
 export function closeUpdate(): void {
   if (state.phase === 'downloading') {
     cancelDownload();
@@ -141,6 +163,7 @@ export async function beginDownload(): Promise<void> {
 
   const controller = new AbortController();
   downloadAbort = controller;
+  downloadedApk = null;
   publish({
     ...state,
     phase: 'downloading',
@@ -161,35 +184,8 @@ export async function beginDownload(): Promise<void> {
       return;
     }
 
-    publish({ ...state, phase: 'installing' });
-    let outcome: 'installed' | 'cancelled';
-
-    try {
-      outcome = await installApk(file);
-    } catch {
-      // The intent failed, most often because the install permission is
-      // missing or was revoked: force the permission screen again next
-      // time instead of failing silently forever.
-      await savePermission(false);
-      publish({
-        ...state,
-        installPermissionGranted: false,
-        phase: 'error',
-        failure: 'No se pudo abrir el instalador. Revisá el permiso de instalación.',
-      });
-      void Haptics.selectionAsync();
-      return;
-    }
-
-    if (outcome === 'cancelled') {
-      // Dismissing the installer is the user's call, not an error.
-      publish({ ...state, phase: 'idle', failure: null });
-      return;
-    }
-
-    await savePermission(true);
-    publish({ ...state, phase: 'ready', failure: null });
-    void Haptics.selectionAsync();
+    downloadedApk = file;
+    await runInstall(file);
   } catch (error) {
     publish({ ...state, phase: 'error', failure: failureFor(error) });
     void Haptics.selectionAsync();
@@ -201,7 +197,41 @@ export async function beginDownload(): Promise<void> {
 export function cancelDownload(): void {
   downloadAbort?.abort();
   downloadAbort = null;
+  downloadedApk = null;
   publish({ ...state, phase: 'idle', failure: null });
+}
+
+/** Hands a downloaded APK to the system installer and records the outcome. */
+async function runInstall(file: File): Promise<void> {
+  publish({ ...state, phase: 'installing' });
+  let outcome: 'installed' | 'cancelled';
+
+  try {
+    outcome = await installApk(file);
+  } catch {
+    // The intent failed, most often because the install permission is
+    // missing or was revoked: force the permission screen again next
+    // time instead of failing silently forever.
+    await savePermission(false);
+    publish({
+      ...state,
+      installPermissionGranted: false,
+      phase: 'error',
+      failure: 'No se pudo abrir el instalador. Revisá el permiso de instalación.',
+    });
+    void Haptics.selectionAsync();
+    return;
+  }
+
+  if (outcome === 'cancelled') {
+    // Dismissing the installer is the user's call, not an error.
+    publish({ ...state, phase: 'idle', failure: null });
+    return;
+  }
+
+  await savePermission(true);
+  publish({ ...state, phase: 'ready', failure: null });
+  void Haptics.selectionAsync();
 }
 
 /** The AppState listener fired and armed the resume; run the download now. */
