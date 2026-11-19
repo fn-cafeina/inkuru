@@ -53,10 +53,15 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     }
 
     pendingRef.current = null;
-    void savePageMark(pending.path, {
-      page: pending.page,
-      total: pending.total,
-    });
+
+    // Page 0 is the page the reader opens on, not reading: a mark there would
+    // paint a bar for a chapter somebody glanced at and left.
+    if (pending.page > 0) {
+      void savePageMark(pending.path, {
+        page: pending.page,
+        total: pending.total,
+      });
+    }
 
     if (pending.mangaPath) {
       void saveProgress(pending.mangaPath, {
