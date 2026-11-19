@@ -20,6 +20,15 @@ export const CACHE_FRESH_MS = {
 } as const;
 
 type IndexEntry = { key: string; savedAt: number; bytes: number };
+
+/**
+ * What an entry costs on disk. `String.length` counts UTF-16 units, which is
+ * what the bridge writes, so this is the size the platform stores, not the
+ * number of visible characters.
+ */
+function entryBytes(raw: string): number {
+  return raw.length * 2;
+}
 type StoredEntry = { v: number; savedAt: number; value: unknown };
 
 const QUEUE_KEY = 'cache:query';
@@ -70,7 +79,7 @@ async function rebuildIndex(): Promise<IndexEntry[]> {
       entries.push({
         key: decodeURIComponent(key.slice(ENTRY_PREFIX.length)),
         savedAt: parsed.savedAt,
-        bytes: raw.length,
+        bytes: entryBytes(raw),
       });
     } catch {
       // Skip unreadable entries; pruning will eventually clear them.
@@ -244,7 +253,7 @@ export function writeCache(key: string, value: unknown): void {
       await AsyncStorage.setItem(storageKey(key), raw);
       const entries = (await loadIndex()).filter((entry) => entry.key !== key);
 
-      entries.push({ key, savedAt, bytes: raw.length });
+      entries.push({ key, savedAt, bytes: entryBytes(raw) });
       index = await prune(entries);
       await sweepOnce();
     } catch {
