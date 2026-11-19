@@ -15,12 +15,16 @@ import {
 } from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
 
-import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
+import {
+  clamp,
+  DOUBLE_TAP_ZOOM,
+  doubleTapScale,
+  RESET_THRESHOLD,
+  translationBounds,
+  zoomAroundPoint,
+} from './readerZoom';
 
 const MAX_ZOOM = 4;
-const DOUBLE_TAP_ZOOM = 2;
-// Below this, releasing a pinch snaps back to the fitted page.
-const RESET_THRESHOLD = 1.05;
 const SETTLE_DURATION = 180;
 // Lets a one-axis pan win over the surrounding scroll view only after the
 // finger clearly left the touch slop.
@@ -34,6 +38,22 @@ type ZoomState = {
   savedX: SharedValue<number>;
   savedY: SharedValue<number>;
 };
+
+/**
+ * Animate the page back to the fitted size and drop the offsets, including the
+ * saved ones: the next pinch or pan must start from 1x, not from where the
+ * previous one ended.
+ */
+function resetZoom(zoom: ZoomState): void {
+  'worklet';
+
+  zoom.scale.value = withTiming(1, { duration: SETTLE_DURATION });
+  zoom.translateX.value = withTiming(0, { duration: SETTLE_DURATION });
+  zoom.translateY.value = withTiming(0, { duration: SETTLE_DURATION });
+  zoom.savedScale.value = 1;
+  zoom.savedX.value = 0;
+  zoom.savedY.value = 0;
+}
 
 /**
  * Settle the zoom into its bounds. Below the reset threshold the page springs
@@ -54,12 +74,7 @@ function settleZoom(
   zoom.savedY.value = zoom.translateY.value;
 
   if (zoom.scale.value <= RESET_THRESHOLD) {
-    zoom.scale.value = withTiming(1, { duration: SETTLE_DURATION });
-    zoom.translateX.value = withTiming(0, { duration: SETTLE_DURATION });
-    zoom.translateY.value = withTiming(0, { duration: SETTLE_DURATION });
-    zoom.savedScale.value = 1;
-    zoom.savedX.value = 0;
-    zoom.savedY.value = 0;
+    resetZoom(zoom);
 
     return false;
   }
@@ -97,8 +112,12 @@ function doubleTapToZoom(
 ): boolean {
   'worklet';
 
-  if (zoom.scale.value > RESET_THRESHOLD) {
-    return settleZoom(baseWidth, baseHeight, viewportWidth, viewportHeight, zoom);
+  // Toggling back is a reset, not a settle: settleZoom only snaps back a pinch
+  // that ended under the threshold and would keep a zoomed page zoomed.
+  if (doubleTapScale(zoom.scale.value) === 1) {
+    resetZoom(zoom);
+
+    return false;
   }
 
   const next = zoomAroundPoint(

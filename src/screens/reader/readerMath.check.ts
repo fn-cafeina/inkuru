@@ -5,7 +5,14 @@ import {
   rememberPageRatio,
 } from './readerPageLayout';
 import { READER_PAGE_ASPECT_RATIO } from '../../theme/layout';
-import { clamp, translationBounds, zoomAroundPoint } from './readerZoom';
+import {
+  clamp,
+  DOUBLE_TAP_ZOOM,
+  doubleTapScale,
+  RESET_THRESHOLD,
+  translationBounds,
+  zoomAroundPoint,
+} from './readerZoom';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {
@@ -16,6 +23,26 @@ function assertEqual<T>(actual: T, expected: T, label: string): void {
 assertEqual(clamp(5, 0, 10), 5, 'a value inside the range passes');
 assertEqual(clamp(-1, 0, 10), 0, 'the minimum clamps');
 assertEqual(clamp(11, 0, 10), 10, 'the maximum clamps');
+
+// Double tap is a toggle: fitted zooms in, zoomed goes back to 1x.
+assertEqual(doubleTapScale(1), DOUBLE_TAP_ZOOM, 'a fitted page zooms in');
+assertEqual(doubleTapScale(2), 1, 'a zoomed page goes back to 1x');
+assertEqual(doubleTapScale(4), 1, 'the deepest zoom goes back to 1x');
+assertEqual(
+  doubleTapScale(RESET_THRESHOLD),
+  DOUBLE_TAP_ZOOM,
+  'a page at the threshold still counts as fitted',
+);
+assertEqual(
+  doubleTapScale(RESET_THRESHOLD + 0.01),
+  1,
+  'just past the threshold resets',
+);
+assertEqual(
+  doubleTapScale(1.5),
+  1,
+  'a half zoom from a pinch resets instead of zooming again',
+);
 
 const noOverflow = translationBounds(100, 100, 200, 200, 1);
 
