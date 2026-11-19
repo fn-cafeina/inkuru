@@ -3,6 +3,7 @@ import {
   chunkChapters,
   displayChapters,
   getChapterState,
+  nextToRead,
   rangeIndexForChapter,
 } from './chapters';
 import type { MangaChapter } from '../../source/zonatmo';
@@ -95,6 +96,39 @@ assertEqual(
   getChapterState('/view_uploads/3', '/view_uploads/2', read),
   undefined,
   'an unmarked chapter has no state',
+);
+
+const order = range(4);
+
+assertEqual(
+  nextToRead(order, '/view_uploads/2', read)?.path,
+  '/view_uploads/2',
+  'a chapter in progress is where reading continues',
+);
+assertEqual(
+  nextToRead(order, '/view_uploads/1', read)?.path,
+  '/view_uploads/2',
+  'a finished chapter hands the reader the next one',
+);
+assertEqual(
+  nextToRead(order, '/view_uploads/1', new Set(order.map((item) => item.path))),
+  undefined,
+  'nothing left to read leaves no continue target',
+);
+assertEqual(
+  nextToRead(order, '/view_uploads/1', new Set(['/view_uploads/1', '/view_uploads/2']))?.path,
+  '/view_uploads/3',
+  'read chapters in a row are skipped',
+);
+assertEqual(
+  nextToRead(order, undefined, read),
+  undefined,
+  'no progress leaves no continue target',
+);
+assertEqual(
+  nextToRead(order, '/view_uploads/99', read),
+  undefined,
+  'a chapter off the list leaves no continue target',
 );
 
 console.log('chapter ranges ok');

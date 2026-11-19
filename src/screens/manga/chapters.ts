@@ -38,6 +38,31 @@ export function getChapterState(
   return readChapters.has(chapterPath) ? 'read' : undefined;
 }
 
+/**
+ * Where reading continues, in reading order: the chapter saved as progress, or
+ * the first unread chapter after it once that one is finished. Nothing left to
+ * read yields `undefined`, so the header hides its continue button.
+ */
+export function nextToRead(
+  ascending: MangaChapter[],
+  currentPath: string | undefined,
+  readChapters: ReadonlySet<string>,
+): MangaChapter | undefined {
+  if (currentPath === undefined) {
+    return undefined;
+  }
+
+  const index = ascending.findIndex((chapter) => chapter.path === currentPath);
+
+  if (index < 0) {
+    return undefined;
+  }
+
+  const start = readChapters.has(currentPath) ? index + 1 : index;
+
+  return ascending.slice(start).find((chapter) => !readChapters.has(chapter.path));
+}
+
 export function chunkChapters(chapters: MangaChapter[]): ChapterRange[] {
   const ranges: ChapterRange[] = [];
 

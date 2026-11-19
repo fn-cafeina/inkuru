@@ -25,6 +25,7 @@ import {
   ascendingChapters,
   chunkChapters,
   displayChapters,
+  nextToRead,
   rangeIndexForChapter,
 } from './chapters';
 import type {
@@ -190,14 +191,18 @@ export default function MangaScreen({ navigation, route }: Props) {
     });
   };
 
-  const resumeChapter = data
-    ? data.chapters.find((chapter) => chapter.path === progress?.chapterPath)
-    : undefined;
   // Ranges always read oldest to newest; sorting only flips chapters inside a
   // range. The source lists chapters newest first.
   const ascending = useMemo(
     () => ascendingChapters(data?.chapters ?? []),
     [data],
+  );
+  const readSet = useMemo(() => new Set(readChapters), [readChapters]);
+  // The saved chapter stops being the continue target once it is read: the
+  // highlight and the continue button move on to the next unread chapter.
+  const continueChapter = useMemo(
+    () => nextToRead(ascending, progress?.chapterPath, readSet),
+    [ascending, progress, readSet],
   );
   const ranges = useMemo(() => chunkChapters(ascending), [ascending]);
   const rangeIndex = resolveRangeIndex(ranges, activeRange, progress);
@@ -282,8 +287,8 @@ export default function MangaScreen({ navigation, route }: Props) {
           rangeIndex={rangeIndex}
           sortOrder={sortOrder}
           readChapters={readChapters}
-          currentChapterPath={progress?.chapterPath}
-          resumeChapter={resumeChapter}
+          currentChapterPath={continueChapter?.path}
+          resumeChapter={continueChapter}
           bottomInset={insets.bottom}
           refreshing={refreshing}
           ready={localLoaded}
