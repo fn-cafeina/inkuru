@@ -137,6 +137,28 @@ assertEqual(
   'unmarking an unknown chapter writes nothing',
 );
 
+// sweepPageMarks has a hard ceiling, and the oldest marks are the ones to go.
+for (let index = 0; index < 505; index += 1) {
+  storage.set(
+    progress.pageProgressKey(`/sweep/${index}`),
+    JSON.stringify({ page: 1, total: 4, savedAt: index }),
+  );
+}
+
+await progress.sweepPageMarks();
+const swept = [...storage.keys()].filter((key) => key.startsWith('reader:page:'));
+
+assertEqual(swept.length, 500, 'the sweep leaves the newest five hundred marks');
+assert(
+  !storage.has(progress.pageProgressKey('/sweep/0')),
+  'the oldest mark is the one dropped',
+);
+assert(
+  storage.has(progress.pageProgressKey('/sweep/504')),
+  'the newest mark survives',
+);
+assert(storage.has(progress.pageProgressKey('/v/5')), 'a fresh mark survives the sweep');
+
 // --- library ---
 
 storage.set('library:entries', '{roto');

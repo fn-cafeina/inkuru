@@ -85,8 +85,13 @@ export async function saveProgress(
 const readKey = (mangaPath: string) => `reader:read:${mangaPath}`;
 const pagePrefix = 'reader:page:';
 
-/** Where one chapter was left, and how long it is. */
-export type PageMark = { page: number; total: number };
+/** Where one chapter was left, how long it is, and when it was written. */
+export type PageMark = { page: number; total: number; savedAt?: number };
+
+// Marks are one key per chapter ever opened, so the store needs a ceiling of
+// its own: the query cache has bytes and the downloads have an index, this has
+// nothing. Old marks lose their bar and reopen the chapter at the start.
+const MAX_PAGE_MARKS = 500;
 
 export const pageProgressKey = (chapterPath: string) =>
   `${pagePrefix}${chapterPath}`;
@@ -110,13 +115,20 @@ function parsePageMark(raw: string | null | undefined): PageMark | null {
       return null;
     }
 
-    const { page, total } = value as Record<string, unknown>;
+    const { page, total, savedAt } = value as Record<string, unknown>;
 
     if (typeof page !== 'number' || typeof total !== 'number') {
       return null;
     }
 
-    return { page: Math.max(0, Math.floor(page)), total: Math.floor(total) };
+    return {
+      page: Math.max(0, Math.floor(page)),
+      total: Math.floor(total),
+      // Stamped from the first build that swept; older marks count as oldest.
+      savedAt: typeof savedAt === 'number' && Number.isFinite(savedAt)
+        ? savedAt
+        : 0,
+    };
   } catch {
     return null;
   }
@@ -152,8 +164,35 @@ export function savePageMark(
 ): Promise<void> {
   return AsyncStorage.setItem(
     pageProgressKey(chapterPath),
-    JSON.stringify(mark),
+    JSON.stringify({ ...mark, savedAt: Date.now() }),
   ).catch(() => undefined);
+}
+
+/**
+ * Keeps the newest `MAX_PAGE_MARKS` marks and deletes the rest. One sweep per
+ * launch: the alternative is a `getAllKeys` per saved page, on the JS thread,
+ * every time a page turns.
+ */
+export async function sweepPageMarks(): Promise<void> {
+  try {
+    const keys = (await AsyncStorage.getAllKeys()).filter((key) =>
+      key.startsWith(pagePrefix),
+    );
+
+    if (keys.length <= MAX_PAGE_MARKS) {
+      return;
+    }
+
+    const pairs = await AsyncStorage.multiGet(keys);
+    const marks = pairs
+      .map(([key, raw]) => ({ key, mark: parsePageMark(raw) }))
+      .sort((a, b) => (b.mark?.savedAt ?? 0) - (a.mark?.savedAt ?? 0));
+    const stale = marks.slice(MAX_PAGE_MARKS).map((entry) => entry.key);
+
+    await AsyncStorage.multiRemove(stale);
+  } catch {
+    // Losing a mark costs a scroll, not the read.
+  }
 }
 
 /** Per-chapter page marks are useless once the files are gone. */

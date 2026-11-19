@@ -17,6 +17,7 @@ import { useColors } from '@/theme/colors';
 import { checkForUpdate } from '@/update/check';
 import { initFlow } from '@/update/flow';
 import { cleanupOldApk } from '@/update/install';
+import { sweepPageMarks } from '@/storage/readerProgress';
 
 export default function RootLayout() {
   const colors = useColors();
@@ -27,6 +28,8 @@ export default function RootLayout() {
     void initFlow();
     void checkForUpdate();
     cleanupOldApk();
+    // One key per chapter ever opened; the sweep keeps the newest few hundred.
+    void sweepPageMarks();
     // The disk scan moves to launch so opening a manga never pays for it.
     void initializeDownloads();
     void loadDownloadConcurrency().then(setDownloadConcurrency);
