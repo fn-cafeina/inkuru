@@ -66,7 +66,7 @@ export default function DiscoverScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="search"
-              placeholder="Buscar manga"
+              placeholder="Buscar manga..."
               placeholderTextColor={colors.iconInactive}
               className="h-12 flex-1 text-base text-white"
             />
