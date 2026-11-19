@@ -6,7 +6,6 @@ import { forgetPageProgress } from '@/storage/readerProgress';
 import {
   deleteChapterFiles,
   downloadPageWithRetry,
-  hasDownloadFiles,
   hasDownloadFilesAsync,
   pageFile,
   prepareChapterDirectory,
@@ -114,7 +113,7 @@ export async function deleteDownload(chapterPath: string) {
   forgetRemoteCache(readerCacheKey(chapterPath));
   void forgetPageProgress(chapterPath);
 
-  if (!deleted && hasDownloadFiles(chapterPath)) {
+  if (!deleted && (await hasDownloadFilesAsync(chapterPath))) {
     // The files survived (collision or unreadable marker); keeping the index
     // entry prevents reconcileDirectories from resurrecting them as unknown.
     // The record stays in memory too, so the UI agrees with the index.

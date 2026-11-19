@@ -218,16 +218,12 @@ export async function readDownloadFile(
 }
 
 /**
- * Whether a directory with this chapter's marker exists. Markers are parsed
- * (once per record at startup) so a hash collision or an unreadable copy
- * cannot pass as this chapter's files. An unreadable marker counts as absent:
- * the record is dropped from the index and reconcileDirectories sweeps the
- * corrupt directory on the next launch. `dirNames` shares one root listing
- * across the startup scan.
- */
-/**
- * Same question as `hasDownloadFiles`, but the marker read is awaited instead
- * of blocking the JS thread: the launch scan parses one marker per download.
+ * Whether a directory with this chapter's marker exists. The marker is parsed
+ * so a hash collision or an unreadable copy cannot pass as this chapter's
+ * files, and the read is awaited instead of blocking the JS thread: the launch
+ * scan parses one marker per download. An unreadable marker counts as absent:
+ * the record leaves the index and reconcileDirectories sweeps the directory on
+ * the next launch. `dirNames` shares one root listing across the scan.
  */
 export async function hasDownloadFilesAsync(
   chapterPath: string,
@@ -248,19 +244,6 @@ export async function hasDownloadFilesAsync(
       }
     } catch {
       // Unreadable marker: ownership unknown, so it does not count.
-    }
-  }
-
-  return false;
-}
-
-export function hasDownloadFiles(
-  chapterPath: string,
-  dirNames?: string[],
-): boolean {
-  for (const directory of existingChapterDirs(chapterPath, dirNames)) {
-    if (directoryOwner(directory) === chapterPath) {
-      return true;
     }
   }
 

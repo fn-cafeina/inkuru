@@ -17,7 +17,6 @@ const { File } = await import('expo-file-system');
 const {
   deleteChapterFiles,
   downloadPage,
-  hasDownloadFiles,
   hasDownloadFilesAsync,
   prepareChapterDirectory,
   readDownloadFile,
@@ -69,7 +68,7 @@ function seed(chapterPath: string) {
 
 const dirA = seed(chapterA);
 
-assert(hasDownloadFiles(chapterA), 'a valid marker counts as downloaded');
+assert(await hasDownloadFilesAsync(chapterA), 'a valid marker counts as downloaded');
 assert(
   await hasDownloadFilesAsync(chapterA),
   'the async marker read agrees with the sync one',
@@ -78,7 +77,7 @@ assert(
   !(await hasDownloadFilesAsync(chapterB)),
   'the async read does not inherit another chapter files',
 );
-assert(!hasDownloadFiles(chapterB), 'another chapter does not inherit the files');
+assert(!(await hasDownloadFilesAsync(chapterB)), 'another chapter does not inherit the files');
 
 const wrapper = await readDownloadFile(chapterA);
 
@@ -94,13 +93,13 @@ fake.write(
 const collisionSlot = prepareChapterDirectory(chapterB);
 
 assert(collisionSlot.uri === dirOf(chapterB, 2), 'an occupied slot moves to the next suffix');
-assert(hasDownloadFiles(chapterA), 'the other chapter folder stays intact');
+assert(await hasDownloadFilesAsync(chapterA), 'the other chapter folder stays intact');
 
 // Unreadable marker: never reused, never silently deleted.
 fake.write(`${dirOf(chapterC)}/reader.json`, '{roto');
 
 assert((await readDownloadFile(chapterC)) === null, 'an unreadable marker does not read');
-assert(!hasDownloadFiles(chapterC), 'an unreadable marker does not count as downloaded');
+assert(!(await hasDownloadFilesAsync(chapterC)), 'an unreadable marker does not count as downloaded');
 assert(
   deleteChapterFiles(chapterC) === false,
   'an unreadable marker blocks a blind delete',
@@ -120,7 +119,7 @@ assert(
 );
 assert(fake.exists(recovered), 'the recovered folder is kept');
 assert(!fake.exists(`${ROOT}/sin-marcador`), 'a folder without a marker is swept');
-assert(hasDownloadFiles(chapterA), 'the known download survives reconciliation');
+assert(await hasDownloadFilesAsync(chapterA), 'the known download survives reconciliation');
 
 // Re-using a directory this chapter already owns wipes it, and the wipe must
 // leave an existing directory behind: the native download needs the parent.
@@ -142,7 +141,7 @@ assert(
 
 // Deleting only touches directories this chapter owns.
 assert(deleteChapterFiles(chapterA), 'the chapter files are deleted');
-assert(!hasDownloadFiles(chapterA), 'the deleted chapter no longer counts');
+assert(!(await hasDownloadFilesAsync(chapterA)), 'the deleted chapter no longer counts');
 assert(!fake.exists(dirA), 'the chapter folder disappears');
 
 // The marker is written last, through a temp file, so a half write never parses.
