@@ -175,5 +175,12 @@ assertEqual(
   1,
   'the last page of a read chapter stays full',
 );
+assertEqual(
+  chapterRatios(barreable, new Set(['/view_uploads/1']), {
+    '/view_uploads/1': { page: 0, total: 10 },
+  })['/view_uploads/1'],
+  0.1,
+  'back on the first page the bar shows one page, not none',
+);
 
 console.log('chapter ranges ok');

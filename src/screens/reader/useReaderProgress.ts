@@ -7,6 +7,7 @@ import {
   markChapterRead,
   savePageMark,
   saveProgress,
+  unmarkChapterRead,
 } from '@/storage/readerProgress';
 import { reachesLastPage } from './readerReadMark';
 import type { ReaderData } from '@/source/zonatmo';
@@ -39,6 +40,11 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
   const restored = restoredPath === path;
 
   const pendingRef = useRef<PendingProgress | null>(null);
+  // Whether the chapter had a mark when it opened. A chapter opened for the
+  // first time writes nothing until a page is turned, so browsing a list and
+  // backing out does not paint a bar; one that already had a mark keeps
+  // following the page, page 0 included.
+  const hadMarkRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flush = useCallback(() => {
     if (timerRef.current) {
@@ -54,9 +60,8 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
     pendingRef.current = null;
 
-    // Page 0 is the page the reader opens on, not reading: a mark there would
-    // paint a bar for a chapter somebody glanced at and left.
-    if (pending.page > 0) {
+    if (pending.page > 0 || hadMarkRef.current) {
+      hadMarkRef.current = true;
       void savePageMark(pending.path, {
         page: pending.page,
         total: pending.total,
@@ -79,6 +84,8 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
       try {
         const mark = (await loadPageMarks([path]))[path];
+
+        hadMarkRef.current = mark !== undefined;
 
         if (mark && mark.page > 0) {
           nextPage = mark.page;
@@ -131,11 +138,15 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
     timerRef.current = setTimeout(flush, PROGRESS_WRITE_DELAY);
 
-    // `markChapterRead` ignores repeats, so showing the last page is enough:
-    // no bookkeeping of the previous page, which used to miss single page
-    // chapters and every chapter opened already at its end.
-    if (mangaPath && reachesLastPage(safePage, total)) {
-      void markChapterRead(mangaPath, path);
+    // Reaching the last page marks the chapter read; leaving a finished chapter
+    // before its end unmarks it, so the continue button and the library order
+    // follow where reading stopped instead of the best page ever reached.
+    if (mangaPath) {
+      if (reachesLastPage(safePage, total)) {
+        void markChapterRead(mangaPath, path);
+      } else if (hadMarkRef.current) {
+        void unmarkChapterRead(mangaPath, path);
+      }
     }
   }, [data, flush, mangaPath, path, restored, safePage, title, total]);
 

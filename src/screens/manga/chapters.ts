@@ -56,7 +56,7 @@ export function chapterRatios(
     const mark = marks[chapter.path];
     const total = mark?.total ?? 0;
 
-    if (mark !== undefined && total > 0 && mark.page > 0) {
+    if (mark !== undefined && total > 0) {
       ratios[chapter.path] = Math.min(1, (mark.page + 1) / total);
       continue;
     }

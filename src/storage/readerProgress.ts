@@ -187,18 +187,41 @@ export function markChapterRead(
   mangaPath: string,
   chapterPath: string,
 ): Promise<void> {
+  return writeReadList(mangaPath, (current) => [...current, chapterPath], (current) =>
+    current.includes(chapterPath),
+  );
+}
+
+/**
+ * A chapter that was finished and then left before its end stops counting as
+ * read: the continue button and the library order follow where reading
+ * actually stopped, not the best page ever reached.
+ */
+export function unmarkChapterRead(
+  mangaPath: string,
+  chapterPath: string,
+): Promise<void> {
+  return writeReadList(
+    mangaPath,
+    (current) => current.filter((item) => item !== chapterPath),
+    (current) => !current.includes(chapterPath),
+  );
+}
+
+function writeReadList(
+  mangaPath: string,
+  next: (current: string[]) => string[],
+  settled: (current: string[]) => boolean,
+): Promise<void> {
   return withLock(readKey(mangaPath), async () => {
     try {
       const current = await loadReadChapters(mangaPath);
 
-      if (current.includes(chapterPath)) {
+      if (settled(current)) {
         return;
       }
 
-      await AsyncStorage.setItem(
-        readKey(mangaPath),
-        JSON.stringify([...current, chapterPath]),
-      );
+      await AsyncStorage.setItem(readKey(mangaPath), JSON.stringify(next(current)));
     } catch {
       // Read marks are a convenience; a storage failure must not block reading.
     }

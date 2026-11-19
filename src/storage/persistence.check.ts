@@ -120,6 +120,23 @@ storage.set(progress.pageProgressKey('/v/1'), '7');
 await progress.forgetPageProgress('/v/1');
 assert(!storage.has(progress.pageProgressKey('/v/1')), 'the page mark is forgotten');
 
+// A finish followed by going back must drop the chapter from the read list, or
+// the continue button keeps skipping it.
+await progress.markChapterRead('/salir', '/v/uno');
+await progress.markChapterRead('/salir', '/v/dos');
+await progress.unmarkChapterRead('/salir', '/v/uno');
+assertEqual(
+  (await progress.loadReadChapters('/salir')).join(','),
+  '/v/dos',
+  'unmarking drops one chapter and keeps the rest',
+);
+await progress.unmarkChapterRead('/salir', '/v/desconocido');
+assertEqual(
+  (await progress.loadReadChapters('/salir')).join(','),
+  '/v/dos',
+  'unmarking an unknown chapter writes nothing',
+);
+
 // --- library ---
 
 storage.set('library:entries', '{roto');
