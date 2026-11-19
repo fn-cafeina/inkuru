@@ -22,8 +22,8 @@ const entries = [
 ];
 
 const ordered = orderLibrary(entries, {
-  'read-old': { chapterPath: 'c', chapterTitle: 'c', page: 3 },
-  'read-new': { chapterPath: 'c', chapterTitle: 'c', page: 1 },
+  'read-old': { chapterPath: 'c', chapterTitle: 'Anterior' },
+  'read-new': { chapterPath: 'c', chapterTitle: 'Reciente' },
 });
 
 assert(
@@ -49,17 +49,17 @@ assert(!sameEntries([single('/a')], [single('/b')]), 'a different path differs')
 assert(!sameEntries([single('/a')], []), 'a shorter list differs');
 assert(
   sameProgress(
-    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
-    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'C' } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'C' } },
   ),
   'equal progress compares equal',
 );
 assert(
   !sameProgress(
-    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 3 } },
-    { '/a': { chapterPath: '/c', chapterTitle: 'C', page: 4 } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'C' } },
+    { '/a': { chapterPath: '/c', chapterTitle: 'D' } },
   ),
-  'a different page differs',
+  'a different title differs',
 );
 
 console.log('library order ok');

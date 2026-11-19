@@ -51,14 +51,18 @@ storage.set(
 
 const saved = await progress.loadProgress('/library/manga/1');
 
-assertEqual(saved?.page, 4, 'the saved page reads back');
 assertEqual(saved?.chapterPath, '/v/1', 'the saved chapter reads back');
+assertEqual(saved?.chapterTitle, 'Capítulo 1', 'the saved title reads back');
 
 storage.set(
-  'reader:progress:/negativo',
-  JSON.stringify({ chapterPath: '/v/1', chapterTitle: 'x', page: -2.7 }),
+  'reader:progress:/solo-titulo',
+  JSON.stringify({ chapterPath: '/v/1', chapterTitle: 'x' }),
 );
-assertEqual((await progress.loadProgress('/negativo'))?.page, 0, 'a negative page clamps to 0');
+assertEqual(
+  (await progress.loadProgress('/solo-titulo'))?.chapterPath,
+  '/v/1',
+  'a record without a page still reads',
+);
 
 storage.set('reader:progress:/tipos', JSON.stringify({ chapterPath: 5 }));
 assertEqual(await progress.loadProgress('/tipos'), null, 'a wrong-typed record is discarded');
@@ -72,7 +76,11 @@ const many = await progress.loadProgressMany([
 ]);
 
 assertEqual(Object.keys(many).length, 1, 'only keys with a record come back');
-assertEqual(many['/library/manga/1']?.page, 4, 'the key comes back without its prefix');
+assertEqual(
+  many['/library/manga/1']?.chapterPath,
+  '/v/1',
+  'the key comes back without its prefix',
+);
 
 // --- read marks ---
 

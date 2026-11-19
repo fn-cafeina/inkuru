@@ -2,10 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { withLock } from './serialize';
 
+/**
+ * Where reading stopped in a manga: which chapter, nothing about the page.
+ * The page lives in the chapter's own mark, so the two cannot disagree.
+ */
 export type ReaderProgress = {
   chapterPath: string;
   chapterTitle: string;
-  page: number;
 };
 
 const PROGRESS_PREFIX = 'reader:progress:';
@@ -24,22 +27,14 @@ function parseProgress(raw: string | null | undefined): ReaderProgress | null {
     }
 
     const record = value as Record<string, unknown>;
-    const { chapterPath, chapterTitle, page } = record;
+    const { chapterPath, chapterTitle } = record;
 
-    if (
-      typeof chapterPath !== 'string' ||
-      typeof chapterTitle !== 'string' ||
-      typeof page !== 'number' ||
-      !Number.isFinite(page)
-    ) {
+    if (typeof chapterPath !== 'string' || typeof chapterTitle !== 'string') {
       return null;
     }
 
-    return {
-      chapterPath,
-      chapterTitle,
-      page: Math.max(0, Math.floor(page)),
-    };
+    // Older builds also stored a page here; the field is ignored, not migrated.
+    return { chapterPath, chapterTitle };
   } catch {
     return null;
   }

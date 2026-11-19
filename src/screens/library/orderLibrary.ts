@@ -41,7 +41,7 @@ export function sameEntries(
   );
 }
 
-/** Same paths and page numbers, ignoring object identity. */
+/** Same chapters and titles, ignoring object identity. */
 export function sameProgress(
   a: Record<string, ReaderProgress>,
   b: Record<string, ReaderProgress>,
@@ -58,8 +58,7 @@ export function sameProgress(
         left !== undefined &&
         right !== undefined &&
         left.chapterPath === right.chapterPath &&
-        left.chapterTitle === right.chapterTitle &&
-        left.page === right.page
+        left.chapterTitle === right.chapterTitle
       );
     })
   );

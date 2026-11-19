@@ -62,7 +62,6 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
       void saveProgress(pending.mangaPath, {
         chapterPath: pending.path,
         chapterTitle: pending.chapterTitle,
-        page: pending.page,
       });
     }
   }, []);
