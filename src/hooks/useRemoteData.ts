@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { readCache, writeCache } from '../storage/queryCache';
-import { readRemoteCache, writeRemoteCache } from '../storage/remoteCache';
-import { withTimeout } from '../downloads/timeout';
-import { log, ms, reason, seconds } from '../dev/log';
+import { readCache, writeCache } from '@/storage/queryCache';
+import { readRemoteCache, writeRemoteCache } from '@/storage/remoteCache';
+import { withTimeout } from '@/downloads/timeout';
+import { log, ms, reason, seconds } from '@/dev/log';
 
 type RemoteData<T> = {
   data: T | null;

@@ -1,5 +1,5 @@
-import type { LibraryEntry } from '../../storage/library';
-import type { ReaderProgress } from '../../storage/readerProgress';
+import type { LibraryEntry } from '@/storage/library';
+import type { ReaderProgress } from '@/storage/readerProgress';
 
 /**
  * Titles with reading progress first, then the rest: "continue reading" is

@@ -7,7 +7,7 @@ import {
   parseRelease,
   shouldCheck,
 } from './release';
-import { withTimeout } from '../downloads/timeout';
+import { withTimeout } from '@/downloads/timeout';
 import type { LatestRelease } from './release';
 
 const REPO = 'fn-cafeina/inkuru';

@@ -12,11 +12,11 @@ import {
   CHAPTER_ROW_HEIGHT,
   CHAPTER_ROW_STEP,
   ChapterRow,
-} from '../../../components/ChapterRow';
-import { EmptyState } from '../../../components/EmptyState';
-import { ListDivider } from '../../../components/ListDivider';
-import type { MangaChapter } from '../../../source/zonatmo';
-import { APP_BAR_GAP } from '../../../theme/spacing';
+} from '@/components/ChapterRow';
+import { EmptyState } from '@/components/EmptyState';
+import { ListDivider } from '@/components/ListDivider';
+import type { MangaChapter } from '@/source/zonatmo';
+import { APP_BAR_GAP } from '@/theme/spacing';
 import { ReaderSheet } from './ReaderSheet';
 
 export function ChapterPicker({

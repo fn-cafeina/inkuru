@@ -1,4 +1,4 @@
-import { log, ms } from '../dev/log';
+import { log, ms } from '@/dev/log';
 import { absoluteUrl } from './url';
 
 /**

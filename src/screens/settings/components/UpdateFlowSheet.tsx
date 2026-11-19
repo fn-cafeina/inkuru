@@ -8,9 +8,9 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { useColors } from '../../../theme/colors';
-import { getUpdateState } from '../../../update/check';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { useColors } from '@/theme/colors';
+import { getUpdateState } from '@/update/check';
 import {
   beginDownload,
   cancelDownload,
@@ -21,9 +21,9 @@ import {
   grantPermissionAndDownload,
   retryUpdate,
   subscribeFlow,
-} from '../../../update/flow';
-import type { UpdatePhase } from '../../../update/flow';
-import type { DownloadProgress } from '../../../update/install';
+} from '@/update/flow';
+import type { UpdatePhase } from '@/update/flow';
+import type { DownloadProgress } from '@/update/install';
 
 /** The phases the sheet actually renders; idle and ready show nothing. */
 type VisiblePhase = Exclude<UpdatePhase, 'idle' | 'ready'>;

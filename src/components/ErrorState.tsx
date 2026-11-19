@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 
 import { AnimatedPressable } from './AnimatedPressable';
-import { palette, reader, useColors } from '../theme/colors';
+import { palette, reader, useColors } from '@/theme/colors';
 
 export function ErrorState({
   message,

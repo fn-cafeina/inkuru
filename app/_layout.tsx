@@ -9,14 +9,14 @@ import {
   initialWindowMetrics,
 } from 'react-native-safe-area-context';
 
-import { UpdateFlowSheet } from '../src/screens/settings/components/UpdateFlowSheet';
-import { watchStalls } from '../src/dev/stall';
-import { initializeDownloads, setDownloadConcurrency } from '../src/downloads/manager';
-import { loadDownloadConcurrency } from '../src/storage/downloadSettings';
-import { useColors } from '../src/theme/colors';
-import { checkForUpdate } from '../src/update/check';
-import { initFlow } from '../src/update/flow';
-import { cleanupOldApk } from '../src/update/install';
+import { UpdateFlowSheet } from '@/screens/settings/components/UpdateFlowSheet';
+import { watchStalls } from '@/dev/stall';
+import { initializeDownloads, setDownloadConcurrency } from '@/downloads/manager';
+import { loadDownloadConcurrency } from '@/storage/downloadSettings';
+import { useColors } from '@/theme/colors';
+import { checkForUpdate } from '@/update/check';
+import { initFlow } from '@/update/flow';
+import { cleanupOldApk } from '@/update/install';
 
 export default function RootLayout() {
   const colors = useColors();

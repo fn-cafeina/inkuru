@@ -1,1 +1,1 @@
-export { default } from '../../src/screens/discover/DiscoverScreen';
+export { default } from '@/screens/discover/DiscoverScreen';

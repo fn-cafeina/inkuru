@@ -1,1 +1,1 @@
-export { default } from '../../src/screens/library/LibraryScreen';
+export { default } from '@/screens/library/LibraryScreen';

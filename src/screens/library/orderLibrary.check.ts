@@ -1,5 +1,5 @@
 import { orderLibrary, sameEntries, sameProgress } from './orderLibrary';
-import type { LibraryEntry } from '../../storage/library';
+import type { LibraryEntry } from '@/storage/library';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {

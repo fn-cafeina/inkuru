@@ -1,4 +1,4 @@
-import type { MangaChapter } from '../../source/zonatmo';
+import type { MangaChapter } from '@/source/zonatmo';
 
 const CHAPTER_RANGE_SIZE = 50;
 

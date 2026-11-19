@@ -1,6 +1,6 @@
 import { mock } from 'bun:test';
 
-import type { MangaDetail } from '../source/zonatmo';
+import type { MangaDetail } from '@/source/zonatmo';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {

@@ -2,10 +2,10 @@ import type { ComponentProps } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import type { DownloadStatus } from '../../../downloads/types';
-import { useDownloadState } from '../../../hooks/useDownloads';
-import { useColors } from '../../../theme/colors';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import type { DownloadStatus } from '@/downloads/types';
+import { useDownloadState } from '@/hooks/useDownloads';
+import { useColors } from '@/theme/colors';
 
 type FeatherName = ComponentProps<typeof Feather>['name'];
 

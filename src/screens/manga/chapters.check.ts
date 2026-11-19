@@ -6,7 +6,7 @@ import {
   nextToRead,
   rangeIndexForChapter,
 } from './chapters';
-import type { MangaChapter } from '../../source/zonatmo';
+import type { MangaChapter } from '@/source/zonatmo';
 
 function assertEqual<T>(actual: T, expected: T, label: string): void {
   if (actual !== expected) {

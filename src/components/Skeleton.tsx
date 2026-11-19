@@ -3,9 +3,9 @@ import type { StyleProp, ViewStyle } from 'react-native';
 import { Animated, ScrollView, View } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
-import { reader } from '../theme/colors';
-import { COVER_ASPECT_RATIO } from '../theme/layout';
-import { GRID_GAP, SCREEN_PADDING } from '../theme/spacing';
+import { reader } from '@/theme/colors';
+import { COVER_ASPECT_RATIO } from '@/theme/layout';
+import { GRID_GAP, SCREEN_PADDING } from '@/theme/spacing';
 
 type Props = {
   className?: string;

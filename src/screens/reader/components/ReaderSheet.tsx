@@ -3,9 +3,9 @@ import { Feather } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { useColors } from '../../../theme/colors';
-import { SHEET_HEIGHT } from '../../../theme/spacing';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { useColors } from '@/theme/colors';
+import { SHEET_HEIGHT } from '@/theme/spacing';
 
 /** Scrim, sliding sheet and header shared by the reader's bottom sheets. */
 export function ReaderSheet({

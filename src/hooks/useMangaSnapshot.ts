@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { hasDownloadsFor } from '../downloads/metadata';
-import { log } from '../dev/log';
+import { hasDownloadsFor } from '@/downloads/metadata';
+import { log } from '@/dev/log';
 import {
   loadMangaSnapshot,
   saveMangaSnapshot,
-} from '../storage/mangaSnapshot';
-import type { MangaDetail } from '../source/zonatmo';
+} from '@/storage/mangaSnapshot';
+import type { MangaDetail } from '@/source/zonatmo';
 
 /**
  * The manga detail as saved on the device, kept in sync with what is worth

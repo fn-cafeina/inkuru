@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Text, View } from 'react-native';
 
-import { useColors } from '../theme/colors';
+import { useColors } from '@/theme/colors';
 
 export function EmptyState({
   title,

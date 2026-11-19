@@ -4,9 +4,9 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import type { MangaChapter } from '../../../source/zonatmo';
-import { Button } from '../../../components/Button';
-import { reader } from '../../../theme/colors';
+import type { MangaChapter } from '@/source/zonatmo';
+import { Button } from '@/components/Button';
+import { reader } from '@/theme/colors';
 
 type Props = {
   next?: MangaChapter;

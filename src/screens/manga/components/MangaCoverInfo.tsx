@@ -1,8 +1,8 @@
 import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
-import { COVER_ASPECT_RATIO } from '../../../theme/layout';
-import { useColors } from '../../../theme/colors';
+import { COVER_ASPECT_RATIO } from '@/theme/layout';
+import { useColors } from '@/theme/colors';
 
 const FACT_VALUES: Record<string, string> = {
   Ongoing: 'En emisión',

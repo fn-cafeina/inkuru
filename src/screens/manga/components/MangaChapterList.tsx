@@ -2,11 +2,11 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 
-import { EmptyState } from '../../../components/EmptyState';
-import type { MangaChapter, MangaDetail } from '../../../source/zonatmo';
-import { useColors } from '../../../theme/colors';
-import type { ChapterRange } from '../chapters';
-import { getChapterState } from '../chapters';
+import { EmptyState } from '@/components/EmptyState';
+import type { MangaChapter, MangaDetail } from '@/source/zonatmo';
+import { useColors } from '@/theme/colors';
+import type { ChapterRange } from '@/screens/manga/chapters';
+import { getChapterState } from '@/screens/manga/chapters';
 import { ChapterCard } from './ChapterCard';
 import { MangaHeader } from './MangaHeader';
 

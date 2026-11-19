@@ -2,8 +2,8 @@ import { Feather } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
-import { reader, useColors } from '../theme/colors';
-import { APP_BAR_GAP } from '../theme/spacing';
+import { reader, useColors } from '@/theme/colors';
+import { APP_BAR_GAP } from '@/theme/spacing';
 import { AnimatedPressable } from './AnimatedPressable';
 
 export function ScreenHeader({

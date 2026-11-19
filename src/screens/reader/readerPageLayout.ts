@@ -1,5 +1,5 @@
-import type { ReaderScale } from '../../storage/readerSettings';
-import { READER_PAGE_ASPECT_RATIO } from '../../theme/layout';
+import type { ReaderScale } from '@/storage/readerSettings';
+import { READER_PAGE_ASPECT_RATIO } from '@/theme/layout';
 
 export type SourceSize = { width: number; height: number };
 

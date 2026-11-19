@@ -4,30 +4,30 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Screen } from '../../components/Screen';
-import { CounterRow } from '../../components/CounterRow';
-import { SettingRow } from '../../components/SettingRow';
-import { SettingSection } from '../../components/SettingSection';
-import { SwitchRow } from '../../components/SwitchRow';
-import { setDownloadConcurrency } from '../../downloads/manager';
-import { useTabBarManager } from '../../hooks/useTabBarManager';
-import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
+import { Screen } from '@/components/Screen';
+import { CounterRow } from '@/components/CounterRow';
+import { SettingRow } from '@/components/SettingRow';
+import { SettingSection } from '@/components/SettingSection';
+import { SwitchRow } from '@/components/SwitchRow';
+import { setDownloadConcurrency } from '@/downloads/manager';
+import { useTabBarManager } from '@/hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '@/navigation/FloatingTabBar';
 import {
   DEFAULT_DOWNLOAD_CONCURRENCY,
   loadDownloadConcurrency,
   MAX_DOWNLOAD_CONCURRENCY,
   MIN_DOWNLOAD_CONCURRENCY,
   saveDownloadConcurrency,
-} from '../../storage/downloadSettings';
-import { useColors } from '../../theme/colors';
+} from '@/storage/downloadSettings';
+import { useColors } from '@/theme/colors';
 import {
   checkForUpdate,
   currentVersion,
   getUpdateState,
   setAutoCheck,
   subscribeUpdates,
-} from '../../update/check';
-import { openUpdate } from '../../update/flow';
+} from '@/update/check';
+import { openUpdate } from '@/update/flow';
 
 export default function SettingsScreen() {
   const colors = useColors();

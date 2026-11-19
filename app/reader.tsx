@@ -1,1 +1,1 @@
-export { default } from '../src/screens/reader/ReaderScreen';
+export { default } from '@/screens/reader/ReaderScreen';

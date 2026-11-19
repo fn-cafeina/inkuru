@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 
-import { reader } from '../../../theme/colors';
+import { reader } from '@/theme/colors';
 
 export function ReaderProgressBar({
   page,

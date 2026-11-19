@@ -6,12 +6,12 @@ import Animated from 'react-native-reanimated';
 import type { SharedValue } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 
-import type { ReaderQuality, ReaderScale } from '../../../storage/readerSettings';
-import { reader } from '../../../theme/colors';
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { knownPageRatio, pageBox, rememberPageRatio } from '../readerPageLayout';
-import type { SourceSize } from '../readerPageLayout';
-import { usePageGestures } from '../usePageGestures';
+import type { ReaderQuality, ReaderScale } from '@/storage/readerSettings';
+import { reader } from '@/theme/colors';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { knownPageRatio, pageBox, rememberPageRatio } from '@/screens/reader/readerPageLayout';
+import type { SourceSize } from '@/screens/reader/readerPageLayout';
+import { usePageGestures } from '@/screens/reader/usePageGestures';
 
 type Props = {
   uri: string;

@@ -1,15 +1,15 @@
 import { memo } from 'react';
 import { Alert, View } from 'react-native';
 
-import { ChapterRow } from '../../../components/ChapterRow';
+import { ChapterRow } from '@/components/ChapterRow';
 import {
   cancelDownload,
   deleteDownload,
   enqueueDownload,
   getDownloadState,
-} from '../../../downloads/manager';
-import type { MangaChapter } from '../../../source/zonatmo';
-import type { ChapterState } from '../chapters';
+} from '@/downloads/manager';
+import type { MangaChapter } from '@/source/zonatmo';
+import type { ChapterState } from '@/screens/manga/chapters';
 import { ChapterDownloadButton } from './ChapterDownloadButton';
 
 type Props = {

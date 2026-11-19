@@ -1,1 +1,1 @@
-export { default } from '../src/screens/manga/MangaScreen';
+export { default } from '@/screens/manga/MangaScreen';

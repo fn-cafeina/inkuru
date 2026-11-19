@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { AnimatedPressable } from './AnimatedPressable';
-import { useColors } from '../theme/colors';
+import { useColors } from '@/theme/colors';
 
 type ChapterRowState = 'current' | 'read' | 'selected';
 

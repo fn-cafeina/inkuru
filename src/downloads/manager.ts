@@ -1,8 +1,8 @@
-import { fetchReader } from '../source/zonatmo';
-import { log, ms, reason } from '../dev/log';
-import { readerCacheKey } from '../storage/cacheKeys';
-import { forgetRemoteCache } from '../storage/remoteCache';
-import { forgetPageProgress } from '../storage/readerProgress';
+import { fetchReader } from '@/source/zonatmo';
+import { log, ms, reason } from '@/dev/log';
+import { readerCacheKey } from '@/storage/cacheKeys';
+import { forgetRemoteCache } from '@/storage/remoteCache';
+import { forgetPageProgress } from '@/storage/readerProgress';
 import {
   deleteChapterFiles,
   downloadPageWithRetry,
@@ -25,7 +25,7 @@ import {
   subscribe,
 } from './store';
 import { withTimeout } from './timeout';
-import { clampDownloadConcurrency } from '../storage/downloadSettings';
+import { clampDownloadConcurrency } from '@/storage/downloadSettings';
 import type { DownloadInput, DownloadRecord } from './types';
 
 export { loadDownloadedReader } from './localReader';

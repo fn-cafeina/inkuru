@@ -6,9 +6,9 @@ import Animated, {
   useReducedMotion,
 } from 'react-native-reanimated';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { ScreenHeader } from '../../../components/ScreenHeader';
-import { reader } from '../../../theme/colors';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { reader } from '@/theme/colors';
 
 type Props = {
   title: string;

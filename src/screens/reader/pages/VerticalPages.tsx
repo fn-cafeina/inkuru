@@ -7,12 +7,12 @@ import { useSharedValue } from 'react-native-reanimated';
 import type {
   ReaderQuality,
   ReaderScale,
-} from '../../../storage/readerSettings';
-import { reader } from '../../../theme/colors';
-import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
-import { ReaderPage } from '../components/ReaderPage';
+} from '@/storage/readerSettings';
+import { reader } from '@/theme/colors';
+import { READER_PAGE_ASPECT_RATIO } from '@/theme/layout';
+import { ReaderPage } from '@/screens/reader/components/ReaderPage';
 import { viewablePage } from './viewablePage';
-import { pageLayoutAt } from '../readerPageLayout';
+import { pageLayoutAt } from '@/screens/reader/readerPageLayout';
 
 export function VerticalPages({
   pages,

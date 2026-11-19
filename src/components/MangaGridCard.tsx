@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
-import { COVER_ASPECT_RATIO } from '../theme/layout';
+import { COVER_ASPECT_RATIO } from '@/theme/layout';
 import { AnimatedPressable } from './AnimatedPressable';
 
 type Props = {

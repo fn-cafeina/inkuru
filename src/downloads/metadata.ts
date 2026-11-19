@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { withLock } from '../storage/serialize';
+import { withLock } from '@/storage/serialize';
 import { isDownloadRecord } from './types';
 import type { DownloadRecord } from './types';
 

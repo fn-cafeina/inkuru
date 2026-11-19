@@ -3,7 +3,7 @@ import { Feather } from '@expo/vector-icons';
 
 import { AnimatedPressable } from './AnimatedPressable';
 import { SettingRow } from './SettingRow';
-import { useColors } from '../theme/colors';
+import { useColors } from '@/theme/colors';
 
 /**
  * A settings row whose trailing action is a minus/plus counter, like the

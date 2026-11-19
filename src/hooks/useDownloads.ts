@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
-import { getDownloadState, subscribe } from '../downloads/manager';
-import type { DownloadState } from '../downloads/types';
+import { getDownloadState, subscribe } from '@/downloads/manager';
+import type { DownloadState } from '@/downloads/types';
 
 export function useIsChapterDownloaded(chapterPath: string): boolean {
   return useSyncExternalStore(

@@ -1,7 +1,7 @@
 import { Text } from 'react-native';
 
 import { AnimatedPressable } from './AnimatedPressable';
-import { reader, useColors } from '../theme/colors';
+import { reader, useColors } from '@/theme/colors';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'lg';

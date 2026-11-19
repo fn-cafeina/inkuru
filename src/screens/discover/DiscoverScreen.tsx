@@ -16,16 +16,16 @@ import {
 } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState } from '../../components/EmptyState';
-import { ErrorState } from '../../components/ErrorState';
-import { MangaGridCard } from '../../components/MangaGridCard';
-import { Screen } from '../../components/Screen';
-import { MangaGridSkeleton } from '../../components/Skeleton';
-import { useTabBarManager } from '../../hooks/useTabBarManager';
-import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
-import type { MangaListItem } from '../../source/zonatmo';
-import { useColors } from '../../theme/colors';
-import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { MangaGridCard } from '@/components/MangaGridCard';
+import { Screen } from '@/components/Screen';
+import { MangaGridSkeleton } from '@/components/Skeleton';
+import { useTabBarManager } from '@/hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '@/navigation/FloatingTabBar';
+import type { MangaListItem } from '@/source/zonatmo';
+import { useColors } from '@/theme/colors';
+import { CARD_GAP, mangaCardWidth } from '@/theme/gridLayout';
 import { useDiscoverFeed } from './useDiscoverFeed';
 
 export default function DiscoverScreen() {

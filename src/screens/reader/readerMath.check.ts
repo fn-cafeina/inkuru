@@ -4,7 +4,7 @@ import {
   pageLayoutAt,
   rememberPageRatio,
 } from './readerPageLayout';
-import { READER_PAGE_ASPECT_RATIO } from '../../theme/layout';
+import { READER_PAGE_ASPECT_RATIO } from '@/theme/layout';
 import {
   clamp,
   DOUBLE_TAP_ZOOM,

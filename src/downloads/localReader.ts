@@ -1,5 +1,5 @@
 import { readDownloadFile } from './files';
-import type { ReaderData } from '../source/zonatmo';
+import type { ReaderData } from '@/source/zonatmo';
 
 /**
  * Reader payloads already read from disk. Opening a downloaded chapter used to

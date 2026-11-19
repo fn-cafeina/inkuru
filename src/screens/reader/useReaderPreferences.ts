@@ -4,7 +4,7 @@ import {
   deactivateKeepAwake,
 } from 'expo-keep-awake';
 
-import { useReaderSettings } from '../../hooks/useReaderSettings';
+import { useReaderSettings } from '@/hooks/useReaderSettings';
 
 export function useReaderPreferences(mangaPath?: string) {
   const {

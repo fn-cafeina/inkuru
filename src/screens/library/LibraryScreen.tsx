@@ -7,19 +7,19 @@ import {
 } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EmptyState } from '../../components/EmptyState';
-import { ErrorState } from '../../components/ErrorState';
-import { MangaGridCard } from '../../components/MangaGridCard';
-import { MangaGridSkeleton } from '../../components/Skeleton';
-import { SectionTitle } from '../../components/SectionTitle';
-import { Screen } from '../../components/Screen';
-import { useTabBarManager } from '../../hooks/useTabBarManager';
-import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
-import { loadLibraryResult } from '../../storage/library';
-import type { LibraryEntry } from '../../storage/library';
-import { loadProgressMany } from '../../storage/readerProgress';
-import type { ReaderProgress } from '../../storage/readerProgress';
-import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
+import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { MangaGridCard } from '@/components/MangaGridCard';
+import { MangaGridSkeleton } from '@/components/Skeleton';
+import { SectionTitle } from '@/components/SectionTitle';
+import { Screen } from '@/components/Screen';
+import { useTabBarManager } from '@/hooks/useTabBarManager';
+import { TAB_BAR_CLEARANCE } from '@/navigation/FloatingTabBar';
+import { loadLibraryResult } from '@/storage/library';
+import type { LibraryEntry } from '@/storage/library';
+import { loadProgressMany } from '@/storage/readerProgress';
+import type { ReaderProgress } from '@/storage/readerProgress';
+import { CARD_GAP, mangaCardWidth } from '@/theme/gridLayout';
 import { orderLibrary, sameEntries, sameProgress } from './orderLibrary';
 
 let cachedEntries: LibraryEntry[] | null = null;

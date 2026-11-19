@@ -1,14 +1,14 @@
 import { ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ReaderPreferenceSections } from '../../../components/ReaderPreferenceSections';
-import { SettingSection } from '../../../components/SettingSection';
-import { SwitchRow } from '../../../components/SwitchRow';
+import { ReaderPreferenceSections } from '@/components/ReaderPreferenceSections';
+import { SettingSection } from '@/components/SettingSection';
+import { SwitchRow } from '@/components/SwitchRow';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
-} from '../../../storage/readerSettings';
+} from '@/storage/readerSettings';
 import { ReaderSheet } from './ReaderSheet';
 
 export function ReaderSettingsSheet({

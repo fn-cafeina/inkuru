@@ -8,9 +8,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { AnimatedPressable } from '../components/AnimatedPressable';
-import { useColors } from '../theme/colors';
-import { getUpdateState, subscribeUpdates } from '../update/check';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { useColors } from '@/theme/colors';
+import { getUpdateState, subscribeUpdates } from '@/update/check';
 import { useTabBarVisibility } from './tabBarState';
 
 // 16px gap under the pill + 60px pill (py-2 + 44px icon button).

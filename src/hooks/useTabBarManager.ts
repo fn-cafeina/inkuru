@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native';
 
-import { setTabBarVisibility } from '../navigation/tabBarState';
+import { setTabBarVisibility } from '@/navigation/tabBarState';
 
 const THRESHOLD = 8;
 

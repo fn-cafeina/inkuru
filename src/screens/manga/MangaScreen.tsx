@@ -3,25 +3,25 @@ import { Alert, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ErrorState } from '../../components/ErrorState';
-import { Screen } from '../../components/Screen';
+import { ErrorState } from '@/components/ErrorState';
+import { Screen } from '@/components/Screen';
 import { MangaChapterList } from './components/MangaChapterList';
 import { MangaSkeleton } from './components/MangaSkeleton';
 import { MangaTopBar } from './components/MangaTopBar';
-import { useRemoteData } from '../../hooks/useRemoteData';
-import { useOpenLog } from '../../hooks/useOpenLog';
-import { useMangaSnapshot } from '../../hooks/useMangaSnapshot';
-import { hasDownloadsFor } from '../../downloads/metadata';
-import type { Fields } from '../../dev/log';
-import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
-import { forgetMangaSnapshot } from '../../storage/mangaSnapshot';
-import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
-import type { ReaderProgress } from '../../storage/readerProgress';
-import { isMangaDetail } from '../../source/guards';
-import { fetchManga } from '../../source/zonatmo';
-import type { MangaChapter, MangaDetail } from '../../source/zonatmo';
-import { CACHE_FRESH_MS } from '../../storage/queryCache';
-import { goBackOrTabs } from '../../navigation/back';
+import { useRemoteData } from '@/hooks/useRemoteData';
+import { useOpenLog } from '@/hooks/useOpenLog';
+import { useMangaSnapshot } from '@/hooks/useMangaSnapshot';
+import { hasDownloadsFor } from '@/downloads/metadata';
+import type { Fields } from '@/dev/log';
+import { addToLibrary, isInLibrary, removeFromLibrary } from '@/storage/library';
+import { forgetMangaSnapshot } from '@/storage/mangaSnapshot';
+import { loadProgress, loadReadChapters } from '@/storage/readerProgress';
+import type { ReaderProgress } from '@/storage/readerProgress';
+import { isMangaDetail } from '@/source/guards';
+import { fetchManga } from '@/source/zonatmo';
+import type { MangaChapter, MangaDetail } from '@/source/zonatmo';
+import { CACHE_FRESH_MS } from '@/storage/queryCache';
+import { goBackOrTabs } from '@/navigation/back';
 import {
   ascendingChapters,
   chunkChapters,

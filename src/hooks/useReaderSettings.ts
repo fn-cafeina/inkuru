@@ -14,14 +14,14 @@ import {
   saveReaderMode,
   saveReaderQuality,
   saveReaderScale,
-} from '../storage/readerSettings';
-import { resolveReaderValues } from '../storage/readerOverrides';
+} from '@/storage/readerSettings';
+import { resolveReaderValues } from '@/storage/readerOverrides';
 import type {
   MangaReaderOverrides,
   ReaderMode,
   ReaderQuality,
   ReaderScale,
-} from '../storage/readerSettings';
+} from '@/storage/readerSettings';
 
 // Last values for the next mount (chapter switch, tab focus) while AsyncStorage
 // resolves. keepAwake starts at the storage default so a focus reload does not

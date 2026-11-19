@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router/js-tabs';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 
-import { FloatingTabBar } from '../../src/navigation/FloatingTabBar';
-import { useColors } from '../../src/theme/colors';
+import { FloatingTabBar } from '@/navigation/FloatingTabBar';
+import { useColors } from '@/theme/colors';
 
 // The navigator calls `tabBar` as a plain function inside a context render
 // prop, where the hook dispatcher is not set; `FloatingTabBar` must render

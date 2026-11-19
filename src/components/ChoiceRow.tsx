@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 import { AnimatedPressable } from './AnimatedPressable';
-import { useColors } from '../theme/colors';
+import { useColors } from '@/theme/colors';
 
 export function ChoiceRow({
   label,

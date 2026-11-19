@@ -40,6 +40,10 @@
 ## Styling
 
 - Apply Tailwind classes through `className` on React Native components.
+- Import across folders through the `@/` alias, which maps to `src/`:
+  `import { Screen } from '@/components/Screen'`. Sibling files stay on
+  `./`. The alias resolves in Metro through `compilerOptions.paths`, so do not
+  add `baseUrl` (TypeScript 6 deprecates it).
 - CSS entry is `global.css` at the project root; Tailwind scans from the root.
   If `global.css` moves, add an explicit `@source`.
 - Import `global.css` only from `app/_layout.tsx`, the router root.

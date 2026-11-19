@@ -1,6 +1,6 @@
 import { Directory, File } from 'expo-file-system';
 
-import { isReaderData } from '../source/guards';
+import { isReaderData } from '@/source/guards';
 import { isChapterDirName } from './ownership';
 import { isDownloadRecord } from './types';
 import type { DownloadFile, DownloadRecord } from './types';

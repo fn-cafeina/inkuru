@@ -2,10 +2,10 @@ import { memo } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import type { RelatedManga } from '../../../source/zonatmo';
-import { useColors } from '../../../theme/colors';
-import { COVER_ASPECT_RATIO } from '../../../theme/layout';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import type { RelatedManga } from '@/source/zonatmo';
+import { useColors } from '@/theme/colors';
+import { COVER_ASPECT_RATIO } from '@/theme/layout';
 
 const CARD_WIDTH = 100;
 

@@ -9,7 +9,7 @@ import { parseMangaRelated } from './related';
 import type { RelatedManga } from './related';
 import { fetchText } from './http';
 import { absoluteUrl, toPath } from './url';
-import { log, ms } from '../dev/log';
+import { log, ms } from '@/dev/log';
 const CATALOG_PATH =
   '/biblioteca?order_item=likes_count&order_dir=desc&title=&filter_by=title&author_filter=&type=&demography=shounen&status=';
 

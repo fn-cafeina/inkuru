@@ -7,9 +7,9 @@ import {
   markChapterRead,
   pageProgressKey,
   saveProgress,
-} from '../../storage/readerProgress';
+} from '@/storage/readerProgress';
 import { reachesLastPage } from './readerReadMark';
-import type { ReaderData } from '../../source/zonatmo';
+import type { ReaderData } from '@/source/zonatmo';
 
 const PROGRESS_WRITE_DELAY = 500;
 

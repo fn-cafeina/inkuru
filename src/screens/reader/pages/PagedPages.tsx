@@ -6,8 +6,8 @@ import type { ListViewToken } from 'react-native';
 import type {
   ReaderQuality,
   ReaderScale,
-} from '../../../storage/readerSettings';
-import { ReaderPage } from '../components/ReaderPage';
+} from '@/storage/readerSettings';
+import { ReaderPage } from '@/screens/reader/components/ReaderPage';
 import { viewablePage } from './viewablePage';
 
 export function PagedPages({

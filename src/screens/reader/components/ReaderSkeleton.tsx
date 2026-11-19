@@ -1,9 +1,9 @@
 import { ActivityIndicator, View } from 'react-native';
 
-import { Skeleton } from '../../../components/Skeleton';
-import type { ReaderMode } from '../../../storage/readerSettings';
-import { reader } from '../../../theme/colors';
-import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
+import { Skeleton } from '@/components/Skeleton';
+import type { ReaderMode } from '@/storage/readerSettings';
+import { reader } from '@/theme/colors';
+import { READER_PAGE_ASPECT_RATIO } from '@/theme/layout';
 
 /**
  * Mirrors the real reader: a column of full-width pages in webtoon mode, one

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 
-import { Skeleton } from '../../../components/Skeleton';
-import { COVER_ASPECT_RATIO } from '../../../theme/layout';
+import { Skeleton } from '@/components/Skeleton';
+import { COVER_ASPECT_RATIO } from '@/theme/layout';
 
 /**
  * Honest detail placeholder: cover, title and status, tags, the read button,

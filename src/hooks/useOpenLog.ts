@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
-import type { Fields } from '../dev/log';
-import { log, ms } from '../dev/log';
+import type { Fields } from '@/dev/log';
+import { log, ms } from '@/dev/log';
 
 /**
  * One info line the first time `fields` is not null for a given `key`: how long

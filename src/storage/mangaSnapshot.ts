@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { isMangaDetail } from '../source/guards';
-import type { MangaDetail } from '../source/zonatmo';
+import { isMangaDetail } from '@/source/guards';
+import type { MangaDetail } from '@/source/zonatmo';
 
 // The query cache expires and evicts, and a downloaded chapter is unreachable
 // once the chapter list is gone: the reader entry point is the manga screen.

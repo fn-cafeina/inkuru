@@ -1,7 +1,7 @@
 import { Switch } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-import { useColors } from '../theme/colors';
+import { useColors } from '@/theme/colors';
 import { SettingRow } from './SettingRow';
 
 /**

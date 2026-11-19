@@ -4,12 +4,12 @@ import {
   READER_MODE_OPTIONS,
   READER_QUALITY_OPTIONS,
   READER_SCALE_OPTIONS,
-} from '../storage/readerSettings';
+} from '@/storage/readerSettings';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
-} from '../storage/readerSettings';
+} from '@/storage/readerSettings';
 
 /** Reader mode, scale and quality rows of the reader settings sheet. */
 export function ReaderPreferenceSections({

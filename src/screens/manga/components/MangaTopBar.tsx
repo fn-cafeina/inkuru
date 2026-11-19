@@ -1,8 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 
-import { AnimatedPressable } from '../../../components/AnimatedPressable';
-import { ScreenHeader } from '../../../components/ScreenHeader';
-import { useColors } from '../../../theme/colors';
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import { useColors } from '@/theme/colors';
 
 type Props = {
   onBack: () => void;

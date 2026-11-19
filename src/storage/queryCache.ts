@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { log, ms, reason } from '../dev/log';
+import { log, ms, reason } from '@/dev/log';
 import { withLock } from './serialize';
 
 const PREFIX = 'cache:query:';

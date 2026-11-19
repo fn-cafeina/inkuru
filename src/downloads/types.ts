@@ -1,4 +1,4 @@
-import type { ReaderData } from '../source/zonatmo';
+import type { ReaderData } from '@/source/zonatmo';
 
 export type DownloadStatus = 'queued' | 'downloading' | 'done' | 'failed';
 

@@ -1,10 +1,10 @@
-import type { MangaChapter, ReaderData } from '../../../source/zonatmo';
+import type { MangaChapter, ReaderData } from '@/source/zonatmo';
 import type {
   ReaderMode,
   ReaderQuality,
   ReaderScale,
-} from '../../../storage/readerSettings';
-import { ReaderTransition } from '../components/ReaderTransition';
+} from '@/storage/readerSettings';
+import { ReaderTransition } from '@/screens/reader/components/ReaderTransition';
 import { PagedPages } from './PagedPages';
 import { VerticalPages } from './VerticalPages';
 
