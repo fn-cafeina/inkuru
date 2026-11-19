@@ -1,6 +1,9 @@
 import { log, ms } from '@/dev/log';
 import { absoluteUrl } from './url';
 
+/** Budget for one request before it is aborted and read as an error. */
+export const REQUEST_TIMEOUT_MS = 15_000;
+
 /**
  * The site's only transport. Read here once so a slow page or a bad status
  * shows up in the log next to the parse that follows it.

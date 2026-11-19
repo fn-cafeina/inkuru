@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { readCache, writeCache } from '@/storage/queryCache';
 import { readRemoteCache, writeRemoteCache } from '@/storage/remoteCache';
 import { withTimeout } from '@/downloads/timeout';
+import { REQUEST_TIMEOUT_MS } from '@/source/http';
 import { log, ms, reason, seconds } from '@/dev/log';
 
 type RemoteData<T> = {
@@ -102,7 +103,7 @@ export function useRemoteData<T>(
 
       try {
         // A request hanging past the budget is aborted and read as an error.
-        const result = await withTimeout(controller, 15000, () =>
+        const result = await withTimeout(controller, REQUEST_TIMEOUT_MS, () =>
           fetcher(controller.signal),
         );
         const savedAt = Date.now();

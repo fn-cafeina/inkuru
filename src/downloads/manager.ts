@@ -1,4 +1,5 @@
 import { fetchReader } from '@/source/zonatmo';
+import { REQUEST_TIMEOUT_MS } from '@/source/http';
 import { log, ms, reason } from '@/dev/log';
 import { readerCacheKey } from '@/storage/cacheKeys';
 import { forgetRemoteCache } from '@/storage/remoteCache';
@@ -234,7 +235,7 @@ async function runDownload(input: DownloadInput) {
   notify();
 
   try {
-    const data = await withTimeout(controller, 15_000, () => fetchReader(chapterPath, controller.signal));
+    const data = await withTimeout(controller, REQUEST_TIMEOUT_MS, () => fetchReader(chapterPath, controller.signal));
 
     if (!runs.isCurrent(chapterPath, generation)) {
       throw new Error('stale');

@@ -4,13 +4,13 @@ import { getDownloadState } from '@/downloads/manager';
 import { withTimeout } from '@/downloads/timeout';
 import { isReaderData } from '@/source/guards';
 import { fetchReader } from '@/source/zonatmo';
+import { REQUEST_TIMEOUT_MS } from '@/source/http';
 import { readerCacheKey } from '@/storage/cacheKeys';
 import { writeCache } from '@/storage/queryCache';
 import { writeRemoteCache } from '@/storage/remoteCache';
 
 /** Pages warmed up front; the reader prefetches the rest as you scroll. */
 const WARM_PAGES = 2;
-const REQUEST_TIMEOUT_MS = 15_000;
 // Chapters are long; this only stops a re-fetch when the reader bounces around
 // the same transition. One attempt per chapter per session, failures included.
 const LIMIT = 24;
