@@ -31,7 +31,7 @@ export function MangaTopBar({
               ? 'Quitar de la biblioteca'
               : 'Añadir a la biblioteca'
           }
-          accessibilityState={{ selected: inLibrary }}
+          accessibilityState={{ selected: inLibrary, disabled: !canToggleLibrary }}
           disabled={!canToggleLibrary}
           onPress={onToggleLibrary}
           className="min-h-12 min-w-12 items-center justify-center rounded-full"
@@ -39,7 +39,13 @@ export function MangaTopBar({
           <Feather
             name="bookmark"
             size={20}
-            color={inLibrary ? colors.accent : colors.iconInactive}
+            color={
+              inLibrary
+                ? colors.accent
+                : canToggleLibrary
+                  ? colors.iconInactive
+                  : colors.border
+            }
           />
         </AnimatedPressable>
       }
