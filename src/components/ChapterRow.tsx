@@ -12,9 +12,9 @@ type ChapterRowState = 'current' | 'read' | 'selected';
 export const CHAPTER_ROW_HEIGHT = 56;
 export const CHAPTER_ROW_STEP = CHAPTER_ROW_HEIGHT + 1;
 
-// One look for every row: nothing dims or strikes a read chapter, the bar
-// underneath says how far it went.
-const TITLE_CLASS = 'flex-1 text-base font-semibold';
+// One look for every row: no highlight, no dimming, no strike. The bar
+// underneath is the only thing that reports how far a chapter went.
+const TITLE_CLASS = 'flex-1 text-base font-semibold text-white';
 
 function stateLabel(
   state: ChapterRowState | undefined,
@@ -57,22 +57,18 @@ export function ChapterRow({
   className?: string;
 }) {
   const colors = useColors();
-  const highlighted = state === 'current' || state === 'selected';
-  const titleStyle = highlighted
-    ? { color: colors.onAccentContainer }
-    : undefined;
+  const current = state === 'current' || state === 'selected';
   const filled = barWidth(progress);
 
   return (
     <AnimatedPressable
       accessibilityRole="button"
       accessibilityLabel={`${title}${stateLabel(state, read)}`}
-      accessibilityState={{ selected: highlighted }}
+      accessibilityState={{ selected: current }}
       onPress={onPress}
-      style={highlighted ? { backgroundColor: colors.accentContainer } : undefined}
       className={`relative flex-row items-center p-4 ${className ?? ''}`}
     >
-      <Text numberOfLines={1} className={TITLE_CLASS} style={titleStyle}>
+      <Text numberOfLines={1} className={TITLE_CLASS}>
         {title}
       </Text>
       {trailing ? <View className="ml-2">{trailing}</View> : null}
