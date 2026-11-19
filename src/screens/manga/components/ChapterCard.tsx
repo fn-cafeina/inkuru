@@ -16,6 +16,8 @@ type Props = {
   chapter: MangaChapter;
   state: ChapterState | undefined;
   read: boolean;
+  /** Share of the chapter read, 0 to 1. */
+  progress?: number;
   mangaPath: string;
   mangaTitle: string;
   onOpen: (chapter: MangaChapter) => void;
@@ -30,6 +32,7 @@ export const ChapterCard = memo(function ChapterCard({
   chapter,
   state,
   read,
+  progress,
   mangaPath,
   mangaTitle,
   onOpen,
@@ -74,6 +77,7 @@ export const ChapterCard = memo(function ChapterCard({
         title={chapter.title}
         state={state}
         read={read}
+        progress={progress}
         trailing={
           <ChapterDownloadButton
             path={chapter.path}

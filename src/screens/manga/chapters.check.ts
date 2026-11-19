@@ -1,5 +1,6 @@
 import {
   ascendingChapters,
+  chapterRatios,
   chunkChapters,
   displayChapters,
   getChapterState,
@@ -129,6 +130,36 @@ assertEqual(
   nextToRead(order, '/view_uploads/99', read),
   undefined,
   'a chapter off the list leaves no continue target',
+);
+
+// --- read bars ---
+
+const barreable = range(3);
+const bars = chapterRatios(barreable, new Set(['/view_uploads/1']), {
+  '/view_uploads/2': { page: 3, total: 10 },
+  '/view_uploads/3': { page: 0, total: 0 },
+});
+
+assertEqual(bars['/view_uploads/1'], 1, 'a read chapter fills its bar');
+assertEqual(bars['/view_uploads/2'], 0.4, 'a started chapter shows its page share');
+assertEqual(
+  bars['/view_uploads/3'],
+  undefined,
+  'a chapter without a length gets no bar',
+);
+assertEqual(
+  chapterRatios(barreable, new Set(), {
+    '/view_uploads/1': { page: 9, total: 10 },
+  })['/view_uploads/1'],
+  1,
+  'the last page never passes a full bar',
+);
+assertEqual(
+  chapterRatios(barreable, new Set(), {
+    '/view_uploads/9': { page: 1, total: 10 },
+  })['/view_uploads/1'],
+  undefined,
+  'a mark for another chapter draws nothing',
 );
 
 console.log('chapter ranges ok');

@@ -10,12 +10,16 @@ import { MangaSkeleton } from './components/MangaSkeleton';
 import { MangaTopBar } from './components/MangaTopBar';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { useOpenLog } from '@/hooks/useOpenLog';
+import { useChapterRatios } from '@/hooks/useChapterRatios';
 import { useMangaSnapshot } from '@/hooks/useMangaSnapshot';
 import { hasDownloadsFor } from '@/downloads/metadata';
 import type { Fields } from '@/dev/log';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '@/storage/library';
 import { forgetMangaSnapshot } from '@/storage/mangaSnapshot';
-import { loadProgress, loadReadChapters } from '@/storage/readerProgress';
+import {
+  loadProgress,
+  loadReadChapters,
+} from '@/storage/readerProgress';
 import type { ReaderProgress } from '@/storage/readerProgress';
 import { isMangaDetail } from '@/source/guards';
 import { fetchManga } from '@/source/zonatmo';
@@ -158,6 +162,10 @@ export default function MangaScreen() {
       };
     }, [path]),
   );
+
+  // Chapter lengths are only known for chapters opened at least once, so the
+  // bars land after the list does.
+  const ratios = useChapterRatios(data?.chapters ?? [], readChapters);
 
   // Whatever is worth reading offline keeps its detail past the query cache,
   // and it steps in when the network is down and the cache no longer has the
@@ -302,6 +310,7 @@ export default function MangaScreen() {
           rangeIndex={rangeIndex}
           sortOrder={sortOrder}
           readChapters={readChapters}
+          ratios={ratios}
           currentChapterPath={continueChapter?.path}
           resumeChapter={continueChapter}
           bottomInset={insets.bottom}

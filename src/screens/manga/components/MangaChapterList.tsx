@@ -20,6 +20,8 @@ type Props = {
   rangeIndex: number;
   sortOrder: 'asc' | 'desc';
   readChapters: string[];
+  /** Share of the chapter read, 0 to 1, keyed by chapter path. */
+  ratios: Record<string, number>;
   currentChapterPath?: string;
   resumeChapter?: MangaChapter;
   bottomInset: number;
@@ -41,6 +43,7 @@ export function MangaChapterList({
   rangeIndex,
   sortOrder,
   readChapters,
+  ratios,
   currentChapterPath,
   resumeChapter,
   bottomInset,
@@ -79,6 +82,7 @@ export function MangaChapterList({
           chapter={item}
           state={getChapterState(item.path, currentChapterPath, readSet)}
           read={readSet.has(item.path)}
+          progress={ratios[item.path]}
           mangaPath={mangaPath}
           mangaTitle={manga.title}
           onOpen={openChapter}

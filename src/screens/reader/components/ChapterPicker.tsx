@@ -24,6 +24,7 @@ export function ChapterPicker({
   chapters,
   currentPath,
   readChapters,
+  ratios,
   onClose,
   onSelect,
 }: {
@@ -31,6 +32,8 @@ export function ChapterPicker({
   chapters: MangaChapter[];
   currentPath: string;
   readChapters: string[];
+  /** Share of the chapter read, 0 to 1, keyed by chapter path. */
+  ratios: Record<string, number>;
   onClose: () => void;
   onSelect: (chapter: MangaChapter) => void;
 }) {
@@ -85,6 +88,7 @@ export function ChapterPicker({
                 title={item.title}
                 state="selected"
                 read={readSet.has(item.path)}
+                progress={ratios[item.path]}
                 className="min-h-14"
                 onPress={() => onSelect(item)}
               />
@@ -93,6 +97,7 @@ export function ChapterPicker({
             <ChapterRow
               title={item.title}
               read={readSet.has(item.path)}
+              progress={ratios[item.path]}
               className="min-h-14"
               onPress={() => onSelect(item)}
             />

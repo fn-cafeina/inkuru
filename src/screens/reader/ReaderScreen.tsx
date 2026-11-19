@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { NavigationBar } from 'expo-navigation-bar';
@@ -16,13 +16,13 @@ import { prefetchChapter } from './prefetchChapter';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { useOpenLog } from '@/hooks/useOpenLog';
 import type { Fields } from '@/dev/log';
+import { useChapterRatios } from '@/hooks/useChapterRatios';
 import { useReaderPreferences } from './useReaderPreferences';
 import { useReaderBack } from './useReaderBack';
 import { useReaderProgress } from './useReaderProgress';
 import { readerCacheKey } from '@/storage/cacheKeys';
 import { loadReadChapters } from '@/storage/readerProgress';
-import { ascendingChapters } from '@/screens/manga/chapters';
-import { loadDownloadedReader } from '@/downloads/manager';
+import { ascendingChapters } from '@/screens/manga/chapters';import { loadDownloadedReader } from '@/downloads/manager';
 import { useIsChapterDownloaded } from '@/hooks/useDownloads';
 import { isReaderData } from '@/source/guards';
 import { fetchReader } from '@/source/zonatmo';
@@ -113,6 +113,11 @@ export default function ReaderScreen() {
       validate: downloaded ? undefined : isReaderData,
     },
   );
+  const chapters = useMemo(
+    () => (data ? ascendingChapters(data.chapters) : []),
+    [data],
+  );
+  const ratios = useChapterRatios(chapters, readChapters);
   const { page, setPage, total, restored } = useReaderProgress({
     path: chapterPath,
     title: chapterTitle,
@@ -255,9 +260,10 @@ export default function ReaderScreen() {
         </View>
         <ChapterPicker
           visible={pickerOpen}
-          chapters={data ? ascendingChapters(data.chapters) : []}
+          chapters={chapters}
           currentPath={chapterPath}
           readChapters={readChapters}
+          ratios={ratios}
           onClose={() => setPickerOpen(false)}
           onSelect={openChapter}
         />

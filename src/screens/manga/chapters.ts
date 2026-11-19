@@ -1,4 +1,5 @@
 import type { MangaChapter } from '@/source/zonatmo';
+import type { PageMark } from '@/storage/readerProgress';
 
 const CHAPTER_RANGE_SIZE = 50;
 
@@ -36,6 +37,36 @@ export function getChapterState(
   }
 
   return readChapters.has(chapterPath) ? 'read' : undefined;
+}
+
+/**
+ * Share of each chapter already read, 0 to 1, for the bar under its row.
+ * A finished chapter is full; a started one uses its saved page against the
+ * chapter length, which only a chapter opened at least once knows.
+ */
+export function chapterRatios(
+  chapters: MangaChapter[],
+  readChapters: ReadonlySet<string>,
+  marks: Record<string, PageMark>,
+): Record<string, number> {
+  const ratios: Record<string, number> = {};
+
+  for (const chapter of chapters) {
+    if (readChapters.has(chapter.path)) {
+      ratios[chapter.path] = 1;
+      continue;
+    }
+
+    const mark = marks[chapter.path];
+
+    if (mark === undefined || mark.total <= 0 || mark.page <= 0) {
+      continue;
+    }
+
+    ratios[chapter.path] = Math.min(1, (mark.page + 1) / mark.total);
+  }
+
+  return ratios;
 }
 
 /**
