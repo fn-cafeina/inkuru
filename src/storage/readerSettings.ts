@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { withLock } from './serialize';
+
 export type ReaderMode = 'webtoon' | 'paged-ltr' | 'paged-rtl';
 export type ReaderScale = 'fit-screen' | 'fit-width';
 export type ReaderQuality = 'balanced' | 'original';
@@ -188,22 +190,28 @@ export async function loadMangaReaderOverrides(
   return map[mangaPath] ?? null;
 }
 
-export async function saveMangaReaderOverride(
+/**
+ * Reads the map, changes one field and writes it back, so a lock keeps two
+ * picks in the settings sheet from dropping each other's field.
+ */
+export function saveMangaReaderOverride(
   mangaPath: string,
   field: OverrideField,
   value: string,
 ): Promise<void> {
-  try {
-    const map = await loadOverrideMap();
+  return withLock(MANGA_OVERRIDES_KEY, async () => {
+    try {
+      const map = await loadOverrideMap();
 
-    await AsyncStorage.setItem(
-      MANGA_OVERRIDES_KEY,
-      JSON.stringify({
-        ...map,
-        [mangaPath]: { ...(map[mangaPath] ?? {}), [field]: value },
-      }),
-    );
-  } catch {
-    // A storage failure must not block reading.
-  }
+      await AsyncStorage.setItem(
+        MANGA_OVERRIDES_KEY,
+        JSON.stringify({
+          ...map,
+          [mangaPath]: { ...(map[mangaPath] ?? {}), [field]: value },
+        }),
+      );
+    } catch {
+      // A storage failure must not block reading.
+    }
+  });
 }
