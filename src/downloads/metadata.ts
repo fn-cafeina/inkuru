@@ -6,34 +6,30 @@ import type { DownloadRecord } from './types';
 
 const INDEX_KEY = 'downloads:index';
 
-let records: DownloadRecord[] | null = null;
-
+/**
+ * The index on disk, read on every call. There is no memory copy here on
+ * purpose: `store.records` is the in-memory view the UI subscribes to, and a
+ * second list that had to be kept in step with it was one missed update away
+ * from deciding "keep this manga for offline" on stale data.
+ */
 async function readIndex(): Promise<DownloadRecord[]> {
-  if (records) {
-    return records;
-  }
-
   const raw = await AsyncStorage.getItem(INDEX_KEY).catch(() => null);
 
   if (!raw) {
-    records = [];
-    return records;
+    return [];
   }
 
   try {
     const parsed: unknown = JSON.parse(raw);
 
-    records = Array.isArray(parsed) ? parsed.filter(isDownloadRecord) : [];
+    return Array.isArray(parsed) ? parsed.filter(isDownloadRecord) : [];
   } catch {
-    records = [];
+    return [];
   }
-
-  return records;
 }
 
-async function persist(next: DownloadRecord[]): Promise<void> {
-  records = next;
-  await AsyncStorage.setItem(INDEX_KEY, JSON.stringify(next)).catch(
+function persist(next: DownloadRecord[]): Promise<void> {
+  return AsyncStorage.setItem(INDEX_KEY, JSON.stringify(next)).catch(
     () => undefined,
   );
 }
