@@ -8,6 +8,7 @@ import type {
   ReaderScale,
 } from '../../../storage/readerSettings';
 import { ReaderPage } from '../components/ReaderPage';
+import { viewablePage } from './viewablePage';
 
 export function PagedPages({
   pages,
@@ -37,9 +38,10 @@ export function PagedPages({
   const [onViewableItemsChanged] = useState(
     () =>
       ({ viewableItems }: { viewableItems: ListViewToken[] }) => {
-        const index = viewableItems[0]?.index;
-        if (index != null && index < pages.length) {
-          onPageChange(index);
+        const next = viewablePage(viewableItems[0]?.index, pages.length);
+
+        if (next != null && next < pages.length) {
+          onPageChange(next);
         }
       },
   );

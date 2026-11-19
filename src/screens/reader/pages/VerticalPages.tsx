@@ -11,6 +11,7 @@ import type {
 import { reader } from '../../../theme/colors';
 import { READER_PAGE_ASPECT_RATIO } from '../../../theme/layout';
 import { ReaderPage } from '../components/ReaderPage';
+import { viewablePage } from './viewablePage';
 import { pageLayoutAt } from '../readerPageLayout';
 
 export function VerticalPages({
@@ -76,7 +77,11 @@ export function VerticalPages({
           }
         }
 
-        onPageChange(index);
+        const next = viewablePage(index, pages.length);
+
+        if (next != null) {
+          onPageChange(next);
+        }
       },
   );
 
