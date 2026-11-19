@@ -9,7 +9,6 @@ import {
   saveProgress,
 } from '../../storage/readerProgress';
 import { reachesLastPage } from './readerReadMark';
-import type { PageMark } from './readerReadMark';
 import type { ReaderData } from '../../source/zonatmo';
 
 const PROGRESS_WRITE_DELAY = 500;
@@ -40,7 +39,6 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
   const pendingRef = useRef<PendingProgress | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevPageRef = useRef<PageMark | null>(null);
   const flush = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -127,10 +125,10 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
 
     timerRef.current = setTimeout(flush, PROGRESS_WRITE_DELAY);
 
-    const prev = prevPageRef.current;
-    prevPageRef.current = { path, page: safePage };
-
-    if (mangaPath && reachesLastPage(prev, path, safePage, total)) {
+    // `markChapterRead` ignores repeats, so showing the last page is enough:
+    // no bookkeeping of the previous page, which used to miss single page
+    // chapters and every chapter opened already at its end.
+    if (mangaPath && reachesLastPage(safePage, total)) {
       void markChapterRead(mangaPath, path);
     }
   }, [data, flush, mangaPath, path, restored, safePage, title, total]);
