@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const MIN_DOWNLOAD_CONCURRENCY = 1;
-export const MAX_DOWNLOAD_CONCURRENCY = 10;
+export const MAX_DOWNLOAD_CONCURRENCY = 3;
 export const DEFAULT_DOWNLOAD_CONCURRENCY = 1;
 
 const CONCURRENCY_KEY = 'downloads:concurrency';
