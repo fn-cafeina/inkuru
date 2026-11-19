@@ -22,12 +22,16 @@ const TITLE_CLASS: Record<ChapterRowState | 'none', string> = {
 export function ChapterRow({
   title,
   state,
+  read = false,
   trailing,
   onPress,
   className,
 }: {
   title: string;
   state?: ChapterRowState;
+  /** Read wins over the row state: a finished chapter is struck through even
+   *  while it is the one being read. */
+  read?: boolean;
   trailing?: ReactNode;
   onPress: () => void;
   /** Extra sizing for contexts that need a taller row, like the reader picker. */
@@ -36,7 +40,17 @@ export function ChapterRow({
   const colors = useColors();
   const highlighted = state === 'current' || state === 'selected';
   const stateLabel =
-    state === 'current' ? ', leyendo' : state === 'read' ? ', leído' : '';
+    state === 'current' || state === 'selected'
+      ? ', leyendo'
+      : read
+        ? ', leído'
+        : '';
+  // `line-through` alone left some rows dimmed without the strike on Android,
+  // so the decoration is set here too.
+  const titleStyle = {
+    ...(highlighted ? { color: colors.onAccentContainer } : null),
+    ...(read ? { textDecorationLine: 'line-through' as const } : null),
+  };
 
   return (
     <AnimatedPressable
@@ -49,8 +63,8 @@ export function ChapterRow({
     >
       <Text
         numberOfLines={1}
-        className={TITLE_CLASS[state ?? 'none']}
-        style={highlighted ? { color: colors.onAccentContainer } : undefined}
+        className={read ? TITLE_CLASS.read : TITLE_CLASS[state ?? 'none']}
+        style={titleStyle}
       >
         {title}
       </Text>

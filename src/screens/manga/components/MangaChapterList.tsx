@@ -78,6 +78,7 @@ export function MangaChapterList({
         <ChapterCard
           chapter={item}
           state={getChapterState(item.path, currentChapterPath, readSet)}
+          read={readSet.has(item.path)}
           mangaPath={mangaPath}
           mangaTitle={manga.title}
           onOpen={openChapter}

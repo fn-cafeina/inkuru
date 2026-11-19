@@ -15,6 +15,7 @@ import { ChapterDownloadButton } from './ChapterDownloadButton';
 type Props = {
   chapter: MangaChapter;
   state: ChapterState | undefined;
+  read: boolean;
   mangaPath: string;
   mangaTitle: string;
   onOpen: (chapter: MangaChapter) => void;
@@ -28,6 +29,7 @@ type Props = {
 export const ChapterCard = memo(function ChapterCard({
   chapter,
   state,
+  read,
   mangaPath,
   mangaTitle,
   onOpen,
@@ -71,6 +73,7 @@ export const ChapterCard = memo(function ChapterCard({
       <ChapterRow
         title={chapter.title}
         state={state}
+        read={read}
         trailing={
           <ChapterDownloadButton
             path={chapter.path}
