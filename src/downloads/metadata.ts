@@ -45,6 +45,13 @@ export async function loadDownloadIndex(): Promise<DownloadRecord[]> {
   return [...(await readIndex())];
 }
 
+/** Whether any chapter of the manga is on disk, so it has to stay reachable. */
+export async function hasDownloadsFor(mangaPath: string): Promise<boolean> {
+  return (await loadDownloadIndex()).some(
+    (record) => record.mangaPath === mangaPath,
+  );
+}
+
 export function upsertRecord(record: DownloadRecord): Promise<void> {
   return withLock(INDEX_KEY, async () => {
     const current = await readIndex();

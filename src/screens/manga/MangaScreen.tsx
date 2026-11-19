@@ -11,8 +11,11 @@ import { MangaSkeleton } from './components/MangaSkeleton';
 import { MangaTopBar } from './components/MangaTopBar';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { useOpenLog } from '../../hooks/useOpenLog';
+import { useMangaSnapshot } from '../../hooks/useMangaSnapshot';
+import { hasDownloadsFor } from '../../downloads/metadata';
 import type { Fields } from '../../dev/log';
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../../storage/library';
+import { forgetMangaSnapshot } from '../../storage/mangaSnapshot';
 import { loadProgress, loadReadChapters } from '../../storage/readerProgress';
 import type { ReaderProgress } from '../../storage/readerProgress';
 import { isMangaDetail } from '../../source/guards';
@@ -159,6 +162,12 @@ export default function MangaScreen({ navigation, route }: Props) {
     }, [path]),
   );
 
+  // Whatever is worth reading offline keeps its detail past the query cache,
+  // and it steps in when the network is down and the cache no longer has the
+  // manga.
+  const snapshot = useMangaSnapshot(path, data, inLibrary);
+  const manga = data ?? snapshot;
+
   const toggleLibrary = async () => {
     if (!data && !inLibrary) {
       return;
@@ -189,13 +198,19 @@ export default function MangaScreen({ navigation, route }: Props) {
       readChapters,
       inLibrary: !inLibrary,
     });
+
+    // Out of the library with nothing downloaded: no reason to keep the detail
+    // around. A download keeps its chapter list reachable offline.
+    if (inLibrary && !(await hasDownloadsFor(path))) {
+      void forgetMangaSnapshot(path);
+    }
   };
 
   // Ranges always read oldest to newest; sorting only flips chapters inside a
   // range. The source lists chapters newest first.
   const ascending = useMemo(
-    () => ascendingChapters(data?.chapters ?? []),
-    [data],
+    () => ascendingChapters(manga?.chapters ?? []),
+    [manga],
   );
   const readSet = useMemo(() => new Set(readChapters), [readChapters]);
   // The saved chapter stops being the continue target once it is read: the
@@ -270,17 +285,17 @@ export default function MangaScreen({ navigation, route }: Props) {
 
   return (
     <Screen>
-      {loading && !data ? (
+      {loading && !manga ? (
         <MangaSkeleton topBar={topBar} />
-      ) : hasError && !data ? (
+      ) : hasError && !manga ? (
         <View className="flex-1">
           {topBar}
           <ErrorState message="No se pudo cargar el manga" onRetry={reload} />
         </View>
-      ) : data ? (
+      ) : manga ? (
         <MangaChapterList
           topBar={topBar}
-          manga={data}
+          manga={manga}
           mangaPath={path}
           chapters={visibleChapters}
           ranges={ranges}
