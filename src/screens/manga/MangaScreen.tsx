@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ErrorState } from '@/components/ErrorState';
@@ -11,17 +11,15 @@ import { MangaTopBar } from './components/MangaTopBar';
 import { useRemoteData } from '@/hooks/useRemoteData';
 import { useOpenLog } from '@/hooks/useOpenLog';
 import { useChapterRatios } from '@/hooks/useChapterRatios';
+import { useMangaLocal } from './useMangaLocal';
 import { useMangaSnapshot } from '@/hooks/useMangaSnapshot';
 import { hasDownloadsFor } from '@/downloads/metadata';
 import type { Fields } from '@/dev/log';
-import { addToLibrary, isInLibrary, removeFromLibrary } from '@/storage/library';
+import { addToLibrary, removeFromLibrary } from '@/storage/library';
 import { forgetMangaSnapshot } from '@/storage/mangaSnapshot';
-import {
-  loadProgress,
-  loadReadChapters,
-} from '@/storage/readerProgress';
 import type { ReaderProgress } from '@/storage/readerProgress';
 import { isMangaDetail } from '@/source/guards';
+import { toPath } from '@/source/url';
 import { fetchManga } from '@/source/zonatmo';
 import type { MangaChapter, MangaDetail } from '@/source/zonatmo';
 import { CACHE_FRESH_MS } from '@/storage/queryCache';
@@ -37,30 +35,6 @@ import type {
   ChapterRange,
   ChapterSort,
 } from './chapters';
-
-type MangaLocalState = {
-  progress: ReaderProgress | null;
-  readChapters: string[];
-  inLibrary: boolean;
-};
-
-// Keep the last local state per manga so reopening a title does not flash the
-// wrong CTA while AsyncStorage resolves.
-const LOCAL_CACHE_LIMIT = 20;
-const localCache = new Map<string, MangaLocalState>();
-
-function rememberLocal(path: string, state: MangaLocalState) {
-  localCache.delete(path);
-  localCache.set(path, state);
-
-  if (localCache.size > LOCAL_CACHE_LIMIT) {
-    const oldest = localCache.keys().next().value;
-
-    if (oldest !== undefined) {
-      localCache.delete(oldest);
-    }
-  }
-}
 
 // Last range/sort picked per manga so reopening a title lands where the user
 // left off instead of back on the first range. Range stays null until picked,
@@ -99,7 +73,10 @@ function mangaOpenFields(data: MangaDetail | null): Fields | null {
 }
 
 export default function MangaScreen() {
-  const { path } = useLocalSearchParams<{ path: string }>();
+  // A deep link can carry any string here, so everything below works on a site
+  // path: an absolute URL would make the app fetch whatever host it names.
+  const params = useLocalSearchParams<{ path: string }>();
+  const path = toPath(params.path ?? '');
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const fetcher = useCallback(
@@ -111,18 +88,15 @@ export default function MangaScreen() {
       freshMs: CACHE_FRESH_MS.manga,
       validate: isMangaDetail,
     });
-  const [progress, setProgress] = useState<ReaderProgress | null>(
-    () => localCache.get(path)?.progress ?? null,
-  );
-  const [readChapters, setReadChapters] = useState<string[]>(
-    () => localCache.get(path)?.readChapters ?? [],
-  );
-  const [inLibrary, setInLibrary] = useState(
-    () => localCache.get(path)?.inLibrary ?? false,
-  );
-  const [localLoaded, setLocalLoaded] = useState(
-    () => localCache.has(path),
-  );
+  const {
+    progress,
+    readChapters,
+    inLibrary,
+    localLoaded,
+    focusTick,
+    setInLibrary,
+    remember,
+  } = useMangaLocal(path);
   const [sortOrder, setSortOrder] = useState<ChapterSort>(
     () => viewCache.get(path)?.sort ?? 'asc',
   );
@@ -130,42 +104,13 @@ export default function MangaScreen() {
     () => viewCache.get(path)?.range ?? null,
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-
-      void Promise.all([
-        loadProgress(path),
-        loadReadChapters(path),
-        isInLibrary(path),
-      ]).then(([value, reads, saved]) => {
-        if (active) {
-          rememberLocal(path, {
-            progress: value,
-            readChapters: reads,
-            inLibrary: saved,
-          });
-          setProgress(value);
-          setReadChapters((current) =>
-            current.length === reads.length &&
-            reads.every((chapter) => current.includes(chapter))
-              ? current
-              : reads,
-          );
-          setInLibrary(saved);
-          setLocalLoaded(true);
-        }
-      });
-
-      return () => {
-        active = false;
-      };
-    }, [path]),
-  );
-
   // Chapter lengths are only known for chapters opened at least once, so the
   // bars land after the list does.
-  const ratios = useChapterRatios(data?.chapters ?? [], readChapters);
+  const ratios = useChapterRatios(
+    data?.chapters ?? [],
+    readChapters,
+    focusTick,
+  );
 
   // Whatever is worth reading offline keeps its detail past the query cache,
   // and it steps in when the network is down and the cache no longer has the
@@ -198,11 +143,7 @@ export default function MangaScreen() {
     }
 
     setInLibrary(!inLibrary);
-    rememberLocal(path, {
-      progress,
-      readChapters,
-      inLibrary: !inLibrary,
-    });
+    remember({ progress, readChapters, inLibrary: !inLibrary });
 
     // Out of the library with nothing downloaded: no reason to keep the detail
     // around. A download keeps its chapter list reachable offline.

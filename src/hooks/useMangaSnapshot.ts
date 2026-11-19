@@ -25,12 +25,19 @@ export function useMangaSnapshot(
     let active = true;
 
     void loadMangaSnapshot(mangaPath).then((saved) => {
-      if (active && saved) {
+      if (!active) {
+        return;
+      }
+
+      // Clearing matters as much as loading: the next manga on this screen may
+      // have no copy, and the previous one would stay under its route.
+      setSnapshot(saved);
+
+      if (saved) {
         log.debug('manga', mangaPath, {
           source: 'snapshot',
           chapters: saved.chapters.length,
         });
-        setSnapshot(saved);
       }
     });
 

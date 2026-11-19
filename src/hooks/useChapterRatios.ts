@@ -7,12 +7,14 @@ import type { PageMark } from '@/storage/readerProgress';
 
 /**
  * Share of each chapter read, keyed by chapter path, for the bars under the
- * chapter rows. Page marks load once per chapter list: a chapter that was
- * never opened has no length, so it gets no bar.
+ * chapter rows. A chapter that was never opened has no length, so it gets no
+ * bar. `refreshKey` re-reads the marks when the screen comes back into view:
+ * a chapter read a minute ago changed its mark, not the chapter list.
  */
 export function useChapterRatios(
   chapters: MangaChapter[],
   readChapters: string[],
+  refreshKey = 0,
 ): Record<string, number> {
   const [marks, setMarks] = useState<Record<string, PageMark>>({});
 
@@ -34,7 +36,7 @@ export function useChapterRatios(
     return () => {
       active = false;
     };
-  }, [chapters]);
+  }, [chapters, refreshKey]);
 
   return useMemo(
     () => chapterRatios(chapters, new Set(readChapters), marks),

@@ -25,6 +25,7 @@ import { loadReadChapters } from '@/storage/readerProgress';
 import { ascendingChapters } from '@/screens/manga/chapters';import { loadDownloadedReader } from '@/downloads/manager';
 import { useIsChapterDownloaded } from '@/hooks/useDownloads';
 import { isReaderData } from '@/source/guards';
+import { toPath } from '@/source/url';
 import { fetchReader } from '@/source/zonatmo';
 import type { MangaChapter, ReaderData } from '@/source/zonatmo';
 import { CACHE_FRESH_MS } from '@/storage/queryCache';
@@ -65,12 +66,22 @@ function readerOpenFields(
 
 type ReaderParams = { path: string; title: string; mangaPath?: string };
 
+/**
+ * The route's parameters as site paths. A deep link can carry any string, and
+ * an absolute URL here would make the app fetch whatever host it names.
+ */
+function useReaderParams(): { path: string; title: string; mangaPath?: string } {
+  const params = useLocalSearchParams<ReaderParams>();
+
+  return {
+    path: toPath(params.path ?? ''),
+    title: params.title ?? '',
+    mangaPath: params.mangaPath ? toPath(params.mangaPath) : undefined,
+  };
+}
+
 export default function ReaderScreen() {
-  const {
-    path: initialPath,
-    title: initialTitle,
-    mangaPath,
-  } = useLocalSearchParams<ReaderParams>();
+  const { path: initialPath, title: initialTitle, mangaPath } = useReaderParams();
   const router = useRouter();
   const [chapterPath, setChapterPath] = useState(initialPath);
   const [chapterTitle, setChapterTitle] = useState(initialTitle);
@@ -117,7 +128,9 @@ export default function ReaderScreen() {
     () => (data ? ascendingChapters(data.chapters) : []),
     [data],
   );
-  const ratios = useChapterRatios(chapters, readChapters);
+  // The picker is the only place these bars show, and opening it must show
+  // the page just read, so the open state is the refresh key.
+  const ratios = useChapterRatios(chapters, readChapters, pickerOpen ? 1 : 0);
   const { page, setPage, total, restored } = useReaderProgress({
     path: chapterPath,
     title: chapterTitle,
