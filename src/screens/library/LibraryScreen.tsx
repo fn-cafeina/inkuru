@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, useWindowDimensions, View } from 'react-native';
 import {
   useFocusEffect,
-  useNavigation,
+  useRouter,
   useScrollToTop,
-} from '@react-navigation/native';
+} from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '../../components/EmptyState';
@@ -15,7 +15,6 @@ import { SectionTitle } from '../../components/SectionTitle';
 import { Screen } from '../../components/Screen';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
 import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
-import type { TabNavigation } from '../../navigation/types';
 import { loadLibraryResult } from '../../storage/library';
 import type { LibraryEntry } from '../../storage/library';
 import { loadProgressMany } from '../../storage/readerProgress';
@@ -27,7 +26,7 @@ let cachedEntries: LibraryEntry[] | null = null;
 let cachedProgress: Record<string, ReaderProgress> = {};
 
 export default function LibraryScreen() {
-  const navigation = useNavigation<TabNavigation<'Library'>>();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { handleScroll, reset } = useTabBarManager();
@@ -112,8 +111,9 @@ export default function LibraryScreen() {
     void load(true);
   };
   const openManga = useCallback(
-    (path: string, title: string) => navigation.navigate('Manga', { path, title }),
-    [navigation],
+    (path: string, title: string) =>
+      router.push({ pathname: '/manga', params: { path, title } }),
+    [router],
   );
 
   return (

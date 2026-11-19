@@ -1,0 +1,59 @@
+import '../global.css';
+
+import { useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { Stack } from 'expo-router/stack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+} from 'react-native-safe-area-context';
+
+import { UpdateFlowSheet } from '../src/screens/settings/components/UpdateFlowSheet';
+import { watchStalls } from '../src/dev/stall';
+import { initializeDownloads, setDownloadConcurrency } from '../src/downloads/manager';
+import { loadDownloadConcurrency } from '../src/storage/downloadSettings';
+import { useColors } from '../src/theme/colors';
+import { checkForUpdate } from '../src/update/check';
+import { initFlow } from '../src/update/flow';
+import { cleanupOldApk } from '../src/update/install';
+
+export default function RootLayout() {
+  const colors = useColors();
+
+  useEffect(() => {
+    watchStalls();
+    // The tab dot replaces the old launch alert as the update announcement.
+    void initFlow();
+    void checkForUpdate();
+    cleanupOldApk();
+    // The disk scan moves to launch so opening a manga never pays for it.
+    void initializeDownloads();
+    void loadDownloadConcurrency().then(setDownloadConcurrency);
+  }, []);
+
+  return (
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: colors.background }}
+    >
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+            animation: 'slide_from_right',
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ animation: 'none' }} />
+          <Stack.Screen name="manga" />
+          <Stack.Screen
+            name="reader"
+            options={{ animation: 'fade', statusBarHidden: true }}
+          />
+        </Stack>
+        <UpdateFlowSheet />
+        <StatusBar style="light" />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}

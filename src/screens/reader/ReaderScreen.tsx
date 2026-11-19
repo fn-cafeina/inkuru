@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { BackHandler, useWindowDimensions, View } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useWindowDimensions, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { NavigationBar } from 'expo-navigation-bar';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,9 +15,9 @@ import { ReaderPages } from './pages/ReaderPages';
 import { prefetchChapter } from './prefetchChapter';
 import { useRemoteData } from '../../hooks/useRemoteData';
 import { useOpenLog } from '../../hooks/useOpenLog';
-import type { Fields } from '../../dev/log';import { useFocusEffect } from '@react-navigation/native';
-import { readerConsumesBack } from './readerBack';
+import type { Fields } from '../../dev/log';
 import { useReaderPreferences } from './useReaderPreferences';
+import { useReaderBack } from './useReaderBack';
 import { useReaderProgress } from './useReaderProgress';
 import { readerCacheKey } from '../../storage/cacheKeys';
 import { loadReadChapters } from '../../storage/readerProgress';
@@ -28,11 +28,8 @@ import { isReaderData } from '../../source/guards';
 import { fetchReader } from '../../source/zonatmo';
 import type { MangaChapter, ReaderData } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
-import type { RootStackParamList } from '../../navigation/types';
 import { goBackOrTabs } from '../../navigation/back';
 import { reader } from '../../theme/colors';
-
-type Props = NativeStackScreenProps<RootStackParamList, 'Reader'>;
 
 function readerTitle(data: ReaderData | null, fallback: string): string {
   return data?.mangaTitle ?? data?.title ?? fallback;
@@ -66,8 +63,15 @@ function readerOpenFields(
   };
 }
 
-export default function ReaderScreen({ navigation, route }: Props) {
-  const { path: initialPath, title: initialTitle, mangaPath } = route.params;
+type ReaderParams = { path: string; title: string; mangaPath?: string };
+
+export default function ReaderScreen() {
+  const {
+    path: initialPath,
+    title: initialTitle,
+    mangaPath,
+  } = useLocalSearchParams<ReaderParams>();
+  const router = useRouter();
   const [chapterPath, setChapterPath] = useState(initialPath);
   const [chapterTitle, setChapterTitle] = useState(initialTitle);
   const insets = useSafeAreaInsets();
@@ -129,7 +133,7 @@ export default function ReaderScreen({ navigation, route }: Props) {
     setChapterPath(chapter.path);
     setChapterTitle(chapter.title);
     setChromeVisible(true);
-    navigation.setParams({
+    router.setParams({
       path: chapter.path,
       title: chapter.title,
       mangaPath,
@@ -173,35 +177,17 @@ export default function ReaderScreen({ navigation, route }: Props) {
     }, [mangaPath, pickerOpen]),
   );
 
-  useEffect(() => {
-    const subscription = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        if (settingsOpen) {
-          setSettingsOpen(false);
-          return true;
-        }
+  useReaderBack({
+    settingsOpen,
+    pickerOpen,
+    chromeVisible,
+    ready,
+    setSettingsOpen,
+    setPickerOpen,
+    setChromeVisible,
+  });
 
-        if (pickerOpen) {
-          setPickerOpen(false);
-          return true;
-        }
-
-        // While the first chapter loads there is no chrome to hide, so the
-        // press must fall through instead of being swallowed.
-        if (!readerConsumesBack({ sheetOpen: false, chromeVisible, ready })) {
-          return false;
-        }
-
-        setChromeVisible(false);
-        return true;
-      },
-    );
-
-    return () => subscription.remove();
-  }, [chromeVisible, pickerOpen, ready, settingsOpen]);
-
-  const goBack = () => goBackOrTabs(navigation);
+  const goBack = () => goBackOrTabs(router);
 
   return (
     // The reader fills the whole window behind both system bars.

@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import {
   useFocusEffect,
-  useNavigation,
+  useRouter,
   useScrollToTop,
-} from '@react-navigation/native';
+} from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '../../components/EmptyState';
@@ -23,7 +23,6 @@ import { Screen } from '../../components/Screen';
 import { MangaGridSkeleton } from '../../components/Skeleton';
 import { useTabBarManager } from '../../hooks/useTabBarManager';
 import { TAB_BAR_CLEARANCE } from '../../navigation/FloatingTabBar';
-import type { TabNavigation } from '../../navigation/types';
 import type { MangaListItem } from '../../source/zonatmo';
 import { useColors } from '../../theme/colors';
 import { CARD_GAP, mangaCardWidth } from '../../theme/gridLayout';
@@ -138,7 +137,7 @@ function DiscoverFallback({
 }
 
 function DiscoverResults({ term }: { term: string }) {
-  const navigation = useNavigation<TabNavigation<'Discover'>>();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<MangaListItem>>(null);
   useScrollToTop(listRef);
@@ -170,8 +169,9 @@ function DiscoverResults({ term }: { term: string }) {
   );
 
   const openManga = useCallback(
-    (path: string, title: string) => navigation.navigate('Manga', { path, title }),
-    [navigation],
+    (path: string, title: string) =>
+      router.push({ pathname: '/manga', params: { path, title } }),
+    [router],
   );
 
   if (!showItems) {

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useEffect, useSyncExternalStore } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -12,16 +12,18 @@ import { AnimatedPressable } from '../components/AnimatedPressable';
 import { useColors } from '../theme/colors';
 import { getUpdateState, subscribeUpdates } from '../update/check';
 import { useTabBarVisibility } from './tabBarState';
-import type { MainTabsParamList } from './types';
 
 // 16px gap under the pill + 60px pill (py-2 + 44px icon button).
 export const TAB_BAR_CLEARANCE = 76;
 const GAP_BELOW = 16;
 
-const ICONS: Record<keyof MainTabsParamList, keyof typeof Feather.glyphMap> = {
-  Library: 'book-open',
-  Discover: 'compass',
-  Settings: 'settings',
+/** Route file names under `app/(tabs)`. */
+type TabName = 'index' | 'discover' | 'settings';
+
+const ICONS: Record<TabName, keyof typeof Feather.glyphMap> = {
+  index: 'book-open',
+  discover: 'compass',
+  settings: 'settings',
 };
 
 /**
@@ -31,7 +33,7 @@ const ICONS: Record<keyof MainTabsParamList, keyof typeof Feather.glyphMap> = {
 export function FloatingTabBar({
   state,
   descriptors,
-  navigation,
+  navigateToTab,
   insets,
 }: BottomTabBarProps) {
   const colors = useColors();
@@ -78,12 +80,12 @@ export function FloatingTabBar({
 
           const { options } = descriptor;
           const isFocused = state.index === index;
-          const name = route.name as keyof MainTabsParamList;
+          const name = route.name as TabName;
           const color = isFocused ? colors.accent : colors.iconInactive;
           // The dot only means "the app found this"; with the auto-check off,
           // nothing found anything.
           const showUpdateDot =
-            name === 'Settings' &&
+            name === 'settings' &&
             update.autoCheck &&
             update.available !== null;
 
@@ -92,14 +94,8 @@ export function FloatingTabBar({
               key={route.key}
               accessibilityLabel={options.title}
               onPress={() => {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: route.key,
-                  canPreventDefault: true,
-                });
-
-                if (!isFocused && !event.defaultPrevented) {
-                  navigation.navigate(name);
+                if (!isFocused) {
+                  navigateToTab(route.key);
                 }
               }}
               className="h-11 w-11 items-center justify-center rounded-lg"

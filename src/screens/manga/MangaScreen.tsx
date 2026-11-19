@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Alert, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ErrorState } from '../../components/ErrorState';
@@ -22,7 +21,6 @@ import { isMangaDetail } from '../../source/guards';
 import { fetchManga } from '../../source/zonatmo';
 import type { MangaChapter, MangaDetail } from '../../source/zonatmo';
 import { CACHE_FRESH_MS } from '../../storage/queryCache';
-import type { RootStackParamList } from '../../navigation/types';
 import { goBackOrTabs } from '../../navigation/back';
 import {
   ascendingChapters,
@@ -35,8 +33,6 @@ import type {
   ChapterRange,
   ChapterSort,
 } from './chapters';
-
-type Props = NativeStackScreenProps<RootStackParamList, 'Manga'>;
 
 type MangaLocalState = {
   progress: ReaderProgress | null;
@@ -98,8 +94,9 @@ function mangaOpenFields(data: MangaDetail | null): Fields | null {
   };
 }
 
-export default function MangaScreen({ navigation, route }: Props) {
-  const { path } = route.params;
+export default function MangaScreen() {
+  const { path } = useLocalSearchParams<{ path: string }>();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchManga(path, signal),
@@ -247,23 +244,26 @@ export default function MangaScreen({ navigation, route }: Props) {
     [path, sortOrder],
   );
   const goBack = () => {
-    goBackOrTabs(navigation);
+    goBackOrTabs(router);
   };
   const openMangaRelated = useCallback(
     (relatedPath: string, title: string) =>
       // Replace, not push: hopping through related titles must not grow the
       // stack, so back always lands on the tabs, like rokimu.
-      navigation.replace('Manga', { path: relatedPath, title }),
-    [navigation],
+      router.replace({ pathname: '/manga', params: { path: relatedPath, title } }),
+    [router],
   );
   const openChapter = useCallback(
     (chapter: MangaChapter) =>
-      navigation.navigate('Reader', {
-        path: chapter.path,
-        title: chapter.title,
-        mangaPath: path,
+      router.push({
+        pathname: '/reader',
+        params: {
+          path: chapter.path,
+          title: chapter.title,
+          mangaPath: path,
+        },
       }),
-    [navigation, path],
+    [router, path],
   );
 
   // One line per open: how long the screen took to have something to show,
