@@ -71,14 +71,17 @@ build profile in `eas.json` restricts the APK to the `arm64-v8a` and
 
 ## Structure
 
+- `app/`: routes. `app/(tabs)/` is the tab bar (library, discover,
+  settings), `app/manga.tsx` and `app/reader.tsx` the stack screens. A
+  route file re-exports the screen it opens.
 - `src/screens/`: one folder per screen, `discover`, `library`,
   `manga`, `reader`
 - `src/components/`: UI shared between screens
 - `src/source/`: HTML parsers for the content source
 - `src/downloads/`: download lifecycle, file management
 - `src/storage/`: persistence, serialization, query cache
-- `src/navigation/`, `src/hooks/`, `src/theme/`: tabs and stack
-  navigation, shared hooks, colors
+- `src/navigation/`, `src/hooks/`, `src/theme/`: floating tab bar and
+  back fallback, shared hooks, colors
 
 ## Legal
 

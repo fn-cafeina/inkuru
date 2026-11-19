@@ -42,13 +42,17 @@
 - Apply Tailwind classes through `className` on React Native components.
 - CSS entry is `global.css` at the project root; Tailwind scans from the root.
   If `global.css` moves, add an explicit `@source`.
-- Import `global.css` only from `App.tsx`, never from `index.ts` (breaks hot reload).
+- Import `global.css` only from `app/_layout.tsx`, the router root.
 - Metro generates `uniwind-types.d.ts`. Do not edit it.
 - In `metro.config.js`, `withUniwindConfig` must be the outermost wrapper.
 
 ## Structure
 
-- No router. Entry `index.ts` renders `App.tsx`.
+- Expo Router owns navigation. Routes are files under `app/`; `app/(tabs)/`
+  holds the three tabs and `app/manga.tsx` / `app/reader.tsx` the stack
+  screens. Add a screen by adding a route file that re-exports it.
+- Screens take params from `useLocalSearchParams` and navigate through
+  `useRouter`; they receive no navigation props.
 - Screens live in `src/screens/<screen>/`, with screen-private components in
   `components/` and pure helpers next to the screen.
 - Shared UI lives in `src/components/`. Move a component there only when more
@@ -56,7 +60,8 @@
 - `src/source/` holds the HTML parsers and the http transport;
   `src/downloads/` the download lifecycle; `src/update/` release check and
   APK install; `src/storage/` persistence and the query cache; `src/hooks/`
-  shared hooks; `src/navigation/` the tabs and stack; `src/theme/` colors;
+  shared hooks; `src/navigation/` the floating tab bar, its visibility store
+  and the back fallback; `src/theme/` colors;
   `src/dev/` the logger and the stall watchdog.
 - Keep files under 300 lines (blank lines and comments excluded); ESLint
   enforces this with `max-lines`.
