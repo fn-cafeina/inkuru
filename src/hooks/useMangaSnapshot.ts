@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { hasDownloadsFor } from '@/downloads/metadata';
 import { log } from '@/dev/log';
@@ -20,6 +20,10 @@ export function useMangaSnapshot(
   inLibrary: boolean,
 ): MangaDetail | null {
   const [snapshot, setSnapshot] = useState<MangaDetail | null>(null);
+  // What the last write stored. The detail gets a new identity on every
+  // revalidation, cache hits included, so identity alone would rewrite tens of
+  // kilobytes of JSON per open.
+  const savedRef = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -52,9 +56,15 @@ export function useMangaSnapshot(
     }
 
     let active = true;
+    const signature = `${detail.title}|${detail.cover}|${detail.chapters.length}`;
+
+    if (savedRef.current === signature) {
+      return;
+    }
 
     void hasDownloadsFor(mangaPath).then((downloaded) => {
       if (active && (inLibrary || downloaded)) {
+        savedRef.current = signature;
         void saveMangaSnapshot(mangaPath, detail);
       }
     });
