@@ -140,7 +140,7 @@ const bars = chapterRatios(barreable, new Set(['/view_uploads/1']), {
   '/view_uploads/3': { page: 0, total: 0 },
 });
 
-assertEqual(bars['/view_uploads/1'], 1, 'a read chapter fills its bar');
+assertEqual(bars['/view_uploads/1'], 1, 'a read chapter without a mark fills its bar');
 assertEqual(bars['/view_uploads/2'], 0.4, 'a started chapter shows its page share');
 assertEqual(
   bars['/view_uploads/3'],
@@ -160,6 +160,20 @@ assertEqual(
   })['/view_uploads/1'],
   undefined,
   'a mark for another chapter draws nothing',
+);
+assertEqual(
+  chapterRatios(barreable, new Set(['/view_uploads/1']), {
+    '/view_uploads/1': { page: 2, total: 10 },
+  })['/view_uploads/1'],
+  0.3,
+  'a finished chapter gone back shows its page, not the full bar',
+);
+assertEqual(
+  chapterRatios(barreable, new Set(['/view_uploads/2']), {
+    '/view_uploads/2': { page: 9, total: 10 },
+  })['/view_uploads/2'],
+  1,
+  'the last page of a read chapter stays full',
 );
 
 console.log('chapter ranges ok');

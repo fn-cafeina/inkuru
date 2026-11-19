@@ -41,8 +41,9 @@ export function getChapterState(
 
 /**
  * Share of each chapter already read, 0 to 1, for the bar under its row.
- * A finished chapter is full; a started one uses its saved page against the
- * chapter length, which only a chapter opened at least once knows.
+ * The saved page wins over the read flag, so going back in a finished chapter
+ * shows where you actually are. The flag only fills the bar for a chapter with
+ * no page mark, which is every chapter read before marks stored a length.
  */
 export function chapterRatios(
   chapters: MangaChapter[],
@@ -52,18 +53,17 @@ export function chapterRatios(
   const ratios: Record<string, number> = {};
 
   for (const chapter of chapters) {
+    const mark = marks[chapter.path];
+    const total = mark?.total ?? 0;
+
+    if (mark !== undefined && total > 0 && mark.page > 0) {
+      ratios[chapter.path] = Math.min(1, (mark.page + 1) / total);
+      continue;
+    }
+
     if (readChapters.has(chapter.path)) {
       ratios[chapter.path] = 1;
-      continue;
     }
-
-    const mark = marks[chapter.path];
-
-    if (mark === undefined || mark.total <= 0 || mark.page <= 0) {
-      continue;
-    }
-
-    ratios[chapter.path] = Math.min(1, (mark.page + 1) / mark.total);
   }
 
   return ratios;
