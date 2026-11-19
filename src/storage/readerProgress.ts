@@ -90,8 +90,76 @@ export async function saveProgress(
 const readKey = (mangaPath: string) => `reader:read:${mangaPath}`;
 const pagePrefix = 'reader:page:';
 
+/** Where one chapter was left, and how long it is. */
+export type PageMark = { page: number; total: number };
+
 export const pageProgressKey = (chapterPath: string) =>
   `${pagePrefix}${chapterPath}`;
+
+/** Older builds stored the bare page number; both shapes are read. */
+function parsePageMark(raw: string | null | undefined): PageMark | null {
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const value: unknown = JSON.parse(raw);
+
+    if (typeof value === 'number') {
+      return Number.isFinite(value)
+        ? { page: Math.max(0, Math.floor(value)), total: 0 }
+        : null;
+    }
+
+    if (typeof value !== 'object' || value === null) {
+      return null;
+    }
+
+    const { page, total } = value as Record<string, unknown>;
+
+    if (typeof page !== 'number' || typeof total !== 'number') {
+      return null;
+    }
+
+    return { page: Math.max(0, Math.floor(page)), total: Math.floor(total) };
+  } catch {
+    return null;
+  }
+}
+
+/** Page marks of the listed chapters, keyed by chapter path. */
+export async function loadPageMarks(
+  chapterPaths: string[],
+): Promise<Record<string, PageMark>> {
+  try {
+    const pairs = await AsyncStorage.multiGet(
+      chapterPaths.map(pageProgressKey),
+    );
+    const result: Record<string, PageMark> = {};
+
+    for (const [key, raw] of pairs) {
+      const mark = parsePageMark(raw);
+
+      if (mark) {
+        result[key.slice(pagePrefix.length)] = mark;
+      }
+    }
+
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+export function savePageMark(
+  chapterPath: string,
+  mark: PageMark,
+): Promise<void> {
+  return AsyncStorage.setItem(
+    pageProgressKey(chapterPath),
+    JSON.stringify(mark),
+  ).catch(() => undefined);
+}
 
 /** Per-chapter page marks are useless once the files are gone. */
 export function forgetPageProgress(chapterPath: string): Promise<void> {

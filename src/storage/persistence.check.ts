@@ -86,6 +86,28 @@ await progress.markChapterRead('/m', '/v/1');
 await progress.markChapterRead('/m', '/v/1');
 assertEqual((await progress.loadReadChapters('/m')).length, 1, 'marking twice does not duplicate');
 
+// --- page marks ---
+
+storage.set(progress.pageProgressKey('/v/1'), '7');
+const oldMark = await progress.loadPageMarks(['/v/1']);
+assertEqual(oldMark['/v/1']?.page, 7, 'a bare page number still reads');
+assertEqual(oldMark['/v/1']?.total, 0, 'a bare page number has no length');
+
+storage.set(progress.pageProgressKey('/v/2'), JSON.stringify({ page: 3, total: 12 }));
+const newMark = await progress.loadPageMarks(['/v/1', '/v/2', '/v/3']);
+assertEqual(Object.keys(newMark).length, 2, 'only chapters with a mark come back');
+assertEqual(newMark['/v/2']?.total, 12, 'the chapter length comes back');
+
+storage.set(progress.pageProgressKey('/v/4'), '{roto');
+assertEqual((await progress.loadPageMarks(['/v/4']))['/v/4'], undefined, 'junk is dropped');
+
+await progress.savePageMark('/v/5', { page: 1, total: 4 });
+assertEqual(
+  (await progress.loadPageMarks(['/v/5']))['/v/5']?.total,
+  4,
+  'a saved mark round trips',
+);
+
 storage.set(progress.pageProgressKey('/v/1'), '7');
 await progress.forgetPageProgress('/v/1');
 assert(!storage.has(progress.pageProgressKey('/v/1')), 'the page mark is forgotten');

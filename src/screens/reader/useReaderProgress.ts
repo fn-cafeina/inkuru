@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
 import { AppState } from 'react-native';
 
 import {
+  loadPageMarks,
   markChapterRead,
-  pageProgressKey,
+  savePageMark,
   saveProgress,
 } from '@/storage/readerProgress';
 import { reachesLastPage } from './readerReadMark';
@@ -16,6 +16,7 @@ const PROGRESS_WRITE_DELAY = 500;
 type PendingProgress = {
   path: string;
   page: number;
+  total: number;
   mangaPath?: string;
   chapterTitle: string;
 };
@@ -52,9 +53,10 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     }
 
     pendingRef.current = null;
-    void AsyncStorage.setItem(pageProgressKey(pending.path), String(pending.page)).catch(
-      () => undefined,
-    );
+    void savePageMark(pending.path, {
+      page: pending.page,
+      total: pending.total,
+    });
 
     if (pending.mangaPath) {
       void saveProgress(pending.mangaPath, {
@@ -72,11 +74,10 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
       let nextPage = 0;
 
       try {
-        const storedPage = await AsyncStorage.getItem(pageProgressKey(path));
-        const parsedPage = Number.parseInt(storedPage ?? '', 10);
+        const mark = (await loadPageMarks([path]))[path];
 
-        if (Number.isFinite(parsedPage) && parsedPage > 0) {
-          nextPage = parsedPage;
+        if (mark && mark.page > 0) {
+          nextPage = mark.page;
         }
       } catch {
         // A storage failure must not block reading.
@@ -115,6 +116,7 @@ export function useReaderProgress({ path, title, mangaPath, data }: Params) {
     pendingRef.current = {
       path,
       page: safePage,
+      total,
       mangaPath,
       chapterTitle: data.title || title,
     };
