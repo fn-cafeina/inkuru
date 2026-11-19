@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Haptics from 'expo-haptics';
 
 import { getUpdateState } from './check';
 import type { File } from 'expo-file-system';
@@ -11,6 +10,7 @@ import {
   type DownloadProgress,
 } from './install';
 import { downloadFailureMessage } from './watchdog';
+import { selectHaptic } from '@/dev/haptics';
 
 export type UpdatePhase =
   | 'idle'
@@ -188,7 +188,7 @@ export async function beginDownload(): Promise<void> {
     await runInstall(file);
   } catch (error) {
     publish({ ...state, phase: 'error', failure: failureFor(error) });
-    void Haptics.selectionAsync();
+    selectHaptic();
   } finally {
     downloadAbort = null;
   }
@@ -219,7 +219,7 @@ async function runInstall(file: File): Promise<void> {
       phase: 'error',
       failure: 'No se pudo abrir el instalador. Revisá el permiso de instalación.',
     });
-    void Haptics.selectionAsync();
+    selectHaptic();
     return;
   }
 
@@ -231,7 +231,7 @@ async function runInstall(file: File): Promise<void> {
 
   await savePermission(true);
   publish({ ...state, phase: 'ready', failure: null });
-  void Haptics.selectionAsync();
+  selectHaptic();
 }
 
 /** The AppState listener fired and armed the resume; run the download now. */

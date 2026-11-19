@@ -9,12 +9,13 @@ import type {
   ViewStyle,
 } from 'react-native';
 import { Pressable } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+
+import { selectHaptic } from '@/dev/haptics';
 
 const AnimatedPressableComponent = Animated.createAnimatedComponent(Pressable);
 const DEFAULT_DEBOUNCE_MS = 300;
@@ -51,7 +52,7 @@ export function AnimatedPressable({
 
       lastPressTimeRef.current = now;
       if (hapticFeedback) {
-        void Haptics.selectionAsync();
+        selectHaptic();
       }
       onPress?.(event);
     },
